@@ -1,0 +1,263 @@
+# API Reference
+
+Complete API documentation for Sigil.
+
+## createLogger
+
+Creates a new logger instance with custom configuration.
+
+```typescript
+import { createLogger } from 'sigil'
+
+const logger = createLogger(config?: LoggerConfig)
+```
+
+### LoggerConfig
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `level` | `LogLevel` | `'info'` | Minimum log level |
+| `enabled` | `boolean` | `true` | Enable/disable logging |
+| `structured` | `boolean` | `false` (dev) / `true` (prod) | JSON output |
+| `sanitize` | `boolean` | `true` | Enable PII sanitization |
+| `sanitizeFields` | `string[]` | `[]` | Additional fields to redact |
+| `context` | `Record<string, unknown>` | `{}` | Static context |
+| `namespace` | `string` | `''` | Logger namespace |
+
+### Example
+
+```typescript
+const logger = createLogger({
+  level: 'debug',
+  structured: true,
+  sanitize: true,
+  sanitizeFields: ['customSecret'],
+  context: {
+    service: 'api',
+    version: '1.0.0'
+  },
+  namespace: 'my-app'
+})
+```
+
+## Default Logger
+
+A pre-configured logger instance for quick usage.
+
+```typescript
+import { log } from 'sigil'
+
+log.trace(message, ...args)
+log.debug(message, ...args)
+log.info(message, ...args)
+log.warn(message, ...args)
+log.error(message, ...args)
+```
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `trace(message, ...args)` | Log at trace level |
+| `debug(message, ...args)` | Log at debug level |
+| `info(message, ...args)` | Log at info level |
+| `warn(message, ...args)` | Log at warn level |
+| `error(message, ...args)` | Log at error level |
+| `setLevel(level)` | Change minimum level |
+| `getLevel()` | Get current level |
+| `enable()` | Enable logging |
+| `disable()` | Disable logging |
+| `isEnabled()` | Check if enabled |
+| `child(namespace, config?)` | Create child logger |
+| `flush()` | Flush pending logs |
+
+## Context Functions
+
+### withContext
+
+Runs a function with logging context.
+
+```typescript
+import { withContext } from 'sigil'
+
+const result = withContext(context, callback)
+```
+
+### withContextAsync
+
+Async version of withContext.
+
+```typescript
+import { withContextAsync } from 'sigil'
+
+const result = await withContextAsync(context, asyncCallback)
+```
+
+### getContext
+
+Gets the current context.
+
+```typescript
+import { getContext } from 'sigil'
+
+const ctx = getContext()
+// → { requestId: '...', traceId: '...' } | undefined
+```
+
+### createCorrelationContext
+
+Creates a new correlation context with IDs.
+
+```typescript
+import { createCorrelationContext } from 'sigil'
+
+const ctx = createCorrelationContext(existing?)
+// → { requestId, traceId, spanId, ...existing }
+```
+
+## ID Generators
+
+### generateRequestId
+
+Generates a UUID v4 request ID.
+
+```typescript
+import { generateRequestId } from 'sigil'
+
+const id = generateRequestId()
+// → '550e8400-e29b-41d4-a716-446655440000'
+```
+
+### generateTraceId
+
+Generates a 32-character hex trace ID (W3C Trace Context).
+
+```typescript
+import { generateTraceId } from 'sigil'
+
+const id = generateTraceId()
+// → '0af7651916cd43dd8448eb211c80319c'
+```
+
+### generateSpanId
+
+Generates a 16-character hex span ID.
+
+```typescript
+import { generateSpanId } from 'sigil'
+
+const id = generateSpanId()
+// → 'b7ad6b7169203331'
+```
+
+## Sanitization
+
+### sanitize
+
+Sanitizes an object, redacting sensitive fields.
+
+```typescript
+import { sanitize } from 'sigil'
+
+const safe = sanitize(data, additionalFields?)
+```
+
+### createSanitizer
+
+Creates a sanitizer with custom fields.
+
+```typescript
+import { createSanitizer } from 'sigil'
+
+const mySanitize = createSanitizer(['customField'])
+const safe = mySanitize(data)
+```
+
+## Utilities
+
+### serializeError
+
+Converts an Error to a serializable object.
+
+```typescript
+import { serializeError } from 'sigil'
+
+const obj = serializeError(error)
+// → { name, message, stack, cause? }
+```
+
+### isError
+
+Type guard for Error objects.
+
+```typescript
+import { isError } from 'sigil'
+
+if (isError(value)) {
+  // value is Error
+}
+```
+
+### getErrorMessage
+
+Extracts error message from unknown value.
+
+```typescript
+import { getErrorMessage } from 'sigil'
+
+const msg = getErrorMessage(error)
+```
+
+## Constants
+
+### LOG_LEVELS
+
+Map of log levels to numeric values.
+
+```typescript
+import { LOG_LEVELS } from 'sigil'
+
+// { trace: 10, debug: 20, info: 30, warn: 40, error: 50 }
+```
+
+### RUNTIME
+
+Current runtime identifier.
+
+```typescript
+import { RUNTIME } from 'sigil'
+
+// 'node' | 'bun' | 'deno' | 'edge' | 'browser' | 'unknown'
+```
+
+### CAPABILITIES
+
+Runtime capability flags.
+
+```typescript
+import { CAPABILITIES } from 'sigil'
+
+// { hasAsyncLocalStorage, hasConsole, hasProcess, ... }
+```
+
+### ENV_VARS
+
+Environment variable names.
+
+```typescript
+import { ENV_VARS } from 'sigil'
+
+// { LEVEL, ENABLED, STRUCTURED, SANITIZE }
+```
+
+## Types
+
+```typescript
+import type {
+  LogLevel,      // 'trace' | 'debug' | 'info' | 'warn' | 'error'
+  LoggerConfig,  // Configuration options
+  Logger,        // Logger interface
+  LogEntry,      // Structured log entry
+  Context,       // Context type
+} from 'sigil'
+```

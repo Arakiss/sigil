@@ -3,17 +3,20 @@ node_modules/
 
 # Build outputs
 dist/
+.next/
 *.tsbuildinfo
 
 # IDE
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 
 # OS
 .DS_Store
 Thumbs.db
+CLAUDE.md
 
 # Logs
 *.log

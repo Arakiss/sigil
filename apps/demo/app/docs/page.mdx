@@ -1,0 +1,45 @@
+# Introduction
+
+Sigil is a lightweight, zero-dependency structured logging library designed for modern JavaScript runtimes.
+
+*Leave your mark.*
+
+## Why Sigil?
+
+Most logging libraries are either too simple (just `console.log` wrappers) or too complex (requiring extensive configuration). Sigil strikes the perfect balance:
+
+- **Zero configuration required** — works out of the box with sensible defaults
+- **Production-ready** — structured JSON output, log levels, and timestamps
+- **Security-first** — automatic PII sanitization protects sensitive data
+- **Universal** — works in Node.js, Bun, Deno, Edge runtimes, and browsers
+
+## Features at a Glance
+
+| Feature | Description |
+|---------|-------------|
+| Structured Output | JSON logs with timestamps, levels, and metadata |
+| PII Sanitization | Auto-redact passwords, emails, tokens, credit cards |
+| Context Propagation | Request tracing with correlation IDs |
+| Child Loggers | Namespaced loggers with inherited config |
+| Multi-Runtime | Node.js, Bun, Deno, Edge, Browser support |
+| TypeScript | Full type safety and inference |
+
+## Quick Example
+
+```typescript
+import { log } from 'sigil'
+
+log.info('User signed up', { userId: 'usr_123' })
+// → {"level":"info","message":"User signed up","metadata":{"userId":"usr_123"},"timestamp":"..."}
+
+log.error('Payment failed', {
+  email: 'user@example.com',  // → partially masked
+  cardNumber: '4111...'       // → redacted
+})
+```
+
+## Next Steps
+
+- [Installation](/docs/getting-started) — Get Sigil installed in your project
+- [Features](/docs/features) — Explore all features in detail
+- [API Reference](/docs/api) — Complete API documentation

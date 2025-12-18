@@ -1,0 +1,122 @@
+# Installation
+
+Get started with Sigil in your project.
+
+## Install the Package
+
+Using your preferred package manager:
+
+```bash
+# Bun
+bun add sigil
+
+# npm
+npm install sigil
+
+# pnpm
+pnpm add sigil
+
+# Yarn
+yarn add sigil
+```
+
+## Basic Usage
+
+Import and start logging immediately:
+
+```typescript
+import { log } from 'sigil'
+
+// Simple messages
+log.info('Application started')
+log.debug('Loading configuration')
+log.warn('Deprecated API called')
+log.error('Request failed')
+
+// With metadata
+log.info('User action', {
+  userId: 'usr_123',
+  action: 'purchase',
+  amount: 99.99
+})
+
+// With errors
+try {
+  await fetchData()
+} catch (error) {
+  log.error('Failed to fetch data', error)
+}
+```
+
+## Log Levels
+
+Sigil supports 5 log levels, from most to least verbose:
+
+| Level | Method | Use Case |
+|-------|--------|----------|
+| `trace` | `log.trace()` | Very detailed debugging |
+| `debug` | `log.debug()` | Development debugging |
+| `info` | `log.info()` | General information |
+| `warn` | `log.warn()` | Warnings, deprecations |
+| `error` | `log.error()` | Errors, exceptions |
+
+## Environment Configuration
+
+Sigil can be configured via environment variables:
+
+```bash
+# Set minimum log level
+SIGIL_LEVEL=debug
+
+# Enable/disable logging
+SIGIL_ENABLED=true
+
+# Enable structured JSON output
+SIGIL_STRUCTURED=true
+
+# Enable PII sanitization
+SIGIL_SANITIZE=true
+
+# Add static context
+SIGIL_CONTEXT_SERVICE=api
+SIGIL_CONTEXT_VERSION=1.0.0
+```
+
+## Custom Logger Instance
+
+For more control, create a custom logger:
+
+```typescript
+import { createLogger } from 'sigil'
+
+const logger = createLogger({
+  level: 'debug',
+  structured: true,
+  sanitize: true,
+  sanitizeFields: ['customSecret'],
+  context: {
+    service: 'api',
+    environment: 'production'
+  }
+})
+
+export { logger }
+```
+
+## TypeScript Support
+
+Sigil is written in TypeScript and exports all types:
+
+```typescript
+import type { LogLevel, LoggerConfig, Logger } from 'sigil'
+
+const config: LoggerConfig = {
+  level: 'info',
+  structured: true
+}
+```
+
+## Next Steps
+
+- [Features](/docs/features) — Learn about sanitization, context, and child loggers
+- [API Reference](/docs/api) — Complete API documentation
