@@ -1,0 +1,5 @@
+[install]
+# Bun 1.3 uses isolated installs by default
+
+[test]
+coverage = true

@@ -1,0 +1,59 @@
+{
+	"name": "logpulse",
+	"version": "1.0.0",
+	"description": "A modern, runtime-agnostic logging library for Next.js. Zero config, TypeScript-first, with automatic sanitization.",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./context": {
+			"types": "./dist/context/index.d.ts",
+			"import": "./dist/context/index.js"
+		}
+	},
+	"files": ["dist"],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc",
+		"build:clean": "rm -rf dist && tsc",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"logging",
+		"logger",
+		"nextjs",
+		"typescript",
+		"bun",
+		"edge",
+		"vercel",
+		"structured-logging",
+		"pii",
+		"sanitization"
+	],
+	"author": "Arakiss",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Arakiss/logpulse.git",
+		"directory": "packages/logpulse"
+	},
+	"bugs": {
+		"url": "https://github.com/Arakiss/logpulse/issues"
+	},
+	"homepage": "https://github.com/Arakiss/logpulse#readme",
+	"devDependencies": {
+		"typescript": "catalog:",
+		"@types/node": "catalog:"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
