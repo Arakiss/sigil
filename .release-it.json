@@ -14,7 +14,7 @@
 	"github": {
 		"release": true,
 		"releaseName": "v${version}",
-		"autoGenerate": false,
+		"autoGenerate": true,
 		"draft": false,
 		"preRelease": false,
 		"comments": {
@@ -22,28 +22,28 @@
 		}
 	},
 	"npm": {
-		"publish": false
+		"publish": false,
+		"versionArgs": ["--workspaces=false"]
 	},
 	"hooks": {
 		"before:init": ["bun run typecheck", "bun run test", "bun run build"],
-		"after:bump": "echo 'Version bumped to ${version}'",
-		"after:release": "echo 'Successfully released ${name} v${version} to ${repo.repository}'"
+		"after:bump": "cd packages/sigil && npm version ${version} --no-git-tag-version && cd ../.. && git add packages/sigil/package.json",
+		"after:release": "echo 'Successfully released sigil v${version}'"
 	},
 	"plugins": {
 		"@release-it/conventional-changelog": {
 			"preset": {
 				"name": "conventionalcommits",
 				"types": [
-					{ "type": "feat", "section": "Features" },
-					{ "type": "fix", "section": "Bug Fixes" },
-					{ "type": "perf", "section": "Performance" },
-					{ "type": "refactor", "section": "Refactoring" },
-					{ "type": "docs", "section": "Documentation" },
-					{ "type": "style", "section": "Styling" },
-					{ "type": "test", "section": "Tests" },
-					{ "type": "build", "section": "Build" },
-					{ "type": "ci", "section": "CI/CD" },
-					{ "type": "chore", "section": "Chores", "hidden": true }
+					{ "type": "feat", "section": "✨ Features" },
+					{ "type": "fix", "section": "🐛 Bug Fixes" },
+					{ "type": "perf", "section": "⚡ Performance" },
+					{ "type": "refactor", "section": "♻️ Refactoring" },
+					{ "type": "docs", "section": "📚 Documentation" },
+					{ "type": "test", "section": "✅ Tests" },
+					{ "type": "build", "section": "📦 Build" },
+					{ "type": "ci", "section": "🔧 CI/CD" },
+					{ "type": "chore", "section": "🧹 Chores", "hidden": true }
 				]
 			},
 			"infile": "CHANGELOG.md",

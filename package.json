@@ -7,16 +7,13 @@
 		"// TypeScript": "",
 		"typescript": "^5.7.0",
 		"@types/node": "^22.0.0",
-
 		"// React 19.2": "",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",
-
 		"// Next.js 16": "",
 		"next": "^16.1.0",
-
 		"// MDX": "",
 		"@next/mdx": "^16.0.10",
 		"@mdx-js/loader": "^3.1.0",
@@ -28,10 +25,14 @@
 		"test": "bun run --filter '*' test",
 		"lint": "biome check .",
 		"format": "biome format --write .",
-		"typecheck": "bun run --filter '*' typecheck"
+		"format:check": "biome format .",
+		"typecheck": "bun run --filter '*' typecheck",
+		"release": "release-it"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.0",
+		"@release-it/conventional-changelog": "^10.0.4",
+		"release-it": "^18.1.2",
 		"typescript": "catalog:"
 	}
 }

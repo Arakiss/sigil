@@ -1,11 +1,20 @@
-# Sigil
+<div align="center">
 
-*Leave your mark.*
+# ✒️ Sigil
+
+**Leave your mark.**
 
 A modern, runtime-agnostic structured logging library with automatic PII sanitization and context propagation.
 
+[![CI](https://github.com/Arakiss/sigil/actions/workflows/ci.yml/badge.svg)](https://github.com/Arakiss/sigil/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/sigil.svg)](https://www.npmjs.com/package/sigil)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+</div>
+
+---
 
 ## Features
 
@@ -180,6 +189,16 @@ Run a function with the given context.
 
 Generate correlation IDs (requestId, traceId, spanId).
 
+## Contributing
+
+We love contributions! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+
+- 🐛 [Report bugs](https://github.com/Arakiss/sigil/issues/new?template=bug_report.md)
+- 💡 [Request features](https://github.com/Arakiss/sigil/issues/new?template=feature_request.md)
+- 📖 [Improve documentation](https://github.com/Arakiss/sigil/pulls)
+
 ## License
 
-MIT
+MIT © [Arakiss](https://github.com/Arakiss)
+
+See [LICENSE](LICENSE) for more details.
