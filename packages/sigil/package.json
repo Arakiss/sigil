@@ -1,6 +1,6 @@
 {
 	"name": "sigil",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Leave your mark. A modern, runtime-agnostic structured logging library with automatic PII sanitization and context propagation.",
 	"type": "module",
 	"main": "./dist/index.js",
