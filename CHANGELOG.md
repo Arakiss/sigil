@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Sigil will be documented in this file.
+All notable changes to Vestig will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -16,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚠ BREAKING CHANGES
 
-* Package renamed from logpulse to sigil.
-  - Renamed package directory from `packages/logpulse` to `packages/sigil`
-  - Updated package name to "sigil" with new branding
-  - Migration: Update imports from `'logpulse'` to `'sigil'`
+* Package renamed from logpulse to vestig.
+  - Renamed package directory from `packages/logpulse` to `packages/vestig`
+  - Updated package name to "vestig" with new branding
+  - Migration: Update imports from `'logpulse'` to `'vestig'`
 
 ### ✨ Features
 

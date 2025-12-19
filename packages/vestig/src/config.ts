@@ -5,10 +5,10 @@ import type { LogContext, LogLevel, LoggerConfig } from './types'
  * Environment variable names
  */
 export const ENV_VARS = {
-	LEVEL: 'SIGIL_LEVEL',
-	ENABLED: 'SIGIL_ENABLED',
-	STRUCTURED: 'SIGIL_STRUCTURED',
-	SANITIZE: 'SIGIL_SANITIZE',
+	LEVEL: 'VESTIG_LEVEL',
+	ENABLED: 'VESTIG_ENABLED',
+	STRUCTURED: 'VESTIG_STRUCTURED',
+	SANITIZE: 'VESTIG_SANITIZE',
 } as const
 
 /**
@@ -38,15 +38,15 @@ function parseBool(value: string | undefined, fallback: boolean): boolean {
 }
 
 /**
- * Get context from SIGIL_CONTEXT_* environment variables
+ * Get context from VESTIG_CONTEXT_* environment variables
  */
 function getEnvContext(): LogContext {
 	const context: LogContext = {}
 	if (typeof process === 'undefined' || !process.env) return context
 
 	for (const [key, value] of Object.entries(process.env)) {
-		if (key.startsWith('SIGIL_CONTEXT_') && value) {
-			const contextKey = key.replace('SIGIL_CONTEXT_', '').toLowerCase()
+		if (key.startsWith('VESTIG_CONTEXT_') && value) {
+			const contextKey = key.replace('VESTIG_CONTEXT_', '').toLowerCase()
 			context[contextKey] = value
 		}
 	}

@@ -1,6 +1,6 @@
-# Contributing to Sigil
+# Contributing to Vestig
 
-First off, thank you for considering contributing to Sigil! It's people like you that make Sigil such a great tool.
+First off, thank you for considering contributing to Vestig! It's people like you that make Vestig such a great tool.
 
 ## Code of Conduct
 
@@ -16,7 +16,7 @@ Before creating bug reports, please check existing issues to avoid duplicates. W
 - **Describe the exact steps to reproduce the problem**
 - **Provide specific examples** (code snippets, configuration files)
 - **Describe the behavior you observed and what you expected**
-- **Include your environment** (OS, Node/Bun version, Sigil version)
+- **Include your environment** (OS, Node/Bun version, Vestig version)
 
 ### Suggesting Enhancements
 
@@ -72,8 +72,8 @@ docs: update API reference
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/sigil.git
-cd sigil
+git clone https://github.com/YOUR_USERNAME/vestig.git
+cd vestig
 
 # Install dependencies
 bun install
@@ -97,9 +97,9 @@ bun run format
 ## Project Structure
 
 ```
-sigil/
+vestig/
 ├── packages/
-│   └── sigil/              # Main logging library
+│   └── vestig/             # Main logging library
 │       ├── src/
 │       │   ├── index.ts    # Public API exports
 │       │   ├── logger.ts   # Core logger implementation

@@ -1,13 +1,13 @@
 <div align="center">
 
-# ✒️ Sigil
+# 👣 Vestig
 
-**Leave your mark.**
+**Leave a trace.**
 
 A modern, runtime-agnostic structured logging library with automatic PII sanitization and context propagation.
 
 [![CI](https://github.com/Arakiss/sigil/actions/workflows/ci.yml/badge.svg)](https://github.com/Arakiss/sigil/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/sigil.svg)](https://www.npmjs.com/package/sigil)
+[![npm version](https://img.shields.io/npm/v/vestig.svg)](https://www.npmjs.com/package/vestig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -16,9 +16,11 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 
 ---
 
-## Why Sigil?
+## Why Vestig?
 
-| Feature | Sigil | Pino | Winston |
+*Vestig* — from Latin *vestigium* (trace, footprint). Leave a trace of what happened.
+
+| Feature | Vestig | Pino | Winston |
 |---------|:-----:|:----:|:-------:|
 | Runtime Agnostic | ✅ | ❌ | ❌ |
 | Auto PII Sanitization | ✅ | ❌ | ❌ |
@@ -31,7 +33,7 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 | Multiple Transports | ✅ | ✅ | ✅ |
 | Zero Dependencies | ✅ | ❌ | ❌ |
 
-**Sigil is the only logging library that:**
+**Vestig is the only logging library that:**
 - Works everywhere (Node.js, Bun, Deno, Edge, Browser)
 - Automatically sanitizes PII with compliance presets
 - Propagates context through async operations
@@ -41,19 +43,19 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 
 ```bash
 # bun
-bun add sigil
+bun add vestig
 
 # npm
-npm install sigil
+npm install vestig
 
 # pnpm
-pnpm add sigil
+pnpm add vestig
 ```
 
 ## Quick Start
 
 ```typescript
-import { log } from 'sigil'
+import { log } from 'vestig'
 
 // Simple logging
 log.info('Hello world')
@@ -74,7 +76,7 @@ log.info('User login', {
 Send logs to multiple destinations simultaneously:
 
 ```typescript
-import { createLogger, ConsoleTransport, HTTPTransport, DatadogTransport } from 'sigil'
+import { createLogger, ConsoleTransport, HTTPTransport, DatadogTransport } from 'vestig'
 
 const log = createLogger()
 
@@ -114,7 +116,7 @@ log.info('Server started', { port: 3000 })
 Choose from compliance-focused presets:
 
 ```typescript
-import { Sanitizer } from 'sigil'
+import { Sanitizer } from 'vestig'
 
 // GDPR compliance (EU data protection)
 const gdprSanitizer = Sanitizer.fromPreset('gdpr')
@@ -143,7 +145,7 @@ const log = createLogger({
 ### Custom Sanitization
 
 ```typescript
-import { Sanitizer } from 'sigil'
+import { Sanitizer } from 'vestig'
 
 const sanitizer = new Sanitizer({
   fields: [
@@ -179,7 +181,7 @@ cacheLog.info('Cache hit')    // [app:cache] Cache hit
 ### Context & Correlation IDs
 
 ```typescript
-import { withContext, createCorrelationContext } from 'sigil'
+import { withContext, createCorrelationContext } from 'vestig'
 
 // Next.js API Route
 export async function GET(req: Request) {
@@ -204,14 +206,14 @@ export async function GET(req: Request) {
 ### Environment Variables
 
 ```bash
-SIGIL_LEVEL=debug        # trace | debug | info | warn | error
-SIGIL_ENABLED=true       # Enable/disable logging
-SIGIL_STRUCTURED=true    # JSON output (auto-enabled in production)
-SIGIL_SANITIZE=true      # PII sanitization (default: true)
+VESTIG_LEVEL=debug        # trace | debug | info | warn | error
+VESTIG_ENABLED=true       # Enable/disable logging
+VESTIG_STRUCTURED=true    # JSON output (auto-enabled in production)
+VESTIG_SANITIZE=true      # PII sanitization (default: true)
 
 # Add to context
-SIGIL_CONTEXT_SERVICE=api
-SIGIL_CONTEXT_VERSION=1.0.0
+VESTIG_CONTEXT_SERVICE=api
+VESTIG_CONTEXT_VERSION=1.0.0
 ```
 
 ### Programmatic
@@ -238,7 +240,7 @@ const log = createLogger({
 
 ## Runtime Detection
 
-Sigil automatically detects and adapts to:
+Vestig automatically detects and adapts to:
 
 - **Node.js** - Full features with AsyncLocalStorage
 - **Bun** - Full features with AsyncLocalStorage
@@ -247,14 +249,14 @@ Sigil automatically detects and adapts to:
 - **Browser** - Client-side logging with sanitization
 
 ```typescript
-import { RUNTIME, IS_SERVER, IS_EDGE } from 'sigil'
+import { RUNTIME, IS_SERVER, IS_EDGE } from 'vestig'
 
 console.log(RUNTIME) // 'node' | 'bun' | 'deno' | 'edge' | 'browser'
 ```
 
 ## Auto-Production Mode
 
-In production (`NODE_ENV=production`), Sigil automatically:
+In production (`NODE_ENV=production`), Vestig automatically:
 
 - Sets log level to `warn`
 - Enables structured (JSON) output
@@ -265,7 +267,7 @@ In production (`NODE_ENV=production`), Sigil automatically:
 ### HTTPTransport
 
 ```typescript
-import { HTTPTransport } from 'sigil'
+import { HTTPTransport } from 'vestig'
 
 const transport = new HTTPTransport({
   name: 'my-http',
@@ -289,7 +291,7 @@ const transport = new HTTPTransport({
 ### FileTransport
 
 ```typescript
-import { FileTransport } from 'sigil'
+import { FileTransport } from 'vestig'
 
 const transport = new FileTransport({
   name: 'file',
@@ -303,14 +305,14 @@ const transport = new FileTransport({
 ### DatadogTransport
 
 ```typescript
-import { DatadogTransport } from 'sigil'
+import { DatadogTransport } from 'vestig'
 
 const transport = new DatadogTransport({
   name: 'datadog',
   apiKey: process.env.DD_API_KEY!,
   site: 'datadoghq.com',  // or datadoghq.eu, us3, us5
   service: 'my-service',
-  source: 'sigil',
+  source: 'vestig',
   tags: ['env:production', 'team:backend'],
 })
 ```
@@ -367,8 +369,8 @@ import pino from 'pino'
 const logger = pino({ level: 'info' })
 logger.info({ userId: 123 }, 'User logged in')
 
-// After (Sigil)
-import { createLogger } from 'sigil'
+// After (Vestig)
+import { createLogger } from 'vestig'
 const logger = createLogger({ level: 'info' })
 logger.info('User logged in', { userId: 123 })
 ```
@@ -384,8 +386,8 @@ const logger = winston.createLogger({
 })
 logger.info('Hello', { meta: 'data' })
 
-// After (Sigil)
-import { createLogger } from 'sigil'
+// After (Vestig)
+import { createLogger } from 'vestig'
 const logger = createLogger({ level: 'info' })
 logger.info('Hello', { meta: 'data' })
 ```

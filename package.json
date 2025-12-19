@@ -1,5 +1,5 @@
 {
-	"name": "sigil-monorepo",
+	"name": "vestig-monorepo",
 	"version": "0.2.0",
 	"private": true,
 	"workspaces": [
@@ -31,7 +31,7 @@
 		"format:check": "biome format .",
 		"typecheck": "bun run --filter '*' typecheck",
 		"release": "release-it",
-		"bench": "bun run packages/sigil/bench/index.ts"
+		"bench": "bun run packages/vestig/bench/index.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.0",

@@ -27,8 +27,8 @@
 	},
 	"hooks": {
 		"before:init": ["bun run typecheck", "bun run test", "bun run build"],
-		"after:bump": "node -e \"const fs=require('fs');const p='packages/sigil/package.json';const pkg=JSON.parse(fs.readFileSync(p));pkg.version='${version}';fs.writeFileSync(p,JSON.stringify(pkg,null,'\\t')+'\\n');\" && git add packages/sigil/package.json",
-		"after:release": "cd packages/sigil && npm publish --access public && echo 'Successfully released and published sigil v${version} to npm'"
+		"after:bump": "node -e \"const fs=require('fs');const p='packages/vestig/package.json';const pkg=JSON.parse(fs.readFileSync(p));pkg.version='${version}';fs.writeFileSync(p,JSON.stringify(pkg,null,'\\t')+'\\n');\" && git add packages/vestig/package.json",
+		"after:release": "cd packages/vestig && npm publish --access public && echo 'Successfully released and published vestig v${version} to npm'"
 	},
 	"plugins": {
 		"@release-it/conventional-changelog": {
@@ -47,7 +47,7 @@
 				]
 			},
 			"infile": "CHANGELOG.md",
-			"header": "# Changelog\n\nAll notable changes to Sigil will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n"
+			"header": "# Changelog\n\nAll notable changes to Vestig will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n"
 		}
 	}
 }

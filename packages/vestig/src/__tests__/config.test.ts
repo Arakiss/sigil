@@ -3,10 +3,10 @@ import { ENV_VARS, getDefaultConfig, mergeConfig } from '../config'
 
 describe('ENV_VARS', () => {
 	test('should export correct environment variable names', () => {
-		expect(ENV_VARS.LEVEL).toBe('SIGIL_LEVEL')
-		expect(ENV_VARS.ENABLED).toBe('SIGIL_ENABLED')
-		expect(ENV_VARS.STRUCTURED).toBe('SIGIL_STRUCTURED')
-		expect(ENV_VARS.SANITIZE).toBe('SIGIL_SANITIZE')
+		expect(ENV_VARS.LEVEL).toBe('VESTIG_LEVEL')
+		expect(ENV_VARS.ENABLED).toBe('VESTIG_ENABLED')
+		expect(ENV_VARS.STRUCTURED).toBe('VESTIG_STRUCTURED')
+		expect(ENV_VARS.SANITIZE).toBe('VESTIG_SANITIZE')
 	})
 })
 
@@ -16,13 +16,13 @@ describe('getDefaultConfig', () => {
 	beforeEach(() => {
 		// Clean relevant env vars
 		process.env.NODE_ENV = undefined
-		process.env.SIGIL_LEVEL = undefined
-		process.env.SIGIL_ENABLED = undefined
-		process.env.SIGIL_STRUCTURED = undefined
-		process.env.SIGIL_SANITIZE = undefined
+		process.env.VESTIG_LEVEL = undefined
+		process.env.VESTIG_ENABLED = undefined
+		process.env.VESTIG_STRUCTURED = undefined
+		process.env.VESTIG_SANITIZE = undefined
 		// Clean context vars
 		for (const key of Object.keys(process.env)) {
-			if (key.startsWith('SIGIL_CONTEXT_')) {
+			if (key.startsWith('VESTIG_CONTEXT_')) {
 				delete process.env[key]
 			}
 		}
@@ -54,37 +54,37 @@ describe('getDefaultConfig', () => {
 		expect(config.structured).toBe(true)
 	})
 
-	test('should respect SIGIL_LEVEL env var', () => {
-		process.env.SIGIL_LEVEL = 'debug'
+	test('should respect VESTIG_LEVEL env var', () => {
+		process.env.VESTIG_LEVEL = 'debug'
 		const config = getDefaultConfig()
 
 		expect(config.level).toBe('debug')
 	})
 
-	test('should respect SIGIL_ENABLED env var', () => {
-		process.env.SIGIL_ENABLED = 'false'
+	test('should respect VESTIG_ENABLED env var', () => {
+		process.env.VESTIG_ENABLED = 'false'
 		const config = getDefaultConfig()
 
 		expect(config.enabled).toBe(false)
 	})
 
-	test('should respect SIGIL_STRUCTURED env var', () => {
-		process.env.SIGIL_STRUCTURED = 'true'
+	test('should respect VESTIG_STRUCTURED env var', () => {
+		process.env.VESTIG_STRUCTURED = 'true'
 		const config = getDefaultConfig()
 
 		expect(config.structured).toBe(true)
 	})
 
-	test('should respect SIGIL_SANITIZE env var', () => {
-		process.env.SIGIL_SANITIZE = 'false'
+	test('should respect VESTIG_SANITIZE env var', () => {
+		process.env.VESTIG_SANITIZE = 'false'
 		const config = getDefaultConfig()
 
 		expect(config.sanitize).toBe(false)
 	})
 
-	test('should parse SIGIL_CONTEXT_* env vars', () => {
-		process.env.SIGIL_CONTEXT_APP = 'myapp'
-		process.env.SIGIL_CONTEXT_VERSION = '1.0.0'
+	test('should parse VESTIG_CONTEXT_* env vars', () => {
+		process.env.VESTIG_CONTEXT_APP = 'myapp'
+		process.env.VESTIG_CONTEXT_VERSION = '1.0.0'
 		const config = getDefaultConfig()
 
 		expect(config.context.app).toBe('myapp')
@@ -92,8 +92,8 @@ describe('getDefaultConfig', () => {
 	})
 
 	test('should handle "1" as true for boolean env vars', () => {
-		process.env.SIGIL_ENABLED = '1'
-		process.env.SIGIL_STRUCTURED = '1'
+		process.env.VESTIG_ENABLED = '1'
+		process.env.VESTIG_STRUCTURED = '1'
 		const config = getDefaultConfig()
 
 		expect(config.enabled).toBe(true)
@@ -101,7 +101,7 @@ describe('getDefaultConfig', () => {
 	})
 
 	test('should handle case-insensitive boolean values', () => {
-		process.env.SIGIL_ENABLED = 'TRUE'
+		process.env.VESTIG_ENABLED = 'TRUE'
 		const config = getDefaultConfig()
 
 		expect(config.enabled).toBe(true)
@@ -113,10 +113,10 @@ describe('mergeConfig', () => {
 
 	beforeEach(() => {
 		process.env.NODE_ENV = undefined
-		process.env.SIGIL_LEVEL = undefined
-		process.env.SIGIL_ENABLED = undefined
-		process.env.SIGIL_STRUCTURED = undefined
-		process.env.SIGIL_SANITIZE = undefined
+		process.env.VESTIG_LEVEL = undefined
+		process.env.VESTIG_ENABLED = undefined
+		process.env.VESTIG_STRUCTURED = undefined
+		process.env.VESTIG_SANITIZE = undefined
 	})
 
 	afterEach(() => {
@@ -153,7 +153,7 @@ describe('mergeConfig', () => {
 	})
 
 	test('should merge context objects', () => {
-		process.env.SIGIL_CONTEXT_ENV = 'test'
+		process.env.VESTIG_CONTEXT_ENV = 'test'
 		const config = mergeConfig({
 			context: { userId: '123', requestId: 'abc' },
 		})
@@ -180,7 +180,7 @@ describe('mergeConfig', () => {
 	})
 
 	test('should preserve user context over defaults', () => {
-		process.env.SIGIL_CONTEXT_APP = 'default-app'
+		process.env.VESTIG_CONTEXT_APP = 'default-app'
 		const config = mergeConfig({
 			context: { app: 'custom-app' },
 		})
