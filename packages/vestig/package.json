@@ -56,13 +56,13 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Arakiss/sigil.git",
+		"url": "git+https://github.com/Arakiss/vestig.git",
 		"directory": "packages/vestig"
 	},
 	"bugs": {
-		"url": "https://github.com/Arakiss/sigil/issues"
+		"url": "https://github.com/Arakiss/vestig/issues"
 	},
-	"homepage": "https://github.com/Arakiss/sigil#readme",
+	"homepage": "https://github.com/Arakiss/vestig#readme",
 	"devDependencies": {
 		"typescript": "catalog:",
 		"@types/node": "catalog:"

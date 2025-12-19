@@ -1,5 +1,5 @@
 # =============================================================================
-# Sigil Release Pipeline
+# Vestig Release Pipeline
 # =============================================================================
 # Automatically creates releases based on Conventional Commits
 #
@@ -181,7 +181,7 @@ jobs:
           bun run release -- --ci --increment=${{ steps.analyze.outputs.bump_type }}
 
           # Get the new version
-          VERSION=$(node -p "require('./packages/sigil/package.json').version")
+          VERSION=$(node -p "require('./packages/vestig/package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "released=true" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT

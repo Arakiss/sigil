@@ -10,7 +10,7 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 [![npm version](https://img.shields.io/npm/v/vestig.svg)](https://www.npmjs.com/package/vestig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Arakiss/vestig/blob/main/CONTRIBUTING.md)
 
 </div>
 
@@ -262,61 +262,6 @@ In production (`NODE_ENV=production`), Vestig automatically:
 - Enables structured (JSON) output
 - Keeps sanitization enabled
 
-## Transports in Detail
-
-### HTTPTransport
-
-```typescript
-import { HTTPTransport } from 'vestig'
-
-const transport = new HTTPTransport({
-  name: 'my-http',
-  url: 'https://logs.example.com/ingest',
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer my-token',
-    'X-Custom-Header': 'value',
-  },
-  batchSize: 100,        // Send when 100 logs accumulated
-  flushInterval: 5000,   // Or every 5 seconds
-  maxRetries: 3,         // Retry failed requests
-  timeout: 30000,        // Request timeout
-  transform: (entries) => ({
-    logs: entries,
-    timestamp: Date.now(),
-  }),
-})
-```
-
-### FileTransport
-
-```typescript
-import { FileTransport } from 'vestig'
-
-const transport = new FileTransport({
-  name: 'file',
-  path: '/var/log/app/app.log',
-  maxSize: 10 * 1024 * 1024,  // 10MB before rotation
-  maxFiles: 5,                 // Keep 5 rotated files
-  compress: true,              // Gzip rotated files
-})
-```
-
-### DatadogTransport
-
-```typescript
-import { DatadogTransport } from 'vestig'
-
-const transport = new DatadogTransport({
-  name: 'datadog',
-  apiKey: process.env.DD_API_KEY!,
-  site: 'datadoghq.com',  // or datadoghq.eu, us3, us5
-  service: 'my-service',
-  source: 'vestig',
-  tags: ['env:production', 'team:backend'],
-})
-```
-
 ## API Reference
 
 ### `createLogger(config?)`
@@ -359,42 +304,9 @@ Generate correlation IDs (requestId, traceId, spanId).
 
 Create a sanitizer from a preset name.
 
-## Migration from Other Loggers
-
-### From Pino
-
-```typescript
-// Before (Pino)
-import pino from 'pino'
-const logger = pino({ level: 'info' })
-logger.info({ userId: 123 }, 'User logged in')
-
-// After (Vestig)
-import { createLogger } from 'vestig'
-const logger = createLogger({ level: 'info' })
-logger.info('User logged in', { userId: 123 })
-```
-
-### From Winston
-
-```typescript
-// Before (Winston)
-import winston from 'winston'
-const logger = winston.createLogger({
-  level: 'info',
-  transports: [new winston.transports.Console()],
-})
-logger.info('Hello', { meta: 'data' })
-
-// After (Vestig)
-import { createLogger } from 'vestig'
-const logger = createLogger({ level: 'info' })
-logger.info('Hello', { meta: 'data' })
-```
-
 ## Contributing
 
-We love contributions! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+We love contributions! Please read our [Contributing Guide](https://github.com/Arakiss/vestig/blob/main/CONTRIBUTING.md) to get started.
 
 - 🐛 [Report bugs](https://github.com/Arakiss/vestig/issues/new?template=bug_report.md)
 - 💡 [Request features](https://github.com/Arakiss/vestig/issues/new?template=feature_request.md)
@@ -404,4 +316,4 @@ We love contributions! Please read our [Contributing Guide](CONTRIBUTING.md) to 
 
 MIT © [Arakiss](https://github.com/Arakiss)
 
-See [LICENSE](LICENSE) for more details.
+See [LICENSE](https://github.com/Arakiss/vestig/blob/main/LICENSE) for more details.

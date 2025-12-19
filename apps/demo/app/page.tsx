@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { CodeBlock } from './components/code-block'
 
-const quickStartCode = `import { log } from 'sigil'
+const quickStartCode = `import { log } from 'vestig'
 
 // Simple logging
 log.info('Application started')
@@ -11,7 +11,7 @@ log.error('Request failed', new Error('Timeout'))
 // Structured output (JSON)
 // {"level":"info","message":"Application started","timestamp":"...","runtime":"bun"}`
 
-const configCode = `import { createLogger } from 'sigil'
+const configCode = `import { createLogger } from 'vestig'
 
 const logger = createLogger({
   level: 'debug',
@@ -25,7 +25,7 @@ const logger = createLogger({
 
 logger.info('Server listening', { port: 3000 })`
 
-const sanitizeCode = `import { log } from 'sigil'
+const sanitizeCode = `import { log } from 'vestig'
 
 log.info('User login', {
   email: 'user@example.com',    // → us***@example.com
@@ -35,7 +35,7 @@ log.info('User login', {
 
 // Sensitive data is automatically sanitized`
 
-const contextCode = `import { withContext, createCorrelationContext, log } from 'sigil'
+const contextCode = `import { withContext, createCorrelationContext, log } from 'vestig'
 
 app.use((req, res, next) => {
   const ctx = createCorrelationContext()
@@ -367,11 +367,11 @@ export default function Home() {
 
 			<nav className="nav">
 				<div className="nav-inner">
-					<span className="nav-logo">Sigil</span>
+					<span className="nav-logo">Vestig</span>
 					<div className="nav-links">
 						<Link href="/docs">Docs</Link>
 						<Link href="/docs/api">API</Link>
-						<a href="https://github.com/Arakiss/sigil" target="_blank" rel="noopener noreferrer">
+						<a href="https://github.com/Arakiss/vestig" target="_blank" rel="noopener noreferrer">
 							GitHub
 						</a>
 						<Link href="/docs/getting-started" className="nav-cta">
@@ -382,7 +382,7 @@ export default function Home() {
 			</nav>
 
 			<section className="hero">
-				<span className="hero-badge">v0.1.0 — Now Available</span>
+				<span className="hero-badge">v0.2.0 — Now Available</span>
 				<h1>
 					<span>Structured Logging</span>
 					<br />
@@ -401,14 +401,14 @@ export default function Home() {
 					</Link>
 				</div>
 				<div className="install-cmd">
-					<code>bun add sigil</code>
+					<code>bun add vestig</code>
 				</div>
 			</section>
 
 			<section className="section">
 				<div className="section-header">
-					<h2>Why Sigil?</h2>
-					<p>Leave your mark with production-ready logging</p>
+					<h2>Why Vestig?</h2>
+					<p>Leave a trace with production-ready logging</p>
 				</div>
 				<div className="features-grid">
 					{features.map((feature) => (
@@ -461,7 +461,7 @@ export default function Home() {
 			<footer className="footer">
 				<p>
 					Built with ❤️ •{' '}
-					<a href="https://github.com/Arakiss/sigil" target="_blank" rel="noopener noreferrer">
+					<a href="https://github.com/Arakiss/vestig" target="_blank" rel="noopener noreferrer">
 						GitHub
 					</a>{' '}
 					• MIT License

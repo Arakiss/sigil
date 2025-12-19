@@ -1,13 +1,13 @@
 # Features
 
-Deep dive into Sigil's core features.
+Deep dive into Vestig's core features.
 
 ## Structured Output
 
-Sigil outputs logs as JSON by default in production, making them easy to parse and analyze with tools like Datadog, Splunk, or CloudWatch.
+Vestig outputs logs as JSON by default in production, making them easy to parse and analyze with tools like Datadog, Splunk, or CloudWatch.
 
 ```typescript
-import { log } from 'sigil'
+import { log } from 'vestig'
 
 log.info('User action', { userId: '123', action: 'click' })
 ```
@@ -28,7 +28,7 @@ Output:
 
 ## Sanitization
 
-Sigil automatically detects and sanitizes sensitive data to prevent accidental PII exposure in logs.
+Vestig automatically detects and sanitizes sensitive data to prevent accidental PII exposure in logs.
 
 ### Default Sensitive Fields
 
@@ -44,7 +44,7 @@ These field names are automatically redacted:
 
 ### Pattern-Based Detection
 
-Sigil also detects patterns in values:
+Vestig also detects patterns in values:
 
 ```typescript
 log.info('User data', {
@@ -75,7 +75,7 @@ Automatically correlate logs across your entire request lifecycle using AsyncLoc
 ### Setting Up Context
 
 ```typescript
-import { withContext, createCorrelationContext, log } from 'sigil'
+import { withContext, createCorrelationContext, log } from 'vestig'
 
 // In your middleware
 app.use((req, res, next) => {
@@ -158,7 +158,7 @@ debugLogger.trace('Very detailed info')
 
 ## Error Handling
 
-Sigil serializes errors with full stack traces:
+Vestig serializes errors with full stack traces:
 
 ```typescript
 try {
@@ -183,10 +183,10 @@ Output includes:
 
 ## Runtime Detection
 
-Sigil automatically detects the runtime environment:
+Vestig automatically detects the runtime environment:
 
 ```typescript
-import { RUNTIME, CAPABILITIES } from 'sigil'
+import { RUNTIME, CAPABILITIES } from 'vestig'
 
 console.log(RUNTIME)
 // → 'node' | 'bun' | 'deno' | 'edge' | 'browser'

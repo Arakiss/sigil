@@ -1,6 +1,6 @@
 # Installation
 
-Get started with Sigil in your project.
+Get started with Vestig in your project.
 
 ## Install the Package
 
@@ -8,16 +8,16 @@ Using your preferred package manager:
 
 ```bash
 # Bun
-bun add sigil
+bun add vestig
 
 # npm
-npm install sigil
+npm install vestig
 
 # pnpm
-pnpm add sigil
+pnpm add vestig
 
 # Yarn
-yarn add sigil
+yarn add vestig
 ```
 
 ## Basic Usage
@@ -25,7 +25,7 @@ yarn add sigil
 Import and start logging immediately:
 
 ```typescript
-import { log } from 'sigil'
+import { log } from 'vestig'
 
 // Simple messages
 log.info('Application started')
@@ -50,7 +50,7 @@ try {
 
 ## Log Levels
 
-Sigil supports 5 log levels, from most to least verbose:
+Vestig supports 5 log levels, from most to least verbose:
 
 | Level | Method | Use Case |
 |-------|--------|----------|
@@ -62,24 +62,24 @@ Sigil supports 5 log levels, from most to least verbose:
 
 ## Environment Configuration
 
-Sigil can be configured via environment variables:
+Vestig can be configured via environment variables:
 
 ```bash
 # Set minimum log level
-SIGIL_LEVEL=debug
+VESTIG_LEVEL=debug
 
 # Enable/disable logging
-SIGIL_ENABLED=true
+VESTIG_ENABLED=true
 
 # Enable structured JSON output
-SIGIL_STRUCTURED=true
+VESTIG_STRUCTURED=true
 
 # Enable PII sanitization
-SIGIL_SANITIZE=true
+VESTIG_SANITIZE=true
 
 # Add static context
-SIGIL_CONTEXT_SERVICE=api
-SIGIL_CONTEXT_VERSION=1.0.0
+VESTIG_CONTEXT_SERVICE=api
+VESTIG_CONTEXT_VERSION=1.0.0
 ```
 
 ## Custom Logger Instance
@@ -87,7 +87,7 @@ SIGIL_CONTEXT_VERSION=1.0.0
 For more control, create a custom logger:
 
 ```typescript
-import { createLogger } from 'sigil'
+import { createLogger } from 'vestig'
 
 const logger = createLogger({
   level: 'debug',
@@ -105,10 +105,10 @@ export { logger }
 
 ## TypeScript Support
 
-Sigil is written in TypeScript and exports all types:
+Vestig is written in TypeScript and exports all types:
 
 ```typescript
-import type { LogLevel, LoggerConfig, Logger } from 'sigil'
+import type { LogLevel, LoggerConfig, Logger } from 'vestig'
 
 const config: LoggerConfig = {
   level: 'info',

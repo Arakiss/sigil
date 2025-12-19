@@ -18,7 +18,7 @@ A clear and concise description of what you want to happen.
 
 ```typescript
 // How would you like to use this feature?
-import { Logger } from 'sigil'
+import { Logger } from 'vestig'
 
 const logger = new Logger({
   // your proposed configuration

@@ -1,12 +1,12 @@
 # Introduction
 
-Sigil is a lightweight, zero-dependency structured logging library designed for modern JavaScript runtimes.
+Vestig is a lightweight, zero-dependency structured logging library designed for modern JavaScript runtimes.
 
-*Leave your mark.*
+*Leave a trace.*
 
-## Why Sigil?
+## Why Vestig?
 
-Most logging libraries are either too simple (just `console.log` wrappers) or too complex (requiring extensive configuration). Sigil strikes the perfect balance:
+Most logging libraries are either too simple (just `console.log` wrappers) or too complex (requiring extensive configuration). Vestig strikes the perfect balance:
 
 - **Zero configuration required** — works out of the box with sensible defaults
 - **Production-ready** — structured JSON output, log levels, and timestamps
@@ -27,7 +27,7 @@ Most logging libraries are either too simple (just `console.log` wrappers) or to
 ## Quick Example
 
 ```typescript
-import { log } from 'sigil'
+import { log } from 'vestig'
 
 log.info('User signed up', { userId: 'usr_123' })
 // → {"level":"info","message":"User signed up","metadata":{"userId":"usr_123"},"timestamp":"..."}
@@ -40,6 +40,6 @@ log.error('Payment failed', {
 
 ## Next Steps
 
-- [Installation](/docs/getting-started) — Get Sigil installed in your project
+- [Installation](/docs/getting-started) — Get Vestig installed in your project
 - [Features](/docs/features) — Explore all features in detail
 - [API Reference](/docs/api) — Complete API documentation

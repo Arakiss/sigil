@@ -25,7 +25,7 @@ A clear and concise description of what you expected to happen.
 ## Code Example
 
 ```typescript
-import { Logger } from 'sigil'
+import { Logger } from 'vestig'
 
 // Your code here
 ```
@@ -40,7 +40,7 @@ import { Logger } from 'sigil'
 
 - **OS**: [e.g., macOS 14, Ubuntu 22.04, Windows 11]
 - **Runtime**: [e.g., Node.js 20.10.0, Bun 1.0.0, Deno 1.40]
-- **Sigil Version**: [e.g., 0.1.0]
+- **Vestig Version**: [e.g., 0.2.0]
 - **TypeScript Version**: [e.g., 5.3.0]
 
 ## Additional Context

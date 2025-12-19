@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-	title: 'Sigil — Leave your mark',
+	title: 'Vestig — Leave a trace',
 	description:
 		'A modern, runtime-agnostic structured logging library with automatic PII sanitization and context propagation.',
 }

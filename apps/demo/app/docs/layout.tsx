@@ -167,12 +167,12 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 			<nav className="docs-nav">
 				<div className="docs-nav-inner">
 					<Link href="/" className="docs-logo">
-						Sigil
+						Vestig
 					</Link>
 					<div className="docs-nav-links">
 						<Link href="/docs">Docs</Link>
 						<Link href="/docs/api">API</Link>
-						<a href="https://github.com/Arakiss/sigil" target="_blank" rel="noopener noreferrer">
+						<a href="https://github.com/Arakiss/vestig" target="_blank" rel="noopener noreferrer">
 							GitHub
 						</a>
 					</div>
