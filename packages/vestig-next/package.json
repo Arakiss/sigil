@@ -1,0 +1,88 @@
+{
+	"name": "@vestig/next",
+	"version": "0.1.0",
+	"description": "First-class Next.js 15+ integration for vestig logging library. Zero boilerplate, automatic request correlation, full type safety.",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./client": {
+			"types": "./dist/client.d.ts",
+			"import": "./dist/client.js"
+		},
+		"./middleware": {
+			"types": "./dist/server/middleware.d.ts",
+			"import": "./dist/server/middleware.js"
+		},
+		"./route": {
+			"types": "./dist/route/index.d.ts",
+			"import": "./dist/route/index.js"
+		},
+		"./config": {
+			"types": "./dist/config/index.d.ts",
+			"import": "./dist/config/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc",
+		"build:clean": "rm -rf dist && tsc",
+		"test": "echo 'No tests yet' && exit 0",
+		"test:watch": "bun test --watch",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"vestig",
+		"logging",
+		"nextjs",
+		"next.js",
+		"react",
+		"server-components",
+		"app-router",
+		"middleware",
+		"structured-logging",
+		"typescript",
+		"request-correlation",
+		"tracing",
+		"observability"
+	],
+	"author": "Arakiss",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Arakiss/vestig.git",
+		"directory": "packages/vestig-next"
+	},
+	"bugs": {
+		"url": "https://github.com/Arakiss/vestig/issues"
+	},
+	"homepage": "https://github.com/Arakiss/vestig#readme",
+	"peerDependencies": {
+		"next": ">=15.0.0",
+		"react": ">=19.0.0",
+		"vestig": ">=0.2.0"
+	},
+	"dependencies": {
+		"vestig": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"next": "catalog:",
+		"react": "catalog:"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
