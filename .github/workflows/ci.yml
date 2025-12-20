@@ -49,21 +49,21 @@ jobs:
           fi
           echo "No test.only() found"
 
-      - name: Run TypeScript type checking
-        run: bun run typecheck
-
       - name: Run BiomeJS linting
         run: bun run lint
 
       - name: Run BiomeJS formatting check
         run: bun run format:check
 
+      - name: Build packages
+        run: bun run build
+
+      - name: Run TypeScript type checking
+        run: bun run typecheck
+
       - name: Run tests
         run: bun run test || echo "No tests found or tests failed"
         continue-on-error: true
-
-      - name: Build packages
-        run: bun run build
 
       - name: Report build size
         run: |
