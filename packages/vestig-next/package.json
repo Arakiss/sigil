@@ -1,6 +1,6 @@
 {
 	"name": "@vestig/next",
-	"version": "0.1.0",
+	"version": "0.3.0",
 	"description": "First-class Next.js 15+ integration for vestig logging library. Zero boilerplate, automatic request correlation, full type safety.",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -27,7 +27,9 @@
 			"import": "./dist/config/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"sideEffects": false,
 	"scripts": {
 		"build": "tsc",
