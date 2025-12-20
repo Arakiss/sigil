@@ -219,6 +219,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Publish @vestig/express to npm
+        id: npm_vestig_express
+        if: steps.release.outputs.released == 'true'
+        run: |
+          cd packages/vestig-express
+          npm publish --access public
+          echo "Published @vestig/express@${{ steps.release.outputs.version }} to npm"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     outputs:
       released: ${{ steps.release.outputs.released }}
       version: ${{ steps.release.outputs.version }}
@@ -251,8 +261,10 @@ jobs:
           echo "- GitHub Release created" >> $GITHUB_STEP_SUMMARY
           echo "- 📦 Published \`vestig@${{ needs.release.outputs.version }}\` to npm" >> $GITHUB_STEP_SUMMARY
           echo "- 📦 Published \`@vestig/next@${{ needs.release.outputs.version }}\` to npm" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Published \`@vestig/express@${{ needs.release.outputs.version }}\` to npm" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📚 Links" >> $GITHUB_STEP_SUMMARY
           echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }})" >> $GITHUB_STEP_SUMMARY
           echo "- [vestig on npm](https://www.npmjs.com/package/vestig)" >> $GITHUB_STEP_SUMMARY
           echo "- [@vestig/next on npm](https://www.npmjs.com/package/@vestig/next)" >> $GITHUB_STEP_SUMMARY
+          echo "- [@vestig/express on npm](https://www.npmjs.com/package/@vestig/express)" >> $GITHUB_STEP_SUMMARY

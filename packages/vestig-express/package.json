@@ -1,0 +1,68 @@
+{
+	"name": "@vestig/express",
+	"version": "0.3.1",
+	"description": "Express.js middleware integration for vestig logging. Automatic request correlation, structured logging, and error handling.",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc",
+		"build:clean": "rm -rf dist && tsc",
+		"test": "bun test",
+		"test:watch": "bun test --watch",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"vestig",
+		"logging",
+		"express",
+		"expressjs",
+		"middleware",
+		"structured-logging",
+		"typescript",
+		"request-correlation",
+		"tracing",
+		"observability",
+		"nodejs"
+	],
+	"author": "Arakiss",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Arakiss/vestig.git",
+		"directory": "packages/vestig-express"
+	},
+	"bugs": {
+		"url": "https://github.com/Arakiss/vestig/issues"
+	},
+	"homepage": "https://github.com/Arakiss/vestig#readme",
+	"peerDependencies": {
+		"express": "^4.18.0 || ^5.0.0",
+		"vestig": ">=0.3.0"
+	},
+	"dependencies": {
+		"vestig": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "catalog:",
+		"@types/node": "catalog:",
+		"@types/express": "^5.0.0",
+		"express": "^5.1.0"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

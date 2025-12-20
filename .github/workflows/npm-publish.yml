@@ -15,9 +15,10 @@ on:
         required: true
         type: choice
         options:
-          - 'both'
+          - 'all'
           - 'vestig'
           - '@vestig/next'
+          - '@vestig/express'
       dry_run:
         description: 'Dry run (show what would be published)'
         required: false
@@ -61,26 +62,35 @@ jobs:
         run: |
           VESTIG_VERSION=$(node -p "require('./packages/vestig/package.json').version")
           VESTIG_NEXT_VERSION=$(node -p "require('./packages/vestig-next/package.json').version")
+          VESTIG_EXPRESS_VERSION=$(node -p "require('./packages/vestig-express/package.json').version")
           echo "vestig_version=$VESTIG_VERSION" >> $GITHUB_OUTPUT
           echo "vestig_next_version=$VESTIG_NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing vestig@$VESTIG_VERSION and @vestig/next@$VESTIG_NEXT_VERSION"
+          echo "vestig_express_version=$VESTIG_EXPRESS_VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing vestig@$VESTIG_VERSION, @vestig/next@$VESTIG_NEXT_VERSION, and @vestig/express@$VESTIG_EXPRESS_VERSION"
 
       - name: Publish vestig (dry run)
-        if: inputs.dry_run == true && (inputs.package == 'vestig' || inputs.package == 'both')
+        if: inputs.dry_run == true && (inputs.package == 'vestig' || inputs.package == 'all')
         run: |
           cd packages/vestig
           npm publish --access public --dry-run
           echo "Would publish vestig@${{ steps.versions.outputs.vestig_version }}"
 
       - name: Publish @vestig/next (dry run)
-        if: inputs.dry_run == true && (inputs.package == '@vestig/next' || inputs.package == 'both')
+        if: inputs.dry_run == true && (inputs.package == '@vestig/next' || inputs.package == 'all')
         run: |
           cd packages/vestig-next
           npm publish --access public --dry-run
           echo "Would publish @vestig/next@${{ steps.versions.outputs.vestig_next_version }}"
 
+      - name: Publish @vestig/express (dry run)
+        if: inputs.dry_run == true && (inputs.package == '@vestig/express' || inputs.package == 'all')
+        run: |
+          cd packages/vestig-express
+          npm publish --access public --dry-run
+          echo "Would publish @vestig/express@${{ steps.versions.outputs.vestig_express_version }}"
+
       - name: Publish vestig
-        if: inputs.dry_run != true && (inputs.package == 'vestig' || inputs.package == 'both')
+        if: inputs.dry_run != true && (inputs.package == 'vestig' || inputs.package == 'all')
         run: |
           cd packages/vestig
           npm publish --access public
@@ -89,11 +99,20 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @vestig/next
-        if: inputs.dry_run != true && (inputs.package == '@vestig/next' || inputs.package == 'both')
+        if: inputs.dry_run != true && (inputs.package == '@vestig/next' || inputs.package == 'all')
         run: |
           cd packages/vestig-next
           npm publish --access public
           echo "✅ Published @vestig/next@${{ steps.versions.outputs.vestig_next_version }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @vestig/express
+        if: inputs.dry_run != true && (inputs.package == '@vestig/express' || inputs.package == 'all')
+        run: |
+          cd packages/vestig-express
+          npm publish --access public
+          echo "✅ Published @vestig/express@${{ steps.versions.outputs.vestig_express_version }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -109,9 +128,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Package | Version |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.package }}" == "vestig" ] || [ "${{ inputs.package }}" == "both" ]; then
+          if [ "${{ inputs.package }}" == "vestig" ] || [ "${{ inputs.package }}" == "all" ]; then
             echo "| vestig | ${{ steps.versions.outputs.vestig_version }} |" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ "${{ inputs.package }}" == "@vestig/next" ] || [ "${{ inputs.package }}" == "both" ]; then
+          if [ "${{ inputs.package }}" == "@vestig/next" ] || [ "${{ inputs.package }}" == "all" ]; then
             echo "| @vestig/next | ${{ steps.versions.outputs.vestig_next_version }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ inputs.package }}" == "@vestig/express" ] || [ "${{ inputs.package }}" == "all" ]; then
+            echo "| @vestig/express | ${{ steps.versions.outputs.vestig_express_version }} |" >> $GITHUB_STEP_SUMMARY
           fi
