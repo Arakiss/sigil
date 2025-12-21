@@ -3,6 +3,22 @@
 import type { LogEntry, Transport, TransportConfig } from 'vestig'
 
 /**
+ * Configuration for offline queue persistence
+ */
+export interface OfflineQueueConfig {
+	/** Enable offline queue persistence (default: true) */
+	enabled?: boolean
+	/** localStorage key for persisted queue (default: 'vestig:offline-queue') */
+	storageKey?: string
+	/** Maximum entries to persist (default: 1000) */
+	maxSize?: number
+	/** Callback when queue is restored from storage */
+	onRestore?: (count: number) => void
+	/** Callback when queue is persisted to storage */
+	onPersist?: (count: number) => void
+}
+
+/**
  * Configuration for ClientHTTPTransport
  */
 export interface ClientHTTPTransportConfig extends TransportConfig {
@@ -22,6 +38,8 @@ export interface ClientHTTPTransportConfig extends TransportConfig {
 	onFlushError?: (error: Error) => void
 	/** Callback when logs are dropped */
 	onDrop?: (count: number) => void
+	/** Offline queue configuration for persistence */
+	offlineQueue?: OfflineQueueConfig
 }
 
 /**
@@ -32,6 +50,7 @@ export interface ClientHTTPTransportConfig extends TransportConfig {
  * - Retry with exponential backoff
  * - Uses keepalive for beforeunload reliability
  * - Automatic page metadata enrichment
+ * - Offline queue persistence with localStorage
  */
 export class ClientHTTPTransport implements Transport {
 	readonly name: string
@@ -46,11 +65,21 @@ export class ClientHTTPTransport implements Transport {
 	private onFlushError?: (error: Error) => void
 	private onDrop?: (count: number) => void
 
+	// Offline queue config
+	private offlineEnabled: boolean
+	private offlineStorageKey: string
+	private offlineMaxSize: number
+	private onOfflineRestore?: (count: number) => void
+	private onOfflinePersist?: (count: number) => void
+
 	private buffer: LogEntry[] = []
 	private flushTimer: ReturnType<typeof setInterval> | null = null
 	private isFlushing = false
 	private isDestroyed = false
 	private maxBufferSize = 500
+	private isOnline = true
+	private boundOnlineHandler: () => void
+	private boundOfflineHandler: () => void
 
 	constructor(config: ClientHTTPTransportConfig) {
 		this.name = config.name
@@ -63,13 +92,116 @@ export class ClientHTTPTransport implements Transport {
 		this.onFlushSuccess = config.onFlushSuccess
 		this.onFlushError = config.onFlushError
 		this.onDrop = config.onDrop
+
+		// Offline queue settings
+		const offlineConfig = config.offlineQueue ?? {}
+		this.offlineEnabled = offlineConfig.enabled ?? true
+		this.offlineStorageKey = offlineConfig.storageKey ?? 'vestig:offline-queue'
+		this.offlineMaxSize = offlineConfig.maxSize ?? 1000
+		this.onOfflineRestore = offlineConfig.onRestore
+		this.onOfflinePersist = offlineConfig.onPersist
+
+		// Initialize network status (default to true if navigator.onLine is not available)
+		this.isOnline =
+			typeof navigator !== 'undefined' && navigator.onLine !== undefined ? navigator.onLine : true
+
+		// Bind handlers for cleanup
+		this.boundOnlineHandler = this.handleOnline.bind(this)
+		this.boundOfflineHandler = this.handleOffline.bind(this)
 	}
 
 	async init(): Promise<void> {
+		// Restore offline queue if any
+		if (this.offlineEnabled) {
+			this.restoreOfflineQueue()
+		}
+
+		// Listen for network status changes
+		if (typeof window !== 'undefined') {
+			window.addEventListener('online', this.boundOnlineHandler)
+			window.addEventListener('offline', this.boundOfflineHandler)
+		}
+
 		// Start flush timer
 		this.flushTimer = setInterval(() => {
 			this.flush()
 		}, this.flushInterval)
+	}
+
+	private handleOnline(): void {
+		this.isOnline = true
+		// Attempt to flush when back online
+		this.flush()
+	}
+
+	private handleOffline(): void {
+		this.isOnline = false
+		// Persist current buffer to offline storage
+		if (this.offlineEnabled && this.buffer.length > 0) {
+			this.persistOfflineQueue()
+		}
+	}
+
+	private restoreOfflineQueue(): void {
+		if (typeof localStorage === 'undefined') return
+
+		try {
+			const stored = localStorage.getItem(this.offlineStorageKey)
+			if (!stored) return
+
+			const entries: LogEntry[] = JSON.parse(stored)
+			if (!Array.isArray(entries) || entries.length === 0) return
+
+			// Add restored entries to the front of the buffer
+			this.buffer.unshift(...entries)
+
+			// Enforce max buffer size
+			if (this.buffer.length > this.maxBufferSize) {
+				const excess = this.buffer.length - this.maxBufferSize
+				this.buffer.splice(this.maxBufferSize)
+				this.onDrop?.(excess)
+			}
+
+			// Clear stored queue
+			localStorage.removeItem(this.offlineStorageKey)
+
+			this.onOfflineRestore?.(entries.length)
+		} catch {
+			// Silently ignore parsing errors
+		}
+	}
+
+	private persistOfflineQueue(): void {
+		if (typeof localStorage === 'undefined') return
+
+		try {
+			// Merge existing stored entries with current buffer
+			let toStore: LogEntry[] = [...this.buffer]
+
+			const existingStored = localStorage.getItem(this.offlineStorageKey)
+			if (existingStored) {
+				try {
+					const existing: LogEntry[] = JSON.parse(existingStored)
+					if (Array.isArray(existing)) {
+						toStore = [...existing, ...toStore]
+					}
+				} catch {
+					// Ignore parse errors
+				}
+			}
+
+			// Enforce max size
+			if (toStore.length > this.offlineMaxSize) {
+				const excess = toStore.length - this.offlineMaxSize
+				toStore = toStore.slice(excess)
+				this.onDrop?.(excess)
+			}
+
+			localStorage.setItem(this.offlineStorageKey, JSON.stringify(toStore))
+			this.onOfflinePersist?.(toStore.length)
+		} catch {
+			// Silently ignore storage errors (quota exceeded, etc.)
+		}
 	}
 
 	log(entry: LogEntry): void {
@@ -110,6 +242,14 @@ export class ClientHTTPTransport implements Transport {
 			return
 		}
 
+		// If offline, persist to storage instead of sending
+		if (!this.isOnline) {
+			if (this.offlineEnabled) {
+				this.persistOfflineQueue()
+			}
+			return
+		}
+
 		this.isFlushing = true
 		const entries = [...this.buffer]
 		this.buffer = []
@@ -126,6 +266,11 @@ export class ClientHTTPTransport implements Transport {
 				const excess = this.buffer.length - this.maxBufferSize
 				this.buffer.splice(this.maxBufferSize)
 				this.onDrop?.(excess)
+			}
+
+			// If send failed, might be network issue - persist to offline queue
+			if (this.offlineEnabled) {
+				this.persistOfflineQueue()
 			}
 
 			this.onFlushError?.(error instanceof Error ? error : new Error(String(error)))
@@ -168,15 +313,49 @@ export class ClientHTTPTransport implements Transport {
 	async destroy(): Promise<void> {
 		this.isDestroyed = true
 
+		// Remove network event listeners
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('online', this.boundOnlineHandler)
+			window.removeEventListener('offline', this.boundOfflineHandler)
+		}
+
 		if (this.flushTimer) {
 			clearInterval(this.flushTimer)
 			this.flushTimer = null
 		}
 
-		// Final flush attempt
-		if (this.buffer.length > 0) {
+		// Persist remaining buffer to offline storage
+		if (this.offlineEnabled && this.buffer.length > 0) {
+			this.persistOfflineQueue()
+		}
+
+		// Final flush attempt if online
+		if (this.buffer.length > 0 && this.isOnline) {
 			this.isFlushing = false // Reset to allow final flush
 			await this.flush()
+		}
+	}
+
+	/**
+	 * Get current online status
+	 */
+	getOnlineStatus(): boolean {
+		return this.isOnline
+	}
+
+	/**
+	 * Get current buffer size
+	 */
+	getBufferSize(): number {
+		return this.buffer.length
+	}
+
+	/**
+	 * Manually trigger offline queue persistence
+	 */
+	persistNow(): void {
+		if (this.offlineEnabled) {
+			this.persistOfflineQueue()
 		}
 	}
 }
