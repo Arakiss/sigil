@@ -33,7 +33,6 @@ const demos = [
 		icon: '⚡',
 		href: '/playground/edge',
 		tags: ['edge', 'vercel', 'cloudflare'],
-		disabled: true,
 	},
 	{
 		title: 'Server Actions',
@@ -41,7 +40,6 @@ const demos = [
 		icon: '🎬',
 		href: '/playground/actions',
 		tags: ['RSC', 'forms', 'mutations'],
-		disabled: true,
 	},
 	{
 		title: 'PII Sanitization',
@@ -49,7 +47,6 @@ const demos = [
 		icon: '🔒',
 		href: '/playground/sanitization',
 		tags: ['GDPR', 'HIPAA', 'PCI-DSS'],
-		disabled: true,
 	},
 	{
 		title: 'Transports',
@@ -57,7 +54,6 @@ const demos = [
 		icon: '📡',
 		href: '/playground/transports',
 		tags: ['HTTP', 'file', 'datadog'],
-		disabled: true,
 	},
 ]
 
@@ -108,7 +104,6 @@ export default function PlaygroundPage() {
 							icon={demo.icon}
 							href={demo.href}
 							tags={demo.tags}
-							className={demo.disabled ? 'opacity-50 pointer-events-none' : ''}
 						/>
 					))}
 				</DemoGrid>
