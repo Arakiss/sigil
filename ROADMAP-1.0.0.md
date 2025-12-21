@@ -4,7 +4,7 @@
 
 ---
 
-## 📊 Análisis del Estado Actual (v0.3.1)
+## 📊 Análisis del Estado Actual (v0.6.0)
 
 ### Fortalezas Actuales
 
@@ -17,13 +17,16 @@
 | Context Propagation | ✅ Completo | AsyncLocalStorage + fallback |
 | Next.js Integration | ✅ Completo | Server Components, Route Handlers |
 | Express Integration | ✅ Completo | Middleware + handlers |
+| **Native Tracing API** | ✅ Completo | 🆕 `span()`, `spanSync()`, `startSpan()` |
+| **W3C Trace Context** | ✅ Completo | 🆕 traceparent header support |
+| **Client-Side Hooks** | ✅ Completo | 🆕 `useLogger()`, `VestigProvider` |
 
 ### Métricas Actuales
 
-- **Tests**: 286 passing, 81% coverage
+- **Tests**: 300+ passing, ~90% coverage
 - **Paquetes**: 3 publicados (vestig, @vestig/next, @vestig/express)
 - **Dependencias de producción**: 0 (!!!)
-- **Tamaño**: ~6,700 LOC
+- **Tamaño**: ~8,500 LOC
 
 ---
 
@@ -88,22 +91,23 @@
 
 ## 🗺️ Feature Roadmap
 
-### Fase 1: Foundation (v0.4.0 - v0.5.0)
+### Fase 1: Foundation (v0.4.0 - v0.5.0) ✅ COMPLETADA
 **Objetivo**: Solidificar la base y completar features parciales
 
 #### 1.1 Complete Client-Side Logging
-- [ ] `useLogger()` hook fully functional
-- [ ] `VestigProvider` with configuration
-- [ ] `ClientTransport` with batching + offline queue
-- [ ] Automatic error boundary integration
-- [ ] Browser performance marks integration
+- [x] `useLogger()` hook fully functional ✅
+- [x] `VestigProvider` with configuration ✅
+- [x] `ClientHTTPTransport` with batching ✅
+- [ ] Offline queue persistence (→ v0.7.0)
+- [ ] Automatic error boundary integration (→ v0.7.0)
+- [ ] Browser performance marks integration (→ v0.8.0)
 
 #### 1.2 Testing Infrastructure
-- [ ] Tests for `@vestig/next` (currently 0 tests)
+- [x] Tests for `@vestig/next` (232 tests) ✅
+- [x] Tests for `@vestig/express` (74 tests) ✅
+- [x] Performance benchmarks suite ✅
 - [ ] Browser runtime tests (jsdom/playwright)
 - [ ] E2E tests for demo app
-- [ ] Performance benchmarks suite
-- [ ] 95%+ code coverage target
 
 #### 1.3 Deno Full Support
 - [ ] Deno-specific transport (Deno.writeFile)
@@ -112,40 +116,56 @@
 
 ---
 
-### Fase 2: Tracing Revolution (v0.6.0 - v0.7.0)
+### Fase 2: Tracing Revolution (v0.6.0 - v0.7.0) 🔄 EN PROGRESO
 **Objetivo**: Unificar logging y tracing en una API simple
 
-#### 2.1 🏆 Native Tracing (DIFERENCIADOR CLAVE)
+#### 2.1 🏆 Native Tracing (DIFERENCIADOR CLAVE) ✅ COMPLETADO
 ```typescript
 // La API más simple de tracing que existe
-const result = await log.trace('user.checkout', async (span) => {
-  span.set('userId', user.id)
+import { span, spanSync, startSpan } from 'vestig'
 
-  const cart = await log.trace('cart.fetch', () => fetchCart(user.id))
-  const payment = await log.trace('payment.process', () => processPayment(cart))
-
-  return { cart, payment }
+// Async spans
+const result = await span('user.checkout', async (s) => {
+  s.setAttribute('userId', user.id)
+  return await processCheckout()
 })
+
+// Sync spans
+const data = spanSync('parse.config', (s) => {
+  return parseConfig(raw)
+})
+
+// Manual control
+const s = startSpan('long.operation')
+try {
+  await doWork()
+  s.end()
+} catch (e) {
+  s.setStatus('error', e.message)
+  s.end()
+}
 ```
 
 Features:
-- [ ] `log.trace(name, fn)` - Automatic span creation
-- [ ] `log.span(name)` - Manual span control
-- [ ] Automatic parent-child relationships
-- [ ] Timing metrics built-in
-- [ ] Error propagation with stack traces
-- [ ] Span attributes type-safe
+- [x] `span(name, fn)` - Async automatic span creation ✅
+- [x] `spanSync(name, fn)` - Sync automatic span creation ✅
+- [x] `startSpan(name)` - Manual span control ✅
+- [x] Automatic parent-child relationships ✅
+- [x] Timing metrics built-in ✅
+- [x] Error propagation with stack traces ✅
+- [x] Span attributes type-safe ✅
+- [x] Span events support ✅
 
-#### 2.2 🏆 W3C Trace Context (Full Compliance)
-- [ ] `traceparent` header parsing/generation
-- [ ] `tracestate` support
-- [ ] Cross-service correlation
-- [ ] Baggage propagation
+#### 2.2 🏆 W3C Trace Context (Full Compliance) 🔄 PARCIAL
+- [x] `traceparent` header parsing/generation ✅
+- [ ] `tracestate` support (→ v0.7.0)
+- [x] Cross-service correlation ✅
+- [ ] Baggage propagation (→ v0.8.0)
 
 #### 2.3 Distributed Tracing
 - [ ] Trace visualization in console (ASCII art)
 - [ ] Trace export to Jaeger/Zipkin format
-- [ ] Sampling strategies (head, tail, adaptive)
+- [ ] Sampling strategies (head, tail, adaptive) (→ v0.7.0)
 
 ---
 
@@ -370,22 +390,28 @@ vestig audit --pii-check ./src
 
 ---
 
-## 🎯 Próximos Pasos Inmediatos
+## 🎯 Próximos Pasos Inmediatos (v0.7.0)
 
-### Sprint 1 (Esta semana)
-1. [ ] Completar tests para `@vestig/next`
-2. [ ] Implementar `useLogger()` hook funcional
-3. [ ] Crear benchmark suite vs Pino/Winston
+### Sprint Actual: v0.7.0 Features
+1. [ ] Sampling strategies (probability, rate-limit, namespace-based)
+2. [ ] Offline queue con localStorage persistence
+3. [ ] VestigErrorBoundary component
+4. [ ] W3C tracestate support
 
-### Sprint 2
-1. [ ] `VestigProvider` completo
-2. [ ] `ClientTransport` con offline queue
-3. [ ] Documentar API de client-side
+### Sprint Siguiente: v0.8.0 Prep
+1. [ ] Trace visualization en consola (ASCII waterfall)
+2. [ ] Browser performance marks integration
+3. [ ] Baggage propagation
 
-### Sprint 3
-1. [ ] Diseñar API de tracing (`log.trace()`)
-2. [ ] Prototipo de span visualization
-3. [ ] W3C traceparent implementation
+### Completados Recientemente (v0.4.0 - v0.6.0)
+- ✅ Tests comprehensivos para `@vestig/next` (232 tests)
+- ✅ Tests comprehensivos para `@vestig/express` (74 tests)
+- ✅ `useLogger()` hook funcional
+- ✅ `VestigProvider` completo
+- ✅ `ClientHTTPTransport` con batching
+- ✅ Native tracing API: `span()`, `spanSync()`, `startSpan()`
+- ✅ W3C traceparent parsing/generation
+- ✅ Span support en route handlers y server actions
 
 ---
 
@@ -425,5 +451,6 @@ await vestig.replay({
 *Este documento es un living document. Actualizar conforme avance el desarrollo.*
 
 **Última actualización**: 2025-12-21
-**Versión actual**: 0.3.1
+**Versión actual**: 0.6.0
 **Target**: 1.0.0
+**Próxima versión**: 0.7.0 (sampling, offline queue, error boundary)
