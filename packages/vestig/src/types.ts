@@ -96,6 +96,16 @@ export interface SanitizeConfig {
  */
 export type SanitizePreset = 'none' | 'minimal' | 'default' | 'gdpr' | 'hipaa' | 'pci-dss'
 
+// Re-export sampling types for convenience
+export type {
+	NamespaceSamplerConfig,
+	ProbabilitySamplerConfig,
+	RateLimitSamplerConfig,
+	Sampler,
+	SamplerConfig,
+	SamplingConfig,
+} from './sampling/types'
+
 /**
  * Logger configuration options
  */
@@ -114,6 +124,41 @@ export interface LoggerConfig {
 	context?: LogContext
 	/** Logger namespace for child loggers */
 	namespace?: string
+	/**
+	 * Sampling configuration to reduce log volume in production.
+	 *
+	 * @example
+	 * ```typescript
+	 * // Sample 10% of logs
+	 * createLogger({ sampling: { enabled: true, sampler: 0.1 } })
+	 *
+	 * // Rate limit to 100 logs/second
+	 * createLogger({ sampling: { enabled: true, sampler: { maxPerSecond: 100 } } })
+	 *
+	 * // Different rates per namespace
+	 * createLogger({
+	 *   sampling: {
+	 *     enabled: true,
+	 *     sampler: {
+	 *       default: { probability: 0.1 },
+	 *       namespaces: {
+	 *         'auth.*': 1, // 100% for auth
+	 *         'db.*': { maxPerSecond: 50 }
+	 *       }
+	 *     }
+	 *   }
+	 * })
+	 * ```
+	 */
+	sampling?: import('./sampling/types').SamplingConfig
+}
+
+/**
+ * Resolved logger configuration with all required fields populated.
+ * Note: `sampling` remains optional as it's disabled by default.
+ */
+export type ResolvedLoggerConfig = Required<Omit<LoggerConfig, 'sampling'>> & {
+	sampling?: import('./sampling/types').SamplingConfig
 }
 
 /**

@@ -1,5 +1,5 @@
 import { parseLogLevel } from './levels'
-import type { LogContext, LogLevel, LoggerConfig } from './types'
+import type { LogContext, LogLevel, ResolvedLoggerConfig, LoggerConfig } from './types'
 
 /**
  * Environment variable names
@@ -56,7 +56,7 @@ function getEnvContext(): LogContext {
 /**
  * Default configuration values
  */
-export function getDefaultConfig(): Required<LoggerConfig> {
+export function getDefaultConfig(): ResolvedLoggerConfig {
 	const isProd = isProduction()
 
 	return {
@@ -67,13 +67,14 @@ export function getDefaultConfig(): Required<LoggerConfig> {
 		sanitizeFields: [],
 		context: getEnvContext(),
 		namespace: '',
+		sampling: undefined,
 	}
 }
 
 /**
  * Merge user config with defaults
  */
-export function mergeConfig(userConfig?: LoggerConfig): Required<LoggerConfig> {
+export function mergeConfig(userConfig?: LoggerConfig): ResolvedLoggerConfig {
 	const defaults = getDefaultConfig()
 
 	return {
@@ -84,5 +85,6 @@ export function mergeConfig(userConfig?: LoggerConfig): Required<LoggerConfig> {
 		sanitizeFields: [...defaults.sanitizeFields, ...(userConfig?.sanitizeFields ?? [])],
 		context: { ...defaults.context, ...userConfig?.context },
 		namespace: userConfig?.namespace ?? defaults.namespace,
+		sampling: userConfig?.sampling ?? defaults.sampling,
 	}
 }

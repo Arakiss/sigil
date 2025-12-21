@@ -3,6 +3,7 @@ export { createLogger, LoggerImpl } from './logger'
 export type {
 	Logger,
 	LoggerConfig,
+	ResolvedLoggerConfig,
 	LogLevel,
 	LogEntry,
 	LogMetadata,
@@ -27,6 +28,13 @@ export type {
 	SpanOptions,
 	SpanStatus,
 	SpanSyncCallback,
+	// Sampling types (re-exported from types.ts)
+	Sampler,
+	SamplerConfig,
+	SamplingConfig,
+	ProbabilitySamplerConfig,
+	RateLimitSamplerConfig,
+	NamespaceSamplerConfig,
 } from './types'
 
 // Runtime detection
@@ -98,6 +106,16 @@ export {
 	withSpanContext,
 	withSpanContextAsync,
 } from './tracing'
+
+// Sampling - factory functions for creating samplers
+export {
+	createSampler,
+	createSamplerFromConfig,
+	createProbabilitySampler,
+	createRateLimitSampler,
+	createNamespaceSampler,
+	createCompositeSampler,
+} from './sampling'
 
 // Default logger instance (convenience)
 import { createLogger } from './logger'

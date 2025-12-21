@@ -2,6 +2,7 @@ import { mergeConfig } from './config'
 import { getContext } from './context'
 import { LOG_LEVELS, shouldLog } from './levels'
 import { RUNTIME } from './runtime'
+import { createSampler, type Sampler } from './sampling'
 import { ConsoleTransport } from './transports/console'
 import {
 	span as spanFn,
@@ -18,6 +19,7 @@ import type {
 	LogMetadata,
 	Logger,
 	LoggerConfig,
+	ResolvedLoggerConfig,
 	Transport,
 } from './types'
 import { isError, serializeError } from './utils/error'
@@ -77,13 +79,19 @@ function formatArgs(args: unknown[]): { message: string; metadata: LogMetadata }
  * Core logger implementation
  */
 export class LoggerImpl implements Logger {
-	private config: Required<LoggerConfig>
+	private config: ResolvedLoggerConfig
 	private transports: Transport[] = []
 	private children: Map<string, LoggerImpl> = new Map()
 	private initialized = false
+	private sampler: Sampler | null = null
 
 	constructor(config?: LoggerConfig) {
 		this.config = mergeConfig(config)
+
+		// Initialize sampler if configured
+		if (this.config.sampling) {
+			this.sampler = createSampler(this.config.sampling)
+		}
 
 		// Add default console transport
 		this.transports.push(
@@ -129,6 +137,11 @@ export class LoggerImpl implements Logger {
 		if (entry.metadata?.error) {
 			const { error: _, ...rest } = entry.metadata
 			entry.metadata = Object.keys(rest).length > 0 ? rest : undefined
+		}
+
+		// Apply sampling if configured
+		if (this.sampler && !this.sampler.shouldSample(entry)) {
+			return
 		}
 
 		// Send to all enabled transports
