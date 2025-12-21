@@ -6,13 +6,12 @@ import { submitFormAction, greetUserAction, simulateErrorAction } from './action
 
 export function ActionDemo() {
 	const log = useLogger('actions-demo:client')
-	const [results, setResults] = useState<Array<{ action: string; result: unknown; time: string }>>([])
+	const [results, setResults] = useState<Array<{ action: string; result: unknown; time: string }>>(
+		[],
+	)
 	const [loading, setLoading] = useState<string | null>(null)
 
-	const runAction = async (
-		name: string,
-		action: () => Promise<unknown>
-	) => {
+	const runAction = async (name: string, action: () => Promise<unknown>) => {
 		setLoading(name)
 		log.info('Invoking server action', { action: name })
 
@@ -62,7 +61,11 @@ export function ActionDemo() {
 			{/* Action buttons */}
 			<div className="flex flex-wrap gap-3">
 				<button
-					onClick={() => runAction('submitForm', () => submitFormAction({ name: 'John Doe', email: 'john@example.com' }))}
+					onClick={() =>
+						runAction('submitForm', () =>
+							submitFormAction({ name: 'John Doe', email: 'john@example.com' }),
+						)
+					}
 					disabled={loading !== null}
 					className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
 				>

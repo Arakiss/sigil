@@ -29,9 +29,7 @@ const DEFAULT_OPTIONS: Required<ErrorHandlerOptions> = {
  * }))
  * ```
  */
-export function createVestigErrorHandler(
-	options: ErrorHandlerOptions = {},
-): ErrorRequestHandler {
+export function createVestigErrorHandler(options: ErrorHandlerOptions = {}): ErrorRequestHandler {
 	const mergedOptions = { ...DEFAULT_OPTIONS, ...options }
 
 	const logger = createLogger({
@@ -62,7 +60,8 @@ export function createVestigErrorHandler(
 		}
 
 		// Check for HTTP status code on error
-		const statusCode = (err as unknown as { statusCode?: number }).statusCode ??
+		const statusCode =
+			(err as unknown as { statusCode?: number }).statusCode ??
 			(err as unknown as { status?: number }).status ??
 			500
 

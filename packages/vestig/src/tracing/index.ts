@@ -32,7 +32,14 @@
  */
 
 // Types
-export type { Span, SpanEvent, SpanOptions, SpanStatus, SpanCallback, SpanSyncCallback } from './types'
+export type {
+	Span,
+	SpanEvent,
+	SpanOptions,
+	SpanStatus,
+	SpanCallback,
+	SpanSyncCallback,
+} from './types'
 
 // Span class (for instanceof checks)
 export { SpanImpl } from './span'

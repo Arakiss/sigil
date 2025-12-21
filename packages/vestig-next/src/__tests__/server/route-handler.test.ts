@@ -498,7 +498,7 @@ describe('createRouteHandlers', () => {
 					return new Response('OK')
 				},
 			},
-			{ level: 'debug', sanitize: 'minimal' }
+			{ level: 'debug', sanitize: 'minimal' },
 		)
 
 		const request = createMockNextRequest('https://example.com/api/test', {
@@ -878,7 +878,7 @@ describe('integration scenarios', () => {
 					return new Response(null, { status: 204 })
 				},
 			},
-			{ namespace: 'api:items' }
+			{ namespace: 'api:items' },
 		)
 
 		// GET all items

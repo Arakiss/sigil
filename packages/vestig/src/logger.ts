@@ -346,11 +346,7 @@ export class LoggerImpl implements Logger {
 	 * // Span name will be 'database:query'
 	 * ```
 	 */
-	async span<T>(
-		name: string,
-		fn: SpanCallback<T>,
-		options?: SpanOptions,
-	): Promise<T> {
+	async span<T>(name: string, fn: SpanCallback<T>, options?: SpanOptions): Promise<T> {
 		const fullName = this.config.namespace ? `${this.config.namespace}:${name}` : name
 		return spanFn(fullName, fn, options)
 	}

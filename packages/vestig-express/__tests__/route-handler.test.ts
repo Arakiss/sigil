@@ -243,10 +243,7 @@ describe('createRouteHandler', () => {
 	it('allows per-handler option overrides', async () => {
 		const apiHandler = createRouteHandler({ namespace: 'api' })
 
-		const handler = apiHandler(
-			async () => {},
-			{ namespace: 'api:users' },
-		)
+		const handler = apiHandler(async () => {}, { namespace: 'api:users' })
 
 		const req = createMockReq()
 		const res = createMockRes()

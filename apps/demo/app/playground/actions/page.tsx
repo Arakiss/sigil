@@ -105,8 +105,8 @@ export const submitForm = vestigAction(
 				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features Demonstrated</h3>
 				<ul className="text-sm text-gray-400 space-y-2">
 					<li>
-						• <strong className="text-white">vestigAction Wrapper</strong> — Automatic logging
-						setup for server actions
+						• <strong className="text-white">vestigAction Wrapper</strong> — Automatic logging setup
+						for server actions
 					</li>
 					<li>
 						• <strong className="text-white">Correlation Propagation</strong> — Request IDs flow

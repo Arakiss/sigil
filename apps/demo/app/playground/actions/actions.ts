@@ -14,7 +14,7 @@ export const submitFormAction = vestigAction(
 
 		log.debug('Validating input data', {
 			hasName: !!data.name,
-			hasEmail: !!data.email
+			hasEmail: !!data.email,
 		})
 
 		// Simulate validation
@@ -49,7 +49,7 @@ export const submitFormAction = vestigAction(
 		namespace: 'actions:submitForm',
 		logInput: false, // Don't log PII
 		logOutput: false,
-	}
+	},
 )
 
 /**
@@ -73,7 +73,7 @@ export const greetUserAction = vestigAction(
 
 		return { greeting, timestamp: new Date().toISOString() }
 	},
-	{ namespace: 'actions:greetUser' }
+	{ namespace: 'actions:greetUser' },
 )
 
 /**
@@ -92,5 +92,5 @@ export const simulateErrorAction = vestigAction(
 		// This error will be caught and logged by vestigAction
 		throw new Error('This is a simulated error for demo purposes')
 	},
-	{ namespace: 'actions:simulateError' }
+	{ namespace: 'actions:simulateError' },
 )

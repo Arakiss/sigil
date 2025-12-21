@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import { vestigAction, createVestigAction } from '../../server/server-action'
-import {
-	setMockHeaders,
-	clearMockHeaders,
-	headers as mockHeaders,
-} from '../mocks/next-headers'
+import { setMockHeaders, clearMockHeaders, headers as mockHeaders } from '../mocks/next-headers'
 import type { Span } from 'vestig'
 
 // Mock next/headers module
@@ -719,10 +715,7 @@ describe('integration scenarios', () => {
 		setMockHeaders({ 'x-request-id': 'form-submit-123' })
 
 		const submitForm = vestigAction(
-			async (
-				data: { email: string; password: string },
-				{ log, ctx }
-			) => {
+			async (data: { email: string; password: string }, { log, ctx }) => {
 				log.debug('Validating form data')
 
 				if (!data.email.includes('@')) {
@@ -733,7 +726,7 @@ describe('integration scenarios', () => {
 
 				return { success: true, userId: 'user-123' }
 			},
-			{ namespace: 'forms:login' }
+			{ namespace: 'forms:login' },
 		)
 
 		const result = await submitForm({
@@ -755,7 +748,7 @@ describe('integration scenarios', () => {
 				items.push({ id, name })
 				return { id, name }
 			},
-			{ namespace: 'db:createItem' }
+			{ namespace: 'db:createItem' },
 		)
 
 		const deleteItem = vestigAction(
@@ -769,7 +762,7 @@ describe('integration scenarios', () => {
 				items.splice(index, 1)
 				return { deleted: true }
 			},
-			{ namespace: 'db:deleteItem' }
+			{ namespace: 'db:deleteItem' },
 		)
 
 		// Create items
@@ -802,7 +795,7 @@ describe('integration scenarios', () => {
 				results.push(`step1: ${ctx.requestId}`)
 				return `${input}-step1`
 			},
-			{ namespace: 'chain:step1' }
+			{ namespace: 'chain:step1' },
 		)
 
 		const step2 = vestigAction(
@@ -810,16 +803,13 @@ describe('integration scenarios', () => {
 				results.push(`step2: ${ctx.requestId}`)
 				return `${input}-step2`
 			},
-			{ namespace: 'chain:step2' }
+			{ namespace: 'chain:step2' },
 		)
 
 		const result1 = await step1('start')
 		const result2 = await step2(result1)
 
 		expect(result2).toBe('start-step1-step2')
-		expect(results).toEqual([
-			'step1: chain-req-123',
-			'step2: chain-req-123',
-		])
+		expect(results).toEqual(['step1: chain-req-123', 'step2: chain-req-123'])
 	})
 })

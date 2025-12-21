@@ -83,8 +83,8 @@ export default async function TransportsPage() {
 					<h1 className="text-2xl font-bold text-white">Transports</h1>
 				</div>
 				<p className="text-gray-400 mb-4">
-					Configure multiple log destinations with different transports. Vestig supports
-					console, HTTP, file, and Datadog out of the box.
+					Configure multiple log destinations with different transports. Vestig supports console,
+					HTTP, file, and Datadog out of the box.
 				</p>
 				<FullRuntimeBadge runtime={RUNTIME} isServer={IS_SERVER} />
 			</div>
@@ -220,8 +220,8 @@ log.info('Application started', { version: '1.0.0' })`}
 				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features</h3>
 				<ul className="text-sm text-gray-400 space-y-2">
 					<li>
-						• <strong className="text-white">Multiple Destinations</strong> — Send logs to
-						console, files, HTTP, and Datadog simultaneously
+						• <strong className="text-white">Multiple Destinations</strong> — Send logs to console,
+						files, HTTP, and Datadog simultaneously
 					</li>
 					<li>
 						• <strong className="text-white">Batch Processing</strong> — Efficient batching with
@@ -232,8 +232,8 @@ log.info('Application started', { version: '1.0.0' })`}
 						exponential backoff for network transports
 					</li>
 					<li>
-						• <strong className="text-white">Level Filtering</strong> — Each transport can have
-						its own minimum log level
+						• <strong className="text-white">Level Filtering</strong> — Each transport can have its
+						own minimum log level
 					</li>
 					<li>
 						• <strong className="text-white">Custom Transports</strong> — Extend BatchTransport to

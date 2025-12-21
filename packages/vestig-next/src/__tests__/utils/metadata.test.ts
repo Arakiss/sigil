@@ -8,7 +8,7 @@ function createMockRequest(
 		method?: string
 		headers?: Record<string, string>
 		ip?: string
-	} = {}
+	} = {},
 ): Request & { nextUrl?: URL; ip?: string } {
 	const request = new Request(url, {
 		method: options.method ?? 'GET',

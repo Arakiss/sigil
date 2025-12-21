@@ -1,12 +1,6 @@
 import type { Span, SpanCallback, SpanOptions, SpanSyncCallback } from './types'
 import { SpanImpl } from './span'
-import {
-	getActiveSpan,
-	pushSpan,
-	popSpan,
-	withSpanContext,
-	withSpanContextAsync,
-} from './context'
+import { getActiveSpan, pushSpan, popSpan, withSpanContext, withSpanContextAsync } from './context'
 
 // Re-export for convenience
 export { getActiveSpan } from './context'
@@ -44,7 +38,7 @@ export { getActiveSpan } from './context'
 export async function span<T>(
 	name: string,
 	fn: SpanCallback<T>,
-	options?: SpanOptions
+	options?: SpanOptions,
 ): Promise<T> {
 	const s = new SpanImpl(name, options)
 
@@ -83,11 +77,7 @@ export async function span<T>(
  * })
  * ```
  */
-export function spanSync<T>(
-	name: string,
-	fn: SpanSyncCallback<T>,
-	options?: SpanOptions
-): T {
+export function spanSync<T>(name: string, fn: SpanSyncCallback<T>, options?: SpanOptions): T {
 	const s = new SpanImpl(name, options)
 
 	return withSpanContext(s, () => {

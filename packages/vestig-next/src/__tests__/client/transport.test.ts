@@ -22,7 +22,7 @@ describe('ClientHTTPTransport', () => {
 
 	beforeEach(() => {
 		mockFetch = mock(() =>
-			Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+			Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })),
 		)
 		globalThis.fetch = mockFetch as unknown as typeof fetch
 	})
@@ -279,8 +279,8 @@ describe('ClientHTTPTransport', () => {
 			mockFetch = mock(
 				() =>
 					new Promise((resolve) =>
-						setTimeout(() => resolve(new Response('ok', { status: 200 })), 50)
-					)
+						setTimeout(() => resolve(new Response('ok', { status: 200 })), 50),
+					),
 			)
 			globalThis.fetch = mockFetch as unknown as typeof fetch
 
@@ -449,7 +449,7 @@ describe('edge cases', () => {
 
 	beforeEach(() => {
 		mockFetch = mock(() =>
-			Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+			Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })),
 		)
 		globalThis.fetch = mockFetch as unknown as typeof fetch
 	})
@@ -473,7 +473,7 @@ describe('edge cases', () => {
 					null: null,
 					undefined: undefined,
 				},
-			})
+			}),
 		)
 
 		await new Promise((r) => setTimeout(r, 10))
@@ -499,9 +499,7 @@ describe('edge cases', () => {
 		const call = mockFetch.mock.calls[0]
 		const body = JSON.parse(call[1]?.body as string)
 
-		expect(body.entries[0].message).toBe(
-			'Test with "quotes" and <brackets> & ampersand'
-		)
+		expect(body.entries[0].message).toBe('Test with "quotes" and <brackets> & ampersand')
 	})
 
 	test('should handle high-frequency logging', async () => {

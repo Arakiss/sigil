@@ -46,8 +46,7 @@ export function extractRequestInfo(req: Request): RequestInfo {
 
 	// Extract and truncate user agent
 	const userAgentHeader = req.headers['user-agent']
-	const userAgent =
-		typeof userAgentHeader === 'string' ? userAgentHeader.slice(0, 100) : undefined
+	const userAgent = typeof userAgentHeader === 'string' ? userAgentHeader.slice(0, 100) : undefined
 
 	return {
 		method: req.method,

@@ -89,10 +89,7 @@ export function withSpanContext<T>(span: Span, fn: () => T): T {
  * Async version of withSpanContext
  * @internal
  */
-export async function withSpanContextAsync<T>(
-	span: Span,
-	fn: () => Promise<T>
-): Promise<T> {
+export async function withSpanContextAsync<T>(span: Span, fn: () => Promise<T>): Promise<T> {
 	// Propagate trace context to the logging system
 	return withContext({ traceId: span.traceId, spanId: span.spanId }, async () => {
 		pushSpan(span)

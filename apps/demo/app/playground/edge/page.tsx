@@ -41,8 +41,8 @@ export default async function EdgePage() {
 					<h1 className="text-2xl font-bold text-white">Edge Runtime</h1>
 				</div>
 				<p className="text-gray-400 mb-4">
-					Lightweight logging in Edge Functions and Middleware. Vestig automatically adapts
-					to the edge environment with reduced bundle size.
+					Lightweight logging in Edge Functions and Middleware. Vestig automatically adapts to the
+					edge environment with reduced bundle size.
 				</p>
 				<FullRuntimeBadge runtime={RUNTIME} isServer={IS_SERVER} />
 			</div>
@@ -174,12 +174,12 @@ export const GET = withVestig(
 						process.env may be restricted
 					</li>
 					<li>
-						• <strong className="text-white">Global Context</strong> — Uses global context
-						manager instead of AsyncLocalStorage
+						• <strong className="text-white">Global Context</strong> — Uses global context manager
+						instead of AsyncLocalStorage
 					</li>
 					<li>
-						• <strong className="text-white">Bundle Size</strong> — Vestig automatically
-						tree-shakes unused features
+						• <strong className="text-white">Bundle Size</strong> — Vestig automatically tree-shakes
+						unused features
 					</li>
 				</ul>
 			</div>
@@ -205,8 +205,8 @@ export const GET = withVestig(
 						edge bundles small
 					</li>
 					<li>
-						• <strong className="text-white">Same API</strong> — Use the same logging API as
-						server and client
+						• <strong className="text-white">Same API</strong> — Use the same logging API as server
+						and client
 					</li>
 				</ul>
 			</div>

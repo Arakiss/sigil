@@ -71,11 +71,7 @@ function getOrCreateLogger(options: MiddlewareOptions): Logger {
 export function createVestigMiddleware(options: MiddlewareOptions = {}) {
 	const mergedOptions = { ...DEFAULT_OPTIONS, ...options }
 
-	return function vestigMiddleware(
-		req: VestigRequest,
-		res: Response,
-		next: NextFunction,
-	): void {
+	return function vestigMiddleware(req: VestigRequest, res: Response, next: NextFunction): void {
 		// Skip configured paths
 		const pathname = req.path
 		if (mergedOptions.skipPaths.some((p) => pathname.startsWith(p))) {

@@ -12,7 +12,7 @@ export function createMockNextRequest(
 		method?: string
 		headers?: Record<string, string>
 		body?: string | object
-	} = {}
+	} = {},
 ): MockNextRequest {
 	const parsedUrl = new URL(url)
 	const headers = new Headers(options.headers ?? {})
@@ -150,9 +150,7 @@ export interface MockRouteContext {
 	params: Promise<Record<string, string>>
 }
 
-export function createMockRouteContext(
-	params: Record<string, string> = {}
-): MockRouteContext {
+export function createMockRouteContext(params: Record<string, string> = {}): MockRouteContext {
 	return {
 		params: Promise.resolve(params),
 	}

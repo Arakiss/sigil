@@ -77,8 +77,8 @@ export default async function SanitizationPage() {
 					<h1 className="text-2xl font-bold text-white">PII Sanitization</h1>
 				</div>
 				<p className="text-gray-400 mb-4">
-					Compare all sanitization presets side-by-side. See how different compliance
-					requirements affect data masking.
+					Compare all sanitization presets side-by-side. See how different compliance requirements
+					affect data masking.
 				</p>
 				<FullRuntimeBadge runtime={RUNTIME} isServer={IS_SERVER} />
 			</div>
@@ -209,12 +209,12 @@ const cleanData = sanitize(userData, { preset: 'hipaa' })`}
 						sanitizes nested objects and arrays
 					</li>
 					<li>
-						• <strong className="text-white">Custom Patterns</strong> — Add your own field
-						matchers and regex patterns
+						• <strong className="text-white">Custom Patterns</strong> — Add your own field matchers
+						and regex patterns
 					</li>
 					<li>
-						• <strong className="text-white">Zero Dependencies</strong> — Lightweight and fast,
-						no external libraries
+						• <strong className="text-white">Zero Dependencies</strong> — Lightweight and fast, no
+						external libraries
 					</li>
 				</ul>
 			</div>

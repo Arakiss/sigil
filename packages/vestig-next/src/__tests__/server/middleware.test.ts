@@ -85,9 +85,7 @@ describe('createVestigMiddleware', () => {
 		expect(requestId).toBeDefined()
 		expect(requestId).not.toBe('')
 		// Should be UUID format
-		expect(requestId).toMatch(
-			/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-		)
+		expect(requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
 	})
 
 	test('should parse traceparent header', () => {
@@ -148,9 +146,7 @@ describe('createVestigMiddleware', () => {
 	test('should handle requests with search params', () => {
 		const middleware = createVestigMiddleware()
 
-		const request = createMockNextRequest(
-			'https://example.com/api/search?q=test&page=1'
-		)
+		const request = createMockNextRequest('https://example.com/api/search?q=test&page=1')
 		const response = middleware(request as never)
 
 		expect(response.headers.get('x-request-id')).toBeDefined()
