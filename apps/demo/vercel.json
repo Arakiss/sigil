@@ -1,6 +1,0 @@
-{
-	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"buildCommand": "cd ../.. && bun install && bun run build --filter=@vestig/demo",
-	"installCommand": "echo 'Skipping install, handled in buildCommand'",
-	"framework": "nextjs"
-}

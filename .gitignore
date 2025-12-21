@@ -32,3 +32,4 @@ coverage/
 
 # Bun
 bun.lockb
+.vercel
