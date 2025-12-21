@@ -5,6 +5,7 @@ import {
 	clearMockHeaders,
 	headers as mockHeaders,
 } from '../mocks/next-headers'
+import type { Span } from 'vestig'
 
 // Mock next/headers module
 mock.module('next/headers', () => ({
@@ -50,11 +51,12 @@ describe('vestigAction', () => {
 			expect(receivedInput).toBe('test-input')
 		})
 
-		test('should provide action context with log and ctx', async () => {
+		test('should provide action context with log, ctx, and span', async () => {
 			let contextReceived = false
 			const action = async (_input: string, ctx: any) => {
 				expect(ctx).toHaveProperty('log')
 				expect(ctx).toHaveProperty('ctx')
+				expect(ctx).toHaveProperty('span')
 				contextReceived = true
 				return 'done'
 			}
@@ -473,6 +475,238 @@ describe('createVestigAction', () => {
 		expect(result.success).toBe(true)
 		expect(result.userId).toBe(123)
 		expect(result.email).toBe('test@example.com')
+	})
+})
+
+describe('tracing', () => {
+	beforeEach(() => {
+		clearMockHeaders()
+	})
+
+	afterEach(() => {
+		clearMockHeaders()
+	})
+
+	describe('span creation', () => {
+		test('should provide a span in action context', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(receivedSpan).toBeDefined()
+			expect(typeof receivedSpan?.spanId).toBe('string')
+			expect(typeof receivedSpan?.traceId).toBe('string')
+		})
+
+		test('span should have correct name with namespace', async () => {
+			let spanName = ''
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				spanName = span.name
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action, { namespace: 'users:create' })
+			await wrapped(null)
+
+			expect(spanName).toBe('action:users:create')
+		})
+
+		test('span should have default name when no namespace', async () => {
+			let spanName = ''
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				spanName = span.name
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(spanName).toBe('action:action')
+		})
+	})
+
+	describe('span attributes', () => {
+		test('should set action.namespace attribute', async () => {
+			let namespace: unknown
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				namespace = span.attributes['action.namespace']
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action, { namespace: 'test:action' })
+			await wrapped(null)
+
+			expect(namespace).toBe('test:action')
+		})
+
+		test('should set action.input_type attribute', async () => {
+			let inputType: unknown
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				inputType = span.attributes['action.input_type']
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped({ name: 'test' })
+
+			expect(inputType).toBe('object')
+		})
+
+		test('should set action.request_id attribute', async () => {
+			setMockHeaders({ 'x-request-id': 'req-123' })
+
+			let requestId: unknown
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				requestId = span.attributes['action.request_id']
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(requestId).toBe('req-123')
+		})
+
+		test('should set action.duration_ms on completion', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				await new Promise((r) => setTimeout(r, 10))
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(receivedSpan?.attributes['action.duration_ms']).toBeGreaterThan(0)
+		})
+	})
+
+	describe('span events', () => {
+		test('should add action-start event', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			const startEvent = receivedSpan?.events.find((e) => e.name === 'action-start')
+			expect(startEvent).toBeDefined()
+		})
+
+		test('should add action-complete event on success', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			const completeEvent = receivedSpan?.events.find((e) => e.name === 'action-complete')
+			expect(completeEvent).toBeDefined()
+		})
+
+		test('should add action-error event on failure', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				throw new Error('Test error')
+			}
+
+			const wrapped = vestigAction(action)
+
+			try {
+				await wrapped(null)
+			} catch {
+				// Expected
+			}
+
+			const errorEvent = receivedSpan?.events.find((e) => e.name === 'action-error')
+			expect(errorEvent).toBeDefined()
+			expect(errorEvent?.attributes?.error).toBe('Test error')
+		})
+	})
+
+	describe('span status', () => {
+		test('should set status to ok on success', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(receivedSpan?.status).toBe('ok')
+		})
+
+		test('should set status to error on exception', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				receivedSpan = span
+				throw new Error('Action failed')
+			}
+
+			const wrapped = vestigAction(action)
+
+			try {
+				await wrapped(null)
+			} catch {
+				// Expected
+			}
+
+			expect(receivedSpan?.status).toBe('error')
+			expect(receivedSpan?.statusMessage).toBe('Action failed')
+		})
+	})
+
+	describe('custom span operations', () => {
+		test('should allow adding custom attributes', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				span.setAttribute('user.id', 'user-456')
+				span.setAttribute('operation.type', 'create')
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			expect(receivedSpan?.attributes['user.id']).toBe('user-456')
+			expect(receivedSpan?.attributes['operation.type']).toBe('create')
+		})
+
+		test('should allow adding custom events', async () => {
+			let receivedSpan: Span | undefined
+			const action = async (_input: unknown, { span }: { span: Span }) => {
+				span.addEvent('validation-start')
+				span.addEvent('validation-complete', { valid: true })
+				receivedSpan = span
+				return 'done'
+			}
+
+			const wrapped = vestigAction(action)
+			await wrapped(null)
+
+			const validationStart = receivedSpan?.events.find((e) => e.name === 'validation-start')
+			const validationComplete = receivedSpan?.events.find((e) => e.name === 'validation-complete')
+
+			expect(validationStart).toBeDefined()
+			expect(validationComplete).toBeDefined()
+			expect(validationComplete?.attributes?.valid).toBe(true)
+		})
 	})
 })
 

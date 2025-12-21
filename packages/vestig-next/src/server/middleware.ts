@@ -8,6 +8,7 @@ import {
 	createLogger,
 	createTraceparent,
 	parseTraceparent,
+	spanSync,
 } from 'vestig'
 import { CORRELATION_HEADERS } from '../utils/headers'
 import { createRequestTiming, formatDuration } from '../utils/timing'
@@ -113,55 +114,72 @@ export function createVestigMiddleware(options: MiddlewareOptions = {}) {
 			spanId: parsed?.spanId,
 		})
 
-		// Log incoming request
-		const requestLogLevel = mergedOptions.requestLogLevel!
-		log[requestLogLevel]('Request received', {
-			method: request.method,
-			path: pathname,
-			search: request.nextUrl.search || undefined,
-			userAgent: request.headers.get('user-agent')?.slice(0, 100),
-			ip:
-				request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-				request.headers.get('x-real-ip'),
-			requestId: ctx.requestId,
-			traceId: ctx.traceId,
-		})
+		// Wrap middleware processing in a span
+		return spanSync(`middleware:${mergedOptions.namespace}`, (s) => {
+			// Set HTTP attributes on span
+			s.setAttributes({
+				'http.method': request.method,
+				'http.path': pathname,
+				'http.request_id': ctx.requestId,
+				'http.trace_id': ctx.traceId,
+			})
 
-		// Create new headers with correlation IDs
-		const requestHeaders = new Headers(request.headers)
-		requestHeaders.set(CORRELATION_HEADERS.REQUEST_ID, ctx.requestId!)
-		requestHeaders.set(CORRELATION_HEADERS.TRACE_ID, ctx.traceId!)
-		requestHeaders.set(CORRELATION_HEADERS.SPAN_ID, ctx.spanId!)
-		requestHeaders.set(
-			CORRELATION_HEADERS.TRACEPARENT,
-			createTraceparent(ctx.traceId!, ctx.spanId!),
-		)
-
-		// Create response with updated headers
-		const response = NextResponse.next({
-			request: {
-				headers: requestHeaders,
-			},
-		})
-
-		// Add correlation headers to response
-		response.headers.set(CORRELATION_HEADERS.REQUEST_ID, ctx.requestId!)
-		response.headers.set(CORRELATION_HEADERS.TRACE_ID, ctx.traceId!)
-
-		// Log response with timing if enabled
-		if (mergedOptions.timing) {
-			const duration = timing.complete()
-			const responseLogLevel = mergedOptions.responseLogLevel!
-			log[responseLogLevel]('Response sent', {
+			// Log incoming request
+			const requestLogLevel = mergedOptions.requestLogLevel!
+			log[requestLogLevel]('Request received', {
 				method: request.method,
 				path: pathname,
-				duration: formatDuration(duration),
-				durationMs: duration,
+				search: request.nextUrl.search || undefined,
+				userAgent: request.headers.get('user-agent')?.slice(0, 100),
+				ip:
+					request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+					request.headers.get('x-real-ip'),
 				requestId: ctx.requestId,
+				traceId: ctx.traceId,
 			})
-		}
 
-		return response
+			s.addEvent('request-received')
+
+			// Create new headers with correlation IDs
+			const requestHeaders = new Headers(request.headers)
+			requestHeaders.set(CORRELATION_HEADERS.REQUEST_ID, ctx.requestId!)
+			requestHeaders.set(CORRELATION_HEADERS.TRACE_ID, ctx.traceId!)
+			requestHeaders.set(CORRELATION_HEADERS.SPAN_ID, ctx.spanId!)
+			requestHeaders.set(
+				CORRELATION_HEADERS.TRACEPARENT,
+				createTraceparent(ctx.traceId!, ctx.spanId!),
+			)
+
+			// Create response with updated headers
+			const response = NextResponse.next({
+				request: {
+					headers: requestHeaders,
+				},
+			})
+
+			// Add correlation headers to response
+			response.headers.set(CORRELATION_HEADERS.REQUEST_ID, ctx.requestId!)
+			response.headers.set(CORRELATION_HEADERS.TRACE_ID, ctx.traceId!)
+
+			// Log response with timing if enabled
+			if (mergedOptions.timing) {
+				const duration = timing.complete()
+				s.setAttribute('http.duration_ms', duration)
+				s.addEvent('response-sent')
+
+				const responseLogLevel = mergedOptions.responseLogLevel!
+				log[responseLogLevel]('Response sent', {
+					method: request.method,
+					path: pathname,
+					duration: formatDuration(duration),
+					durationMs: duration,
+					requestId: ctx.requestId,
+				})
+			}
+
+			s.setStatus('ok')
+			return response
+		})
 	}
 }
 

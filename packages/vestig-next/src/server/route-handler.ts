@@ -2,8 +2,10 @@ import {
 	type LogLevel,
 	type Logger,
 	type SanitizePreset,
+	type Span,
 	createCorrelationContext,
 	createLogger,
+	span as createSpan,
 	withContext,
 } from 'vestig'
 import type { RouteHandler, RouteHandlerContext, WithVestigOptions } from '../types'
@@ -103,57 +105,81 @@ export function withVestig<T = Response>(
 		// Get route params
 		const params = routeContext?.params ? await routeContext.params : {}
 
-		// Create handler context
-		const handlerContext: RouteHandlerContext = {
-			log,
-			ctx,
-			params,
-			timing: {
-				start: timing.start,
-				elapsed: () => timing.elapsed(),
-				mark: (name: string) => timing.mark(name),
-			},
-		}
+		// Get URL info for span name
+		const url = request.nextUrl ?? new URL(request.url)
+		const namespace = mergedOptions.namespace ?? 'api'
 
 		return withContext(ctx, async () => {
-			// Log request if enabled
-			if (mergedOptions.logRequest !== false) {
-				const metadata = extractRequestMetadata(request)
-				log.info('Request received', {
-					...metadata,
-					requestId: ctx.requestId,
-					traceId: ctx.traceId,
+			// Wrap entire request handling in a span
+			return createSpan(`route:${namespace}`, async (s: Span) => {
+				// Set HTTP attributes on span
+				s.setAttributes({
+					'http.method': request.method,
+					'http.url': url.pathname,
+					'http.request_id': ctx.requestId,
 				})
-			}
 
-			try {
-				const result = await handler(request, handlerContext)
+				// Create handler context with span
+				const handlerContext: RouteHandlerContext = {
+					log,
+					ctx,
+					params,
+					timing: {
+						start: timing.start,
+						elapsed: () => timing.elapsed(),
+						mark: (name: string) => timing.mark(name),
+					},
+					span: s,
+				}
 
-				// Log response if enabled and result is Response
-				if (mergedOptions.logResponse !== false && result instanceof Response) {
+				// Log request if enabled
+				if (mergedOptions.logRequest !== false) {
+					const metadata = extractRequestMetadata(request)
+					log.info('Request received', {
+						...metadata,
+						requestId: ctx.requestId,
+						traceId: ctx.traceId,
+					})
+				}
+
+				try {
+					const result = await handler(request, handlerContext)
+
+					// Log response if enabled and result is Response
+					if (result instanceof Response) {
+						const duration = timing.complete()
+						s.setAttribute('http.status_code', result.status)
+						s.setStatus(result.ok ? 'ok' : 'error')
+
+						if (mergedOptions.logResponse !== false) {
+							log.info('Response sent', {
+								status: result.status,
+								duration: formatDuration(duration),
+								durationMs: duration,
+								requestId: ctx.requestId,
+							})
+						}
+
+						// Add correlation headers to response
+						setCorrelationHeaders(result.headers, ctx)
+					} else {
+						s.setStatus('ok')
+					}
+
+					return result
+				} catch (error) {
 					const duration = timing.complete()
-					log.info('Response sent', {
-						status: result.status,
+					s.setStatus('error', error instanceof Error ? error.message : String(error))
+
+					log.error('Request failed', {
+						error,
 						duration: formatDuration(duration),
 						durationMs: duration,
 						requestId: ctx.requestId,
 					})
-
-					// Add correlation headers to response
-					setCorrelationHeaders(result.headers, ctx)
+					throw error
 				}
-
-				return result
-			} catch (error) {
-				const duration = timing.complete()
-				log.error('Request failed', {
-					error,
-					duration: formatDuration(duration),
-					durationMs: duration,
-					requestId: ctx.requestId,
-				})
-				throw error
-			}
+			})
 		})
 	}
 }

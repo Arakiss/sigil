@@ -3,8 +3,10 @@ import {
 	type LogLevel,
 	type Logger,
 	type SanitizePreset,
+	type Span,
 	createCorrelationContext,
 	createLogger,
+	span as createSpan,
 	withContext,
 } from 'vestig'
 import type { ActionContext, ServerAction, VestigActionOptions } from '../types'
@@ -98,49 +100,75 @@ export function vestigAction<TInput, TOutput>(
 		const spanId = headersList.get(CORRELATION_HEADERS.SPAN_ID) ?? undefined
 
 		const ctx = createCorrelationContext({ requestId, traceId, spanId })
-		const actionContext: ActionContext = { log, ctx }
+		const namespace = mergedOptions.namespace ?? 'action'
 
 		return withContext(ctx, async () => {
-			// Log action start
-			const startLog: Record<string, unknown> = {
-				requestId: ctx.requestId,
-				inputType: typeof input,
-			}
-
-			if (mergedOptions.logInput) {
-				startLog.input = input
-			}
-
-			log.info('Action started', startLog)
-
-			try {
-				const result = await action(input, actionContext)
-				const duration = timing.complete()
-
-				const endLog: Record<string, unknown> = {
-					duration: formatDuration(duration),
-					durationMs: duration,
-					requestId: ctx.requestId,
-					success: true,
-				}
-
-				if (mergedOptions.logOutput) {
-					endLog.output = result
-				}
-
-				log.info('Action completed', endLog)
-
-				return result
-			} catch (error) {
-				const duration = timing.complete()
-				log.error('Action failed', {
-					error,
-					duration: formatDuration(duration),
-					durationMs: duration,
-					requestId: ctx.requestId,
+			// Wrap entire action in a span
+			return createSpan(`action:${namespace}`, async (s: Span) => {
+				// Set initial attributes
+				s.setAttributes({
+					'action.namespace': namespace,
+					'action.request_id': ctx.requestId,
+					'action.input_type': typeof input,
 				})
-				throw error
-			}
+
+				// Create action context with span
+				const actionContext: ActionContext = { log, ctx, span: s }
+
+				// Log action start
+				const startLog: Record<string, unknown> = {
+					requestId: ctx.requestId,
+					inputType: typeof input,
+				}
+
+				if (mergedOptions.logInput) {
+					startLog.input = input
+					s.setAttribute('action.has_input', true)
+				}
+
+				log.info('Action started', startLog)
+				s.addEvent('action-start')
+
+				try {
+					const result = await action(input, actionContext)
+					const duration = timing.complete()
+
+					s.addEvent('action-complete')
+					s.setAttribute('action.duration_ms', duration)
+					s.setStatus('ok')
+
+					const endLog: Record<string, unknown> = {
+						duration: formatDuration(duration),
+						durationMs: duration,
+						requestId: ctx.requestId,
+						success: true,
+					}
+
+					if (mergedOptions.logOutput) {
+						endLog.output = result
+					}
+
+					log.info('Action completed', endLog)
+
+					return result
+				} catch (error) {
+					const duration = timing.complete()
+
+					s.addEvent('action-error', {
+						error: error instanceof Error ? error.message : String(error),
+					})
+					s.setAttribute('action.duration_ms', duration)
+					s.setStatus('error', error instanceof Error ? error.message : String(error))
+
+					log.error('Action failed', {
+						error,
+						duration: formatDuration(duration),
+						durationMs: duration,
+						requestId: ctx.requestId,
+					})
+					throw error
+				}
+			})
 		})
 	}
 }

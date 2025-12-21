@@ -11,6 +11,7 @@ import type {
 	LoggerConfig,
 	SanitizeConfig,
 	SanitizePreset,
+	Span,
 	Transport,
 } from 'vestig'
 
@@ -25,6 +26,7 @@ export type {
 	Transport,
 	SanitizePreset,
 	SanitizeConfig,
+	Span,
 }
 
 // Re-export config types
@@ -56,6 +58,8 @@ export interface RouteHandlerContext {
 		/** Mark a checkpoint */
 		mark: (name: string) => void
 	}
+	/** Active span for the request - use for adding attributes, events */
+	span: Span
 }
 
 /**
@@ -86,6 +90,8 @@ export interface ActionContext {
 	log: Logger
 	/** Correlation context */
 	ctx: LogContext
+	/** Active span for the action - use for adding attributes, events */
+	span: Span
 }
 
 /**

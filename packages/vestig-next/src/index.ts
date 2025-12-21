@@ -56,6 +56,7 @@ export type {
 	Transport,
 	SanitizePreset,
 	SanitizeConfig,
+	Span,
 	// Next.js types
 	RouteHandlerContext,
 	RouteHandler,

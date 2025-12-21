@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { withVestig, createRouteHandlers } from '../../server/route-handler'
 import { createMockNextRequest, createMockRouteContext } from '../mocks/next-server'
+import type { Span } from 'vestig'
 
 describe('withVestig', () => {
 	describe('basic functionality', () => {
@@ -36,13 +37,14 @@ describe('withVestig', () => {
 			expect(capturedUrl).toBe('https://example.com/api/users')
 		})
 
-		test('should provide handler context with log, ctx, params, timing', async () => {
+		test('should provide handler context with log, ctx, params, timing, span', async () => {
 			let contextReceived = false
 			const handler = async (_req: Request, ctx: any) => {
 				expect(ctx).toHaveProperty('log')
 				expect(ctx).toHaveProperty('ctx')
 				expect(ctx).toHaveProperty('params')
 				expect(ctx).toHaveProperty('timing')
+				expect(ctx).toHaveProperty('span')
 				contextReceived = true
 				return new Response('OK')
 			}
@@ -548,7 +550,7 @@ describe('createRouteHandlers', () => {
 		expect(handlers.OPTIONS).toBeDefined()
 	})
 
-	test('handlers should receive context with log, ctx, params, timing', async () => {
+	test('handlers should receive context with log, ctx, params, timing, span', async () => {
 		let contextValid = false
 		const handlers = createRouteHandlers({
 			GET: async (_req, ctx: any) => {
@@ -557,7 +559,8 @@ describe('createRouteHandlers', () => {
 					typeof ctx.log === 'object' &&
 					typeof ctx.ctx === 'object' &&
 					typeof ctx.params === 'object' &&
-					typeof ctx.timing === 'object'
+					typeof ctx.timing === 'object' &&
+					typeof ctx.span === 'object'
 				return new Response('OK')
 			},
 		})
@@ -606,6 +609,227 @@ describe('createRouteHandlers', () => {
 		const handlers = createRouteHandlers({})
 
 		expect(Object.keys(handlers).length).toBe(0)
+	})
+})
+
+describe('tracing', () => {
+	describe('span creation', () => {
+		test('should provide a span in handler context', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				receivedSpan = span
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan).toBeDefined()
+			expect(typeof receivedSpan?.spanId).toBe('string')
+			expect(typeof receivedSpan?.traceId).toBe('string')
+		})
+
+		test('span should have correct name with namespace', async () => {
+			let spanName = ''
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				spanName = span.name
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler, { namespace: 'api:users' })
+			const request = createMockNextRequest('https://example.com/api/users')
+			await wrapped(request as never)
+
+			expect(spanName).toBe('route:api:users')
+		})
+
+		test('span should have default name when no namespace', async () => {
+			let spanName = ''
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				spanName = span.name
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(spanName).toBe('route:api')
+		})
+	})
+
+	describe('span attributes', () => {
+		test('should set http.method attribute', async () => {
+			let httpMethod: unknown
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				httpMethod = span.attributes['http.method']
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test', {
+				method: 'POST',
+			})
+			await wrapped(request as never)
+
+			expect(httpMethod).toBe('POST')
+		})
+
+		test('should set http.url attribute', async () => {
+			let httpUrl: unknown
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				httpUrl = span.attributes['http.url']
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/users/123')
+			await wrapped(request as never)
+
+			expect(httpUrl).toBe('/api/users/123')
+		})
+
+		test('should set http.request_id attribute', async () => {
+			let httpRequestId: unknown
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				httpRequestId = span.attributes['http.request_id']
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test', {
+				headers: { 'x-request-id': 'req-abc-123' },
+			})
+			await wrapped(request as never)
+
+			expect(httpRequestId).toBe('req-abc-123')
+		})
+
+		test('should set http.status_code on response', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				receivedSpan = span
+				return new Response('Created', { status: 201 })
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			// After the handler completes, the span should have status_code
+			expect(receivedSpan?.attributes['http.status_code']).toBe(201)
+		})
+	})
+
+	describe('span status', () => {
+		test('should set status to ok on successful response', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				receivedSpan = span
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan?.status).toBe('ok')
+		})
+
+		test('should set status to error on error response', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				receivedSpan = span
+				return new Response('Not Found', { status: 404 })
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan?.status).toBe('error')
+		})
+
+		test('should set status to error on exception', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				receivedSpan = span
+				throw new Error('Test error')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+
+			try {
+				await wrapped(request as never)
+			} catch {
+				// Expected
+			}
+
+			expect(receivedSpan?.status).toBe('error')
+			expect(receivedSpan?.statusMessage).toBe('Test error')
+		})
+	})
+
+	describe('custom span operations', () => {
+		test('should allow adding custom attributes', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				span.setAttribute('user.id', 'user-123')
+				span.setAttribute('custom.key', 'custom-value')
+				receivedSpan = span
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan?.attributes['user.id']).toBe('user-123')
+			expect(receivedSpan?.attributes['custom.key']).toBe('custom-value')
+		})
+
+		test('should allow adding events', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				span.addEvent('db-query-start', { table: 'users' })
+				span.addEvent('db-query-end', { rowCount: 10 })
+				receivedSpan = span
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan?.events.length).toBe(2)
+			expect(receivedSpan?.events[0].name).toBe('db-query-start')
+			expect(receivedSpan?.events[0].attributes?.table).toBe('users')
+			expect(receivedSpan?.events[1].name).toBe('db-query-end')
+			expect(receivedSpan?.events[1].attributes?.rowCount).toBe(10)
+		})
+
+		test('should allow setAttributes for multiple attributes', async () => {
+			let receivedSpan: Span | undefined
+			const handler = async (_req: Request, { span }: { span: Span }) => {
+				span.setAttributes({
+					'cache.hit': true,
+					'cache.key': 'users:list',
+					'cache.ttl': 3600,
+				})
+				receivedSpan = span
+				return new Response('OK')
+			}
+
+			const wrapped = withVestig(handler)
+			const request = createMockNextRequest('https://example.com/api/test')
+			await wrapped(request as never)
+
+			expect(receivedSpan?.attributes['cache.hit']).toBe(true)
+			expect(receivedSpan?.attributes['cache.key']).toBe('users:list')
+			expect(receivedSpan?.attributes['cache.ttl']).toBe(3600)
+		})
 	})
 })
 
