@@ -1,0 +1,441 @@
+# Vestig
+
+> Zero-dependency TypeScript logging with auto PII sanitization, native tracing, and multi-runtime support.
+
+Vestig is a lightweight structured logging library designed for modern TypeScript applications. It works seamlessly across Bun, Node.js, Deno, Edge runtimes (Vercel, Cloudflare Workers), and browsers.
+
+## Quick Start
+
+```bash
+bun add vestig
+# or: npm install vestig
+```
+
+```typescript
+import { log } from 'vestig'
+
+log.info('Application started', { version: '1.0.0' })
+log.error('Request failed', { error: new Error('Timeout') })
+```
+
+## Key Features
+
+- **Zero Dependencies**: <5KB gzipped, no supply chain risks
+- **Multi-Runtime**: Works in Bun, Node, Deno, Edge, and browsers
+- **Auto PII Sanitization**: Redacts passwords, emails, credit cards automatically
+- **Native Tracing**: Built-in distributed tracing with span()
+- **Context Propagation**: AsyncLocalStorage-based request correlation
+- **Smart Sampling**: Probability, rate-limit, and namespace-based sampling
+
+## Documentation
+
+- [Getting Started](/docs/getting-started) - Installation and basic usage
+- [Features Overview](/docs/features) - All features explained
+- [API Reference](/docs/api) - Complete API documentation
+
+### Feature Guides
+
+- [PII Sanitization](/docs/features/sanitization) - Automatic data redaction
+- [Native Tracing](/docs/features/tracing) - Distributed tracing with spans
+- [Context Propagation](/docs/features/context) - Request correlation
+- [Transports](/docs/features/transports) - Console, HTTP, File, Datadog
+- [Sampling](/docs/features/sampling) - Control log volume
+
+### Integration Guides
+
+- [Next.js](/docs/integrations/nextjs) - Server components, route handlers, middleware
+- [Express](/docs/integrations/express) - Middleware and request logging
+- [Hono](/docs/integrations/hono) - Lightweight edge framework
+
+## Optional Packages
+
+- `@vestig/next` - Next.js integration with server/client components
+- `@vestig/express` - Express.js middleware
+
+## Links
+
+- [GitHub Repository](https://github.com/vestig-lang/vestig)
+- [npm Package](https://www.npmjs.com/package/vestig)
+- [Changelog](/changelog)
+
+
+---
+
+# Vestig - Complete API Reference
+
+> This document provides a comprehensive reference for AI assistants working with Vestig.
+
+## Installation
+
+```bash
+bun add vestig
+# Optional packages:
+bun add @vestig/next    # Next.js integration
+bun add @vestig/express # Express middleware
+```
+
+## Core API
+
+### createLogger(config?)
+
+Creates a new logger instance.
+
+```typescript
+import { createLogger } from 'vestig'
+
+const log = createLogger({
+  level: 'debug',           // 'trace' | 'debug' | 'info' | 'warn' | 'error'
+  structured: true,         // JSON output (default: true in server, false in browser)
+  sanitize: true,           // Enable PII sanitization (default: true)
+  sanitizeFields: ['password', 'apiKey'], // Additional fields to sanitize
+  namespace: 'app',         // Logger namespace
+  context: {                // Static context added to all logs
+    service: 'api',
+    version: '1.0.0'
+  },
+  sampling: {               // Optional sampling configuration
+    type: 'probability',
+    rate: 0.1               // Log 10% of messages
+  }
+})
+```
+
+### log.{level}(message, metadata?)
+
+Log methods for each level:
+
+```typescript
+log.trace('Detailed trace info', { data: '...' })
+log.debug('Debug information', { requestId: '123' })
+log.info('Application event', { userId: 'user-123' })
+log.warn('Warning condition', { threshold: 0.9 })
+log.error('Error occurred', { error: new Error('Failed') })
+```
+
+### log.child(namespace, config?)
+
+Create a namespaced child logger:
+
+```typescript
+const dbLog = log.child('database')
+dbLog.info('Query executed')  // namespace: 'app:database'
+
+const authLog = log.child('auth', { level: 'warn' })
+```
+
+## Context API
+
+### withContext(context, callback)
+
+Execute code with request-scoped context:
+
+```typescript
+import { withContext, log } from 'vestig'
+
+await withContext({ requestId: 'req-123', userId: 'user-456' }, async () => {
+  log.info('Processing')  // Includes requestId and userId automatically
+  await doWork()
+})
+```
+
+### withContextAsync(context, callback)
+
+Same as withContext but explicitly async:
+
+```typescript
+await withContextAsync({ traceId: 'trace-123' }, async () => {
+  await processRequest()
+})
+```
+
+### createCorrelationContext()
+
+Generate correlation IDs for request tracing:
+
+```typescript
+import { createCorrelationContext } from 'vestig'
+
+const ctx = createCorrelationContext()
+// Returns: { requestId, traceId, spanId }
+```
+
+### getContext()
+
+Get current async context:
+
+```typescript
+import { getContext } from 'vestig'
+
+const ctx = getContext()
+console.log(ctx?.requestId)
+```
+
+## Tracing API
+
+### span(name, callback, options?)
+
+Create a traced async operation:
+
+```typescript
+import { span } from 'vestig'
+
+const result = await span('fetch-user', async (s) => {
+  s.setAttribute('userId', '123')
+  s.addEvent('cache-miss')
+
+  const user = await db.users.findById('123')
+
+  return user
+})
+```
+
+### spanSync(name, callback, options?)
+
+Create a traced synchronous operation:
+
+```typescript
+import { spanSync } from 'vestig'
+
+const parsed = spanSync('parse-json', (s) => {
+  s.setAttribute('size', data.length)
+  return JSON.parse(data)
+})
+```
+
+### startSpan(name, options?) / endSpan()
+
+Manual span management:
+
+```typescript
+import { startSpan, endSpan, getActiveSpan } from 'vestig'
+
+startSpan('operation')
+try {
+  const span = getActiveSpan()
+  span?.setAttribute('key', 'value')
+  // ... work
+} finally {
+  endSpan()
+}
+```
+
+### Span interface
+
+```typescript
+interface Span {
+  name: string
+  traceId: string
+  spanId: string
+  parentSpanId?: string
+  startTime: number
+  endTime?: number
+  status: 'unset' | 'ok' | 'error'
+  attributes: Record<string, unknown>
+  events: SpanEvent[]
+
+  setAttribute(key: string, value: unknown): void
+  setAttributes(attrs: Record<string, unknown>): void
+  addEvent(name: string, attributes?: Record<string, unknown>): void
+  setStatus(status: SpanStatus, message?: string): void
+  end(): void
+}
+```
+
+## Sampling API
+
+### Built-in samplers
+
+```typescript
+import { createLogger } from 'vestig'
+
+// Probability sampling - log X% of messages
+const log1 = createLogger({
+  sampling: { type: 'probability', rate: 0.1 }  // 10%
+})
+
+// Rate limiting - max N logs per second
+const log2 = createLogger({
+  sampling: { type: 'rateLimit', maxPerSecond: 100 }
+})
+
+// Namespace-based - different rates per namespace
+const log3 = createLogger({
+  sampling: {
+    type: 'namespace',
+    rules: [
+      { namespace: 'debug:*', rate: 0.01 },  // 1%
+      { namespace: 'api:*', rate: 1.0 },     // 100%
+      { namespace: '*', rate: 0.5 }          // default 50%
+    ]
+  }
+})
+
+// Composite - combine multiple strategies
+const log4 = createLogger({
+  sampling: {
+    type: 'composite',
+    operator: 'and',
+    samplers: [
+      { type: 'probability', rate: 0.5 },
+      { type: 'rateLimit', maxPerSecond: 50 }
+    ]
+  }
+})
+```
+
+## Transport API
+
+### Built-in transports
+
+```typescript
+import {
+  ConsoleTransport,
+  HTTPTransport,
+  FileTransport,
+  DatadogTransport,
+  BatchTransport
+} from 'vestig'
+
+// Console (default)
+const consoleTransport = new ConsoleTransport({
+  structured: true,
+  colors: true
+})
+
+// HTTP batch transport
+const httpTransport = new HTTPTransport({
+  name: 'api',
+  url: 'https://logs.example.com/ingest',
+  batchSize: 100,
+  flushInterval: 5000,
+  headers: { 'Authorization': 'Bearer ...' }
+})
+
+// File transport (Node/Bun only)
+const fileTransport = new FileTransport({
+  name: 'file',
+  path: '/var/log/app.log',
+  maxSize: '10MB',
+  maxFiles: 5
+})
+
+// Datadog transport
+const datadogTransport = new DatadogTransport({
+  name: 'datadog',
+  apiKey: process.env.DD_API_KEY,
+  service: 'my-app',
+  env: 'production'
+})
+```
+
+### Adding transports
+
+```typescript
+const log = createLogger()
+log.addTransport(httpTransport)
+log.removeTransport('console')  // Remove by name
+```
+
+## Sanitization API
+
+### Built-in patterns
+
+Automatically detected and sanitized:
+- Passwords (password, pwd, secret, etc.)
+- API keys (apiKey, api_key, token, etc.)
+- Emails (partially masked: j***@example.com)
+- Credit cards (masked: 4532********0366)
+- SSN/ID numbers
+- JWTs
+- Bearer tokens
+
+### Custom sanitization
+
+```typescript
+import { createLogger, createSanitizer } from 'vestig'
+
+const log = createLogger({
+  sanitize: true,
+  sanitizeFields: ['customSecret', 'internalId']
+})
+
+// Or create a custom sanitizer
+const sanitizer = createSanitizer({
+  fields: ['myField'],
+  patterns: [/CUSTOM-\d+/g],
+  replacement: '[HIDDEN]'
+})
+```
+
+## @vestig/next Integration
+
+### Server-side logging
+
+```typescript
+// app/api/route.ts
+import { withVestigRouteHandler } from '@vestig/next'
+
+export const GET = withVestigRouteHandler(async (request, { log }) => {
+  log.info('API called')
+  return Response.json({ ok: true })
+})
+```
+
+### Server Actions
+
+```typescript
+// app/actions.ts
+'use server'
+import { withVestigServerAction } from '@vestig/next'
+
+export const myAction = withVestigServerAction(async (data, { log }) => {
+  log.info('Action executed', { data })
+  return { success: true }
+})
+```
+
+### Client-side logging
+
+```typescript
+// app/page.tsx
+'use client'
+import { ClientHTTPTransport } from '@vestig/next/client'
+import { createLogger } from 'vestig'
+
+const log = createLogger()
+log.addTransport(new ClientHTTPTransport({
+  name: 'client',
+  url: '/api/vestig'
+}))
+```
+
+## Environment Variables
+
+```bash
+VESTIG_LEVEL=debug          # Log level
+VESTIG_STRUCTURED=true      # JSON output
+VESTIG_SANITIZE=true        # PII sanitization
+VESTIG_ENABLED=true         # Enable/disable logging
+```
+
+## TypeScript Types
+
+Key exported types:
+
+```typescript
+import type {
+  Logger,
+  LoggerConfig,
+  LogLevel,
+  LogEntry,
+  LogMetadata,
+  LogContext,
+  Transport,
+  TransportConfig,
+  Span,
+  SpanOptions,
+  SpanCallback,
+  Sampler,
+  SamplingConfig
+} from 'vestig'
+```
