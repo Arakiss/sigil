@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.0](https://github.com/Arakiss/vestig/compare/v0.4.0...v0.5.0) (2025-12-21)
+
+### ✨ Features
+
+* **demo:** add interactive playground pages for all features ([2c6dbfe](https://github.com/Arakiss/vestig/commit/2c6dbfe4ada72f7ab3b7ec969ba4b8d1a560482b))
+* **tracing:** add native tracing API with span(), startSpan(), and context propagation ([f0917c7](https://github.com/Arakiss/vestig/commit/f0917c73fb6fb6526df18fd85fe9fdbe87cef0ea))
+
+### 📚 Documentation
+
+* add v1.0.0 roadmap ([e6739a5](https://github.com/Arakiss/vestig/commit/e6739a5115c8937aca0516c9bac6906f54240331))
+
+### ✅ Tests
+
+* **next:** add comprehensive test suite with 205 tests ([fd7f336](https://github.com/Arakiss/vestig/commit/fd7f33672e7c1e321e449deba401a50cafb27d67))
+
 ## [0.4.0](https://github.com/Arakiss/vestig/compare/v0.3.1...v0.4.0) (2025-12-20)
 
 ### ✨ Features
