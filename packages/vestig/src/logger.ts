@@ -3,6 +3,14 @@ import { getContext } from './context'
 import { LOG_LEVELS, shouldLog } from './levels'
 import { RUNTIME } from './runtime'
 import { ConsoleTransport } from './transports/console'
+import {
+	span as spanFn,
+	spanSync as spanSyncFn,
+	type Span,
+	type SpanCallback,
+	type SpanOptions,
+	type SpanSyncCallback,
+} from './tracing'
 import type {
 	LogContext,
 	LogEntry,
@@ -315,6 +323,61 @@ export class LoggerImpl implements Logger {
 		await Promise.all(this.transports.map((t) => t.destroy?.()))
 		this.transports = []
 		this.initialized = false
+	}
+
+	/**
+	 * Create and run a span for an async operation
+	 *
+	 * The span name will be prefixed with the logger's namespace if present.
+	 * This provides automatic instrumentation context for your operations.
+	 *
+	 * @param name - Human-readable name for the operation
+	 * @param fn - Async function to execute within the span
+	 * @param options - Optional span configuration
+	 * @returns The result of the function
+	 *
+	 * @example
+	 * ```typescript
+	 * const db = log.child('database')
+	 * const result = await db.span('query', async (span) => {
+	 *   span.setAttribute('table', 'users')
+	 *   return await executeQuery()
+	 * })
+	 * // Span name will be 'database:query'
+	 * ```
+	 */
+	async span<T>(
+		name: string,
+		fn: SpanCallback<T>,
+		options?: SpanOptions,
+	): Promise<T> {
+		const fullName = this.config.namespace ? `${this.config.namespace}:${name}` : name
+		return spanFn(fullName, fn, options)
+	}
+
+	/**
+	 * Create and run a span for a synchronous operation
+	 *
+	 * Similar to `span()` but for synchronous code.
+	 *
+	 * @param name - Human-readable name for the operation
+	 * @param fn - Synchronous function to execute within the span
+	 * @param options - Optional span configuration
+	 * @returns The result of the function
+	 *
+	 * @example
+	 * ```typescript
+	 * const parser = log.child('parser')
+	 * const data = parser.spanSync('parse-json', (span) => {
+	 *   span.setAttribute('size', content.length)
+	 *   return JSON.parse(content)
+	 * })
+	 * // Span name will be 'parser:parse-json'
+	 * ```
+	 */
+	spanSync<T>(name: string, fn: SpanSyncCallback<T>, options?: SpanOptions): T {
+		const fullName = this.config.namespace ? `${this.config.namespace}:${name}` : name
+		return spanSyncFn(fullName, fn, options)
 	}
 }
 

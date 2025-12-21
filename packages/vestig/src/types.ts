@@ -208,6 +208,16 @@ export interface DatadogTransportConfig extends BatchTransportConfig {
 	tags?: string[]
 }
 
+// Re-export tracing types for convenience
+export type {
+	Span,
+	SpanCallback,
+	SpanEvent,
+	SpanOptions,
+	SpanStatus,
+	SpanSyncCallback,
+} from './tracing/types'
+
 /**
  * Logger interface
  */
@@ -239,4 +249,34 @@ export interface Logger {
 	getTransports(): readonly Transport[]
 	/** Destroy all transports (call on shutdown) */
 	destroy(): Promise<void>
+
+	/**
+	 * Create and run a span for an async operation
+	 *
+	 * The span name will be prefixed with the logger's namespace if present.
+	 *
+	 * @param name - Human-readable name for the operation
+	 * @param fn - Async function to execute within the span
+	 * @param options - Optional span configuration
+	 * @returns The result of the function
+	 */
+	span<T>(
+		name: string,
+		fn: import('./tracing/types').SpanCallback<T>,
+		options?: import('./tracing/types').SpanOptions,
+	): Promise<T>
+
+	/**
+	 * Create and run a span for a synchronous operation
+	 *
+	 * @param name - Human-readable name for the operation
+	 * @param fn - Synchronous function to execute within the span
+	 * @param options - Optional span configuration
+	 * @returns The result of the function
+	 */
+	spanSync<T>(
+		name: string,
+		fn: import('./tracing/types').SpanSyncCallback<T>,
+		options?: import('./tracing/types').SpanOptions,
+	): T
 }

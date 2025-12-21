@@ -20,6 +20,13 @@ export type {
 	SanitizePattern,
 	SanitizeConfig,
 	SanitizePreset,
+	// Tracing types (re-exported from types.ts)
+	Span,
+	SpanCallback,
+	SpanEvent,
+	SpanOptions,
+	SpanStatus,
+	SpanSyncCallback,
 } from './types'
 
 // Runtime detection
@@ -75,6 +82,22 @@ export { BatchTransport } from './transports/batch'
 export { HTTPTransport, HTTPTransportError } from './transports/http'
 export { FileTransport } from './transports/file'
 export { DatadogTransport, DatadogTransportError } from './transports/datadog'
+
+// Tracing - standalone functions and utilities
+export {
+	span,
+	spanSync,
+	startSpan,
+	endSpan,
+	getActiveSpan,
+	withActiveSpan,
+	SpanImpl,
+	// Context utilities (for advanced use cases)
+	clearActiveSpans,
+	getActiveSpanStackDepth,
+	withSpanContext,
+	withSpanContextAsync,
+} from './tracing'
 
 // Default logger instance (convenience)
 import { createLogger } from './logger'
