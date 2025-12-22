@@ -1,7 +1,6 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card'
 import { Container } from '@/components/layout'
 import { Lock, Copy, Code, Search } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
@@ -44,15 +43,6 @@ const presetDescriptions: Record<string, string> = {
 	gdpr: 'GDPR compliant - EU personal data protection requirements',
 	hipaa: 'HIPAA compliant - Healthcare data protection (US)',
 	'pci-dss': 'PCI-DSS compliant - Payment card industry standards',
-}
-
-const presetVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
-	none: 'outline',
-	minimal: 'secondary',
-	default: 'default',
-	gdpr: 'default',
-	hipaa: 'default',
-	'pci-dss': 'default',
 }
 
 /**
@@ -115,15 +105,17 @@ export default async function SanitizationPage() {
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					{sanitizedResults.map(({ name, description, result }) => (
-						<Card key={name} className="bg-surface overflow-hidden">
-							<CardHeader className="pb-2 bg-surface-elevated">
+						<Card key={name} className="bg-surface overflow-hidden border-white/[0.06]">
+							<CardHeader className="pb-2 bg-white/[0.02]">
 								<div className="flex items-center gap-2">
-									<Badge variant={presetVariants[name] || 'default'}>{name.toUpperCase()}</Badge>
+									<span className="text-[10px] px-2 py-0.5 bg-white/5 border border-white/10 text-white/60 uppercase tracking-wider">
+										{name}
+									</span>
 								</div>
-								<CardDescription className="mt-1">{description}</CardDescription>
+								<CardDescription className="mt-1 text-white/40">{description}</CardDescription>
 							</CardHeader>
 							<CardContent className="pt-4">
-								<pre className="text-xs text-muted-foreground overflow-x-auto max-h-64 overflow-y-auto">
+								<pre className="text-xs text-white/50 overflow-x-auto max-h-64 overflow-y-auto font-mono">
 									{JSON.stringify(result, null, 2)}
 								</pre>
 							</CardContent>
@@ -190,33 +182,49 @@ const cleanData = sanitize(userData, { preset: 'hipaa' })`}
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">6 Built-in Presets</strong> — From minimal to
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">6 Built-in Presets</strong> — From minimal to
 							compliance-ready (GDPR, HIPAA, PCI-DSS)
-						</li>
-						<li>
-							• <strong className="text-foreground">Automatic Detection</strong> — Recognizes
-							emails, credit cards, SSNs, tokens, and more
-						</li>
-						<li>
-							• <strong className="text-foreground">Deep Object Sanitization</strong> — Recursively
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Automatic Detection</strong> — Recognizes emails,
+							credit cards, SSNs, tokens, and more
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Deep Object Sanitization</strong> — Recursively
 							sanitizes nested objects and arrays
-						</li>
-						<li>
-							• <strong className="text-foreground">Custom Patterns</strong> — Add your own field
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Custom Patterns</strong> — Add your own field
 							matchers and regex patterns
-						</li>
-						<li>
-							• <strong className="text-foreground">Zero Dependencies</strong> — Lightweight and
-							fast, no external libraries
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Zero Dependencies</strong> — Lightweight and fast,
+							no external libraries
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

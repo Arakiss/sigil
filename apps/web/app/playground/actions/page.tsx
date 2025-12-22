@@ -1,8 +1,7 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Container } from '@/components/layout'
-import { MediaVideo, Link as LinkIcon, Play, Code } from 'iconoir-react'
+import { Play, Link as LinkIcon, Code } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
 import { IS_SERVER, RUNTIME } from 'vestig'
 import { ActionDemo } from './action-demo'
@@ -29,7 +28,7 @@ export default async function ActionsPage() {
 			{/* Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-4">
-					<MediaVideo className="h-8 w-8 text-foreground" />
+					<Play className="h-8 w-8 text-foreground" />
 					<h1 className="text-2xl font-bold text-foreground">Server Actions</h1>
 				</div>
 				<p className="text-muted-foreground mb-4">
@@ -104,35 +103,49 @@ export const submitForm = vestigAction(
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">
-						✓ Key Features Demonstrated
-					</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">vestigAction Wrapper</strong> — Automatic
-							logging setup for server actions
-						</li>
-						<li>
-							• <strong className="text-foreground">Correlation Propagation</strong> — Request IDs
-							flow from client to server action
-						</li>
-						<li>
-							• <strong className="text-foreground">Timing Metrics</strong> — Automatic duration
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">vestigAction Wrapper</strong> — Automatic logging
+							setup for server actions
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Correlation Propagation</strong> — Request IDs flow
+							from client to server action
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Timing Metrics</strong> — Automatic duration
 							tracking
-						</li>
-						<li>
-							• <strong className="text-foreground">Error Handling</strong> — Errors are logged
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Error Handling</strong> — Errors are logged
 							automatically with context
-						</li>
-						<li>
-							• <strong className="text-foreground">Input/Output Logging</strong> — Optional logging
-							of action inputs and outputs
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Input/Output Logging</strong> — Optional logging of
+							action inputs and outputs
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

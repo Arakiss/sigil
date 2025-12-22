@@ -1,48 +1,17 @@
 import type { Runtime } from 'vestig'
+import { Server, Laptop, Globe, Flash, Settings, HelpCircle } from 'iconoir-react'
+import { cn } from '@/lib/utils'
 
 /**
- * Runtime configuration for display
+ * Runtime configuration for display (monochromatic)
  */
-const runtimeConfig: Record<
-	Runtime | 'unknown',
-	{ label: string; color: string; bg: string; icon: string }
-> = {
-	node: {
-		label: 'Node.js',
-		color: 'text-green-400',
-		bg: 'bg-green-500/10 border-green-500/30',
-		icon: '🟢',
-	},
-	bun: {
-		label: 'Bun',
-		color: 'text-pink-400',
-		bg: 'bg-pink-500/10 border-pink-500/30',
-		icon: '🥟',
-	},
-	edge: {
-		label: 'Edge',
-		color: 'text-orange-400',
-		bg: 'bg-orange-500/10 border-orange-500/30',
-		icon: '⚡',
-	},
-	browser: {
-		label: 'Browser',
-		color: 'text-purple-400',
-		bg: 'bg-purple-500/10 border-purple-500/30',
-		icon: '🌐',
-	},
-	worker: {
-		label: 'Worker',
-		color: 'text-cyan-400',
-		bg: 'bg-cyan-500/10 border-cyan-500/30',
-		icon: '⚙️',
-	},
-	unknown: {
-		label: 'Unknown',
-		color: 'text-gray-400',
-		bg: 'bg-gray-500/10 border-gray-500/30',
-		icon: '❓',
-	},
+const runtimeConfig: Record<Runtime | 'unknown', { label: string; shortLabel: string }> = {
+	node: { label: 'Node.js', shortLabel: 'Node' },
+	bun: { label: 'Bun', shortLabel: 'Bun' },
+	edge: { label: 'Edge', shortLabel: 'Edge' },
+	browser: { label: 'Browser', shortLabel: 'Browser' },
+	worker: { label: 'Worker', shortLabel: 'Worker' },
+	unknown: { label: 'Unknown', shortLabel: '?' },
 }
 
 interface RuntimeBadgeProps {
@@ -58,7 +27,7 @@ interface RuntimeBadgeProps {
 
 /**
  * Visual badge showing the current runtime environment
- * Color-coded to easily identify where code is executing
+ * Monochromatic design following Lyra preset
  */
 export function RuntimeBadge({
 	runtime,
@@ -69,23 +38,39 @@ export function RuntimeBadge({
 	const config = runtimeConfig[runtime]
 
 	const sizeClasses = {
-		sm: 'text-[10px] px-1.5 py-0.5',
-		md: 'text-xs px-2 py-1',
-		lg: 'text-sm px-3 py-1.5',
+		sm: 'text-[10px] px-1.5 py-0.5 gap-1',
+		md: 'text-xs px-2 py-1 gap-1.5',
+		lg: 'text-sm px-3 py-1.5 gap-2',
+	}
+
+	const iconSizes = {
+		sm: 'h-2.5 w-2.5',
+		md: 'h-3 w-3',
+		lg: 'h-3.5 w-3.5',
 	}
 
 	return (
 		<span
-			className={`inline-flex items-center gap-1 rounded-full border font-medium ${config.color} ${config.bg} ${sizeClasses[size]} ${className}`}
+			className={cn(
+				'inline-flex items-center font-medium',
+				'bg-white/5 border border-white/10 text-white/70',
+				'hover:bg-white/10 hover:text-white/90 transition-colors',
+				sizeClasses[size],
+				className,
+			)}
 		>
-			{showIcon && <span>{config.icon}</span>}
+			{showIcon && (
+				<span className={cn('text-white/50', iconSizes[size])}>
+					{runtime.charAt(0).toUpperCase()}
+				</span>
+			)}
 			<span>{config.label}</span>
 		</span>
 	)
 }
 
 /**
- * Server/Client indicator badge
+ * Server/Client indicator badge (monochromatic)
  */
 export function EnvironmentBadge({
 	isServer,
@@ -97,28 +82,31 @@ export function EnvironmentBadge({
 	className?: string
 }) {
 	const sizeClasses = {
-		sm: 'text-[10px] px-1.5 py-0.5',
-		md: 'text-xs px-2 py-1',
-		lg: 'text-sm px-3 py-1.5',
+		sm: 'text-[10px] px-1.5 py-0.5 gap-1',
+		md: 'text-xs px-2 py-1 gap-1.5',
+		lg: 'text-sm px-3 py-1.5 gap-2',
 	}
 
-	if (isServer) {
-		return (
-			<span
-				className={`inline-flex items-center gap-1 rounded-full border font-medium text-green-400 bg-green-500/10 border-green-500/30 ${sizeClasses[size]} ${className}`}
-			>
-				<span>🖥️</span>
-				<span>Server</span>
-			</span>
-		)
+	const iconSizes = {
+		sm: 'h-2.5 w-2.5',
+		md: 'h-3 w-3',
+		lg: 'h-3.5 w-3.5',
 	}
+
+	const Icon = isServer ? Server : Laptop
 
 	return (
 		<span
-			className={`inline-flex items-center gap-1 rounded-full border font-medium text-purple-400 bg-purple-500/10 border-purple-500/30 ${sizeClasses[size]} ${className}`}
+			className={cn(
+				'inline-flex items-center font-medium',
+				'bg-white/5 border border-white/10 text-white/70',
+				'hover:bg-white/10 hover:text-white/90 transition-colors',
+				sizeClasses[size],
+				className,
+			)}
 		>
-			<span>💻</span>
-			<span>Client</span>
+			<Icon className={cn('text-white/50', iconSizes[size])} />
+			<span>{isServer ? 'Server' : 'Client'}</span>
 		</span>
 	)
 }
@@ -138,7 +126,7 @@ export function FullRuntimeBadge({
 	className?: string
 }) {
 	return (
-		<div className={`flex items-center gap-2 ${className}`}>
+		<div className={cn('flex items-center gap-2', className)}>
 			<RuntimeBadge runtime={runtime} size={size} />
 			<EnvironmentBadge isServer={isServer} size={size} />
 		</div>
@@ -151,11 +139,6 @@ export function FullRuntimeBadge({
 export function RuntimeIndicator({
 	runtime,
 	className = '',
-}: {
-	runtime: Runtime | 'unknown'
-	className?: string
-}) {
-	const config = runtimeConfig[runtime]
-
-	return <span className={`${config.color} font-mono text-xs ${className}`}>[{runtime}]</span>
+}: { runtime: Runtime | 'unknown'; className?: string }) {
+	return <span className={cn('text-white/50 font-mono text-xs', className)}>[{runtime}]</span>
 }

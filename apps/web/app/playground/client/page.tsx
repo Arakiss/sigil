@@ -2,7 +2,6 @@
 
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -225,9 +224,9 @@ export default function ClientDemoPage() {
 					<Button onClick={handleSubmit} className="w-full">
 						Submit (Watch Logs Below)
 					</Button>
-					<div className="mt-3 p-3 bg-white/5 border border-white/10 text-xs text-muted-foreground">
-						⚠️ Sensitive fields like email, password, and creditCard are automatically sanitized in
-						the log output!
+					<div className="mt-3 p-3 bg-white/5 border border-white/10 text-xs text-white/50">
+						<span className="text-amber-400/80">!</span> Sensitive fields like email, password, and
+						creditCard are automatically sanitized in the log output
 					</div>
 				</DemoCard>
 			</div>
@@ -275,35 +274,49 @@ export default function MyClientComponent() {
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">
-						✓ Key Features Demonstrated
-					</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">Browser Detection</strong> — Runtime shows as
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Browser Detection</strong> — Runtime shows as
 							'browser'
-						</li>
-						<li>
-							• <strong className="text-foreground">PII Sanitization</strong> — Email, password,
-							credit cards are redacted
-						</li>
-						<li>
-							• <strong className="text-foreground">Unified Logging</strong> — Client logs appear in
-							the same panel as server logs
-						</li>
-						<li>
-							• <strong className="text-foreground">Pretty Console</strong> — Colored output in
-							browser devtools
-						</li>
-						<li>
-							• <strong className="text-foreground">No AsyncLocalStorage</strong> — Graceful
-							degradation in browser
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">PII Sanitization</strong> — Email, password, credit
+							cards are redacted
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Unified Logging</strong> — Client logs appear in the
+							same panel as server logs
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Pretty Console</strong> — Colored output in browser
+							devtools
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">No AsyncLocalStorage</strong> — Graceful degradation
+							in browser
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

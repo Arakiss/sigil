@@ -1,6 +1,5 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Container } from '@/components/layout'
 import { Server, Search, GitFork, Code } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
@@ -177,35 +176,49 @@ export default async function MyServerComponent() {
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">
-						✓ Key Features Demonstrated
-					</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">Runtime Detection</strong> — Automatically
-							detects Node.js/Bun environment
-						</li>
-						<li>
-							• <strong className="text-foreground">Structured Logging</strong> — JSON output for
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Runtime Detection</strong> — Automatically detects
+							Node.js/Bun environment
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Structured Logging</strong> — JSON output for
 							server-side logs
-						</li>
-						<li>
-							• <strong className="text-foreground">Child Loggers</strong> — Namespaced logging for
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Child Loggers</strong> — Namespaced logging for
 							components
-						</li>
-						<li>
-							• <strong className="text-foreground">Context Propagation</strong> — Request IDs
-							tracked across async operations
-						</li>
-						<li>
-							• <strong className="text-foreground">Real-time Streaming</strong> — Logs appear in
-							the panel below
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Context Propagation</strong> — Request IDs tracked
+							across async operations
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Real-time Streaming</strong> — Logs appear in the
+							panel below
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

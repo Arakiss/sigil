@@ -2,7 +2,6 @@
 
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Container } from '@/components/layout'
 import { PlugTypeA, Download, Upload, Code } from 'iconoir-react'
 import { useState } from 'react'
@@ -164,9 +163,9 @@ export default function ApiRoutesDemoPage() {
 					onAction={handlePostRequest}
 					isLoading={isLoading.post}
 				>
-					<div className="mb-4 p-3 bg-white/5 border border-white/10 text-xs text-muted-foreground">
-						⚠️ This request includes: email, password, and creditCard fields. Check the log panel to
-						see them sanitized!
+					<div className="mb-4 p-3 bg-white/5 border border-white/10 text-xs text-white/50">
+						<span className="text-amber-400/80">!</span> This request includes: email, password, and
+						creditCard fields. Check the log panel to see them sanitized
 					</div>
 					<div className="mb-4 p-3 bg-black/30">
 						<div className="text-[10px] text-muted-foreground uppercase mb-1">
@@ -251,35 +250,49 @@ export async function GET(request: Request) {
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">
-						✓ Key Features Demonstrated
-					</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">Request Lifecycle</strong> — Full tracing from
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Request Lifecycle</strong> — Full tracing from
 							request to response
-						</li>
-						<li>
-							• <strong className="text-foreground">Correlation IDs</strong> — Request ID and Trace
-							ID propagation
-						</li>
-						<li>
-							• <strong className="text-foreground">Response Headers</strong> — IDs returned for
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Correlation IDs</strong> — Request ID and Trace ID
+							propagation
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Response Headers</strong> — IDs returned for
 							client-side tracing
-						</li>
-						<li>
-							• <strong className="text-foreground">Duration Tracking</strong> — Performance metrics
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Duration Tracking</strong> — Performance metrics
 							logged automatically
-						</li>
-						<li>
-							• <strong className="text-foreground">Error Handling</strong> — Errors logged with
-							context preserved
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Error Handling</strong> — Errors logged with context
+							preserved
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

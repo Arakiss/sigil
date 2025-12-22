@@ -1,7 +1,6 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/layout'
 import { Antenna, Terminal, Globe, Folder, Database, Shuffle, Settings } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
@@ -96,8 +95,8 @@ export default async function TransportsPage() {
 			{/* Transport cards */}
 			<div className="space-y-6">
 				{transports.map((transport) => (
-					<Card key={transport.name} className="bg-surface overflow-hidden">
-						<CardHeader className="bg-surface-elevated">
+					<Card key={transport.name} className="bg-surface overflow-hidden border-white/[0.06]">
+						<CardHeader className="bg-white/[0.02]">
 							<div className="flex items-center gap-3">
 								<span className="text-muted-foreground">{transport.icon}</span>
 								<div>
@@ -120,14 +119,17 @@ export default async function TransportsPage() {
 
 							{/* Features */}
 							<div>
-								<h4 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">
+								<h4 className="text-xs font-medium text-white/30 uppercase tracking-widest mb-2">
 									Features
 								</h4>
 								<div className="flex flex-wrap gap-2">
 									{transport.features.map((feature) => (
-										<Badge key={feature} variant="secondary">
+										<span
+											key={feature}
+											className="text-[10px] px-2 py-0.5 bg-white/5 border border-white/10 text-white/60"
+										>
 											{feature}
-										</Badge>
+										</span>
 									))}
 								</div>
 							</div>
@@ -218,33 +220,49 @@ log.info('Application started', { version: '1.0.0' })`}
 			</div>
 
 			{/* Key points */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">Multiple Destinations</strong> — Send logs to
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Multiple Destinations</strong> — Send logs to
 							console, files, HTTP, and Datadog simultaneously
-						</li>
-						<li>
-							• <strong className="text-foreground">Batch Processing</strong> — Efficient batching
-							with configurable size and flush intervals
-						</li>
-						<li>
-							• <strong className="text-foreground">Retry Logic</strong> — Automatic retries with
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Batch Processing</strong> — Efficient batching with
+							configurable size and flush intervals
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Retry Logic</strong> — Automatic retries with
 							exponential backoff for network transports
-						</li>
-						<li>
-							• <strong className="text-foreground">Level Filtering</strong> — Each transport can
-							have its own minimum log level
-						</li>
-						<li>
-							• <strong className="text-foreground">Custom Transports</strong> — Extend
-							BatchTransport to create your own
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Level Filtering</strong> — Each transport can have
+							its own minimum log level
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Custom Transports</strong> — Extend BatchTransport
+							to create your own
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }

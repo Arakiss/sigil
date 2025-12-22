@@ -1,6 +1,5 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Container } from '@/components/layout'
 import { Flash, Search, Settings, Shuffle, PlugTypeA, Check, Xmark } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
@@ -167,58 +166,87 @@ export const GET = withVestig(
 			</div>
 
 			{/* Edge considerations */}
-			<Card className="mt-8 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">⚠ Edge Considerations</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">No File System</strong> — FileTransport is not
+			<div className="mt-8 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-amber-400/80">!</span> Edge Considerations
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">No File System</strong> — FileTransport is not
 							available in edge runtime
-						</li>
-						<li>
-							• <strong className="text-foreground">Limited APIs</strong> — Some Node.js APIs like
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Limited APIs</strong> — Some Node.js APIs like
 							process.env may be restricted
-						</li>
-						<li>
-							• <strong className="text-foreground">Global Context</strong> — Uses global context
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Global Context</strong> — Uses global context
 							manager instead of AsyncLocalStorage
-						</li>
-						<li>
-							• <strong className="text-foreground">Bundle Size</strong> — Vestig automatically
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Bundle Size</strong> — Vestig automatically
 							tree-shakes unused features
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+				</ul>
+			</div>
 
 			{/* Key points */}
-			<Card className="mt-6 bg-white/5 border-white/10">
-				<CardContent className="p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
-					<ul className="text-sm text-muted-foreground space-y-2">
-						<li>
-							• <strong className="text-foreground">Zero Config</strong> — Works automatically in
-							Vercel Edge and Cloudflare Workers
-						</li>
-						<li>
-							• <strong className="text-foreground">Auto Detection</strong> — Vestig detects edge
+			<div className="mt-6 relative p-6 bg-surface border border-white/[0.06] overflow-hidden">
+				<div className="absolute top-0 right-0 w-12 h-12 border-l border-b border-white/[0.04]" />
+				<h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+					<span className="text-white/50">—</span> Key Features
+				</h3>
+				<ul className="text-sm text-white/50 space-y-2">
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Zero Config</strong> — Works automatically in Vercel
+							Edge and Cloudflare Workers
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Auto Detection</strong> — Vestig detects edge
 							runtime and adapts accordingly
-						</li>
-						<li>
-							• <strong className="text-foreground">Correlation IDs</strong> — Request correlation
-							works across edge and origin
-						</li>
-						<li>
-							• <strong className="text-foreground">Minimal Bundle</strong> — Tree-shakeable design
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Correlation IDs</strong> — Request correlation works
+							across edge and origin
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Minimal Bundle</strong> — Tree-shakeable design
 							keeps edge bundles small
-						</li>
-						<li>
-							• <strong className="text-foreground">Same API</strong> — Use the same logging API as
+						</span>
+					</li>
+					<li className="flex gap-2">
+						<span className="text-white/30">›</span>
+						<span>
+							<strong className="text-white/70">Same API</strong> — Use the same logging API as
 							server and client
-						</li>
-					</ul>
-				</CardContent>
-			</Card>
+						</span>
+					</li>
+				</ul>
+			</div>
 		</Container>
 	)
 }
