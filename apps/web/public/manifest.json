@@ -1,0 +1,16 @@
+{
+	"name": "Vestig Documentation",
+	"short_name": "Vestig",
+	"description": "Zero-dependency TypeScript logging library with automatic PII sanitization and multi-runtime support.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#0a0a0a",
+	"theme_color": "#f97316",
+	"icons": [
+		{
+			"src": "/favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml"
+		}
+	]
+}

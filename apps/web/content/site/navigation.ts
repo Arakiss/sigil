@@ -3,6 +3,7 @@ import type { NavigationConfig } from '@/lib/content/types'
 export const navigationConfig: NavigationConfig = {
 	header: [
 		{ label: 'Docs', href: '/docs' },
+		{ label: 'Blog', href: '/blog' },
 		{ label: 'Playground', href: '/playground' },
 		{ label: 'GitHub', href: 'https://github.com/Arakiss/vestig', external: true },
 	],
