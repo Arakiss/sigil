@@ -2,6 +2,8 @@
 
 import { useLogPanel } from '@/lib/log-context'
 import { CompactLogViewer } from './log-viewer'
+import { NavArrowDown, NavArrowUp, ListSelect } from 'iconoir-react'
+import { cn } from '@/lib/utils'
 
 /**
  * Collapsible log panel that sits at the bottom of the playground
@@ -12,32 +14,42 @@ export function LogPanel() {
 
 	return (
 		<div
-			className={`fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-white/10 transition-all duration-300 ease-in-out z-50 ${
-				isOpen ? 'h-80' : 'h-10'
-			}`}
+			className={cn(
+				'fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10 transition-all duration-300 ease-in-out z-50',
+				isOpen ? 'h-80' : 'h-10',
+			)}
 		>
 			{/* Toggle bar */}
 			<button
 				type="button"
 				onClick={toggle}
-				className="w-full h-10 flex items-center justify-between px-4 bg-gray-900 hover:bg-gray-800 transition-colors"
+				className="w-full h-10 flex items-center justify-between px-4 bg-surface hover:bg-surface-elevated transition-colors"
 			>
 				<div className="flex items-center gap-3">
 					{/* Connection indicator */}
-					<span
-						className={`w-2 h-2 rounded-full ${
-							isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-						}`}
-					/>
-					<span className="text-sm font-medium text-gray-300">📋 Log Panel</span>
+					<span className={cn('w-2 h-2', isConnected ? 'bg-white animate-pulse' : 'bg-white/30')} />
+					<ListSelect className="h-4 w-4 text-muted-foreground" />
+					<span className="text-sm font-medium text-foreground">Log Panel</span>
 					{/* Log count badge */}
 					{logCount > 0 && (
-						<span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full text-xs font-medium">
+						<span className="px-2 py-0.5 bg-white/10 text-foreground text-xs font-medium">
 							{logCount}
 						</span>
 					)}
 				</div>
-				<span className="text-gray-500">{isOpen ? '▼ Collapse' : '▲ Expand'}</span>
+				<span className="flex items-center gap-1.5 text-muted-foreground text-sm">
+					{isOpen ? (
+						<>
+							<NavArrowDown className="h-3.5 w-3.5" />
+							Collapse
+						</>
+					) : (
+						<>
+							<NavArrowUp className="h-3.5 w-3.5" />
+							Expand
+						</>
+					)}
+				</span>
 			</button>
 
 			{/* Log viewer content */}
@@ -60,14 +72,15 @@ export function LogPanelToggle() {
 		<button
 			type="button"
 			onClick={toggle}
-			className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-full shadow-lg transition-all ${
-				isOpen ? 'bg-gray-800 text-gray-300' : 'bg-blue-600 text-white hover:bg-blue-500'
-			}`}
+			className={cn(
+				'fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2 shadow-lg transition-all',
+				isOpen ? 'bg-surface text-foreground' : 'bg-white text-black hover:bg-white/90',
+			)}
 		>
-			<span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
+			<span className={cn('w-2 h-2', isConnected ? 'bg-current animate-pulse' : 'bg-current/30')} />
 			<span className="text-sm font-medium">Logs</span>
 			{logCount > 0 && (
-				<span className="px-1.5 py-0.5 bg-white/20 rounded-full text-xs">
+				<span className="px-1.5 py-0.5 bg-black/10 text-xs">
 					{logCount > 99 ? '99+' : logCount}
 				</span>
 			)}
@@ -81,10 +94,7 @@ export function LogPanelToggle() {
  */
 export function InlineLogPanel({ height = 300 }: { height?: number }) {
 	return (
-		<div
-			className="bg-gray-950 rounded-lg border border-white/10 overflow-hidden"
-			style={{ height }}
-		>
+		<div className="bg-black/60 border border-white/10 overflow-hidden" style={{ height }}>
 			<CompactLogViewer />
 		</div>
 	)

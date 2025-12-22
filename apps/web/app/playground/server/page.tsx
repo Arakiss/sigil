@@ -1,5 +1,8 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Container } from '@/components/layout'
+import { Server, Search, GitFork, Code } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
 import { IS_SERVER, RUNTIME } from 'vestig'
 
@@ -49,17 +52,17 @@ async function UserProfile({ userId }: { userId: number }) {
 	})
 
 	return (
-		<div className="bg-gray-800/50 rounded-lg p-4 border border-white/10">
+		<div className="bg-surface p-4 border border-white/10">
 			<div className="flex items-center gap-3 mb-3">
-				<div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+				<div className="w-10 h-10 bg-white/10 flex items-center justify-center text-foreground font-medium">
 					{user.name[0]}
 				</div>
 				<div>
-					<div className="font-medium text-white">{user.name}</div>
-					<div className="text-sm text-gray-400">{user.email}</div>
+					<div className="font-medium text-foreground">{user.name}</div>
+					<div className="text-sm text-muted-foreground">{user.email}</div>
 				</div>
 			</div>
-			<div className="text-sm text-gray-500">
+			<div className="text-sm text-muted-foreground">
 				{posts.length} posts · {user.role}
 			</div>
 		</div>
@@ -93,14 +96,14 @@ export default async function ServerDemoPage() {
 	log.trace('Initial render complete, fetching data')
 
 	return (
-		<div className="max-w-3xl mx-auto">
+		<Container size="default">
 			{/* Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-4">
-					<span className="text-3xl">🖥️</span>
-					<h1 className="text-2xl font-bold text-white">Server Components</h1>
+					<Server className="h-8 w-8 text-foreground" />
+					<h1 className="text-2xl font-bold text-foreground">Server Components</h1>
 				</div>
-				<p className="text-gray-400 mb-4">
+				<p className="text-muted-foreground mb-4">
 					Logging in React Server Components with automatic runtime detection and context
 					propagation.
 				</p>
@@ -111,25 +114,25 @@ export default async function ServerDemoPage() {
 			<DemoCard
 				title="Runtime Detection"
 				description="Vestig automatically detects the current runtime environment"
-				icon="🔍"
+				icon={<Search className="h-5 w-5" />}
 			>
 				<DemoResult>
 					<div className="grid grid-cols-2 gap-4 text-sm">
 						<div>
-							<span className="text-gray-500">Runtime:</span>{' '}
-							<span className="text-green-400 font-mono">{RUNTIME}</span>
+							<span className="text-muted-foreground">Runtime:</span>{' '}
+							<span className="text-foreground font-mono">{RUNTIME}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Environment:</span>{' '}
-							<span className="text-green-400 font-mono">{IS_SERVER ? 'Server' : 'Client'}</span>
+							<span className="text-muted-foreground">Environment:</span>{' '}
+							<span className="text-foreground font-mono">{IS_SERVER ? 'Server' : 'Client'}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Request ID:</span>{' '}
-							<span className="text-cyan-400 font-mono text-xs">{ctx.requestId}</span>
+							<span className="text-muted-foreground">Request ID:</span>{' '}
+							<span className="text-foreground/70 font-mono text-xs">{ctx.requestId}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Trace ID:</span>{' '}
-							<span className="text-cyan-400 font-mono text-xs">{ctx.traceId}</span>
+							<span className="text-muted-foreground">Trace ID:</span>{' '}
+							<span className="text-foreground/70 font-mono text-xs">{ctx.traceId}</span>
 						</div>
 					</div>
 				</DemoResult>
@@ -140,7 +143,7 @@ export default async function ServerDemoPage() {
 				<DemoCard
 					title="Nested Components with Logging"
 					description="Child components inherit context and create namespaced logs"
-					icon="🌳"
+					icon={<GitFork className="h-5 w-5" />}
 				>
 					<DemoResult title="User Profile Component">
 						<UserProfile userId={1} />
@@ -153,7 +156,7 @@ export default async function ServerDemoPage() {
 				<DemoCard
 					title="Code Example"
 					description="How to use vestig in Server Components with @vestig/next"
-					icon="📝"
+					icon={<Code className="h-5 w-5" />}
 					code={`import { getLogger, getRequestContext } from '@vestig/next'
 
 export default async function MyServerComponent() {
@@ -174,31 +177,35 @@ export default async function MyServerComponent() {
 			</div>
 
 			{/* Key points */}
-			<div className="mt-8 bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features Demonstrated</h3>
-				<ul className="text-sm text-gray-400 space-y-2">
-					<li>
-						• <strong className="text-white">Runtime Detection</strong> — Automatically detects
-						Node.js/Bun environment
-					</li>
-					<li>
-						• <strong className="text-white">Structured Logging</strong> — JSON output for
-						server-side logs
-					</li>
-					<li>
-						• <strong className="text-white">Child Loggers</strong> — Namespaced logging for
-						components
-					</li>
-					<li>
-						• <strong className="text-white">Context Propagation</strong> — Request IDs tracked
-						across async operations
-					</li>
-					<li>
-						• <strong className="text-white">Real-time Streaming</strong> — Logs appear in the panel
-						below
-					</li>
-				</ul>
-			</div>
-		</div>
+			<Card className="mt-8 bg-white/5 border-white/10">
+				<CardContent className="p-6">
+					<h3 className="text-sm font-semibold text-foreground mb-3">
+						✓ Key Features Demonstrated
+					</h3>
+					<ul className="text-sm text-muted-foreground space-y-2">
+						<li>
+							• <strong className="text-foreground">Runtime Detection</strong> — Automatically
+							detects Node.js/Bun environment
+						</li>
+						<li>
+							• <strong className="text-foreground">Structured Logging</strong> — JSON output for
+							server-side logs
+						</li>
+						<li>
+							• <strong className="text-foreground">Child Loggers</strong> — Namespaced logging for
+							components
+						</li>
+						<li>
+							• <strong className="text-foreground">Context Propagation</strong> — Request IDs
+							tracked across async operations
+						</li>
+						<li>
+							• <strong className="text-foreground">Real-time Streaming</strong> — Logs appear in
+							the panel below
+						</li>
+					</ul>
+				</CardContent>
+			</Card>
+		</Container>
 	)
 }

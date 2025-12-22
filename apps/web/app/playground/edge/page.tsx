@@ -1,5 +1,8 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Container } from '@/components/layout'
+import { Flash, Search, Settings, Shuffle, PlugTypeA, Check, Xmark } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
 import { IS_SERVER, RUNTIME, CAPABILITIES, IS_EDGE } from 'vestig'
 
@@ -33,14 +36,14 @@ export default async function EdgePage() {
 	})
 
 	return (
-		<div className="max-w-3xl mx-auto">
+		<Container size="default">
 			{/* Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-4">
-					<span className="text-3xl">⚡</span>
-					<h1 className="text-2xl font-bold text-white">Edge Runtime</h1>
+					<Flash className="h-8 w-8 text-foreground" />
+					<h1 className="text-2xl font-bold text-foreground">Edge Runtime</h1>
 				</div>
-				<p className="text-gray-400 mb-4">
+				<p className="text-muted-foreground mb-4">
 					Lightweight logging in Edge Functions and Middleware. Vestig automatically adapts to the
 					edge environment with reduced bundle size.
 				</p>
@@ -51,27 +54,25 @@ export default async function EdgePage() {
 			<DemoCard
 				title="Runtime Detection"
 				description="Vestig automatically detects the edge environment"
-				icon="🔍"
+				icon={<Search className="h-5 w-5" />}
 			>
 				<DemoResult>
 					<div className="grid grid-cols-2 gap-4 text-sm">
 						<div>
-							<span className="text-gray-500">Runtime:</span>{' '}
-							<span className="text-green-400 font-mono">{RUNTIME}</span>
+							<span className="text-muted-foreground">Runtime:</span>{' '}
+							<span className="text-foreground font-mono">{RUNTIME}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Is Edge:</span>{' '}
-							<span className={`font-mono ${IS_EDGE ? 'text-green-400' : 'text-gray-400'}`}>
-								{IS_EDGE ? 'true' : 'false'}
-							</span>
+							<span className="text-muted-foreground">Is Edge:</span>{' '}
+							<span className="font-mono text-foreground">{IS_EDGE ? 'true' : 'false'}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Request ID:</span>{' '}
-							<span className="text-cyan-400 font-mono text-xs">{ctx.requestId}</span>
+							<span className="text-muted-foreground">Request ID:</span>{' '}
+							<span className="text-foreground/70 font-mono text-xs">{ctx.requestId}</span>
 						</div>
 						<div>
-							<span className="text-gray-500">Trace ID:</span>{' '}
-							<span className="text-cyan-400 font-mono text-xs">{ctx.traceId}</span>
+							<span className="text-muted-foreground">Trace ID:</span>{' '}
+							<span className="text-foreground/70 font-mono text-xs">{ctx.traceId}</span>
 						</div>
 					</div>
 				</DemoResult>
@@ -82,19 +83,23 @@ export default async function EdgePage() {
 				<DemoCard
 					title="Runtime Capabilities"
 					description="APIs available in the current edge environment"
-					icon="🧰"
+					icon={<Settings className="h-5 w-5" />}
 				>
 					<DemoResult>
 						<div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
 							{Object.entries(CAPABILITIES).map(([key, value]) => (
 								<div
 									key={key}
-									className={`flex items-center gap-2 px-3 py-2 rounded ${
-										value ? 'bg-green-500/10' : 'bg-gray-800/50'
+									className={`flex items-center gap-2 px-3 py-2 ${
+										value ? 'bg-white/10' : 'bg-white/5'
 									}`}
 								>
-									<span>{value ? '✅' : '❌'}</span>
-									<span className={value ? 'text-green-400' : 'text-gray-500'}>
+									{value ? (
+										<Check className="h-4 w-4 text-foreground" />
+									) : (
+										<Xmark className="h-4 w-4 text-muted-foreground" />
+									)}
+									<span className={value ? 'text-foreground' : 'text-muted-foreground'}>
 										{key.replace('has', '')}
 									</span>
 								</div>
@@ -109,7 +114,7 @@ export default async function EdgePage() {
 				<DemoCard
 					title="Edge Middleware"
 					description="How to use vestig in Next.js Edge Middleware"
-					icon="🔀"
+					icon={<Shuffle className="h-5 w-5" />}
 					code={`// middleware.ts
 import { createVestigMiddleware } from '@vestig/next/middleware'
 
@@ -136,7 +141,7 @@ export const config = {
 				<DemoCard
 					title="Edge API Route"
 					description="Logging in Edge API routes with correlation"
-					icon="🔌"
+					icon={<PlugTypeA className="h-5 w-5" />}
 					code={`// app/api/edge-example/route.ts
 import { withVestig } from '@vestig/next'
 
@@ -162,54 +167,58 @@ export const GET = withVestig(
 			</div>
 
 			{/* Edge considerations */}
-			<div className="mt-8 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-6">
-				<h3 className="text-sm font-semibold text-yellow-400 mb-3">⚠️ Edge Considerations</h3>
-				<ul className="text-sm text-gray-400 space-y-2">
-					<li>
-						• <strong className="text-white">No File System</strong> — FileTransport is not
-						available in edge runtime
-					</li>
-					<li>
-						• <strong className="text-white">Limited APIs</strong> — Some Node.js APIs like
-						process.env may be restricted
-					</li>
-					<li>
-						• <strong className="text-white">Global Context</strong> — Uses global context manager
-						instead of AsyncLocalStorage
-					</li>
-					<li>
-						• <strong className="text-white">Bundle Size</strong> — Vestig automatically tree-shakes
-						unused features
-					</li>
-				</ul>
-			</div>
+			<Card className="mt-8 bg-white/5 border-white/10">
+				<CardContent className="p-6">
+					<h3 className="text-sm font-semibold text-foreground mb-3">⚠ Edge Considerations</h3>
+					<ul className="text-sm text-muted-foreground space-y-2">
+						<li>
+							• <strong className="text-foreground">No File System</strong> — FileTransport is not
+							available in edge runtime
+						</li>
+						<li>
+							• <strong className="text-foreground">Limited APIs</strong> — Some Node.js APIs like
+							process.env may be restricted
+						</li>
+						<li>
+							• <strong className="text-foreground">Global Context</strong> — Uses global context
+							manager instead of AsyncLocalStorage
+						</li>
+						<li>
+							• <strong className="text-foreground">Bundle Size</strong> — Vestig automatically
+							tree-shakes unused features
+						</li>
+					</ul>
+				</CardContent>
+			</Card>
 
 			{/* Key points */}
-			<div className="mt-6 bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features</h3>
-				<ul className="text-sm text-gray-400 space-y-2">
-					<li>
-						• <strong className="text-white">Zero Config</strong> — Works automatically in Vercel
-						Edge and Cloudflare Workers
-					</li>
-					<li>
-						• <strong className="text-white">Auto Detection</strong> — Vestig detects edge runtime
-						and adapts accordingly
-					</li>
-					<li>
-						• <strong className="text-white">Correlation IDs</strong> — Request correlation works
-						across edge and origin
-					</li>
-					<li>
-						• <strong className="text-white">Minimal Bundle</strong> — Tree-shakeable design keeps
-						edge bundles small
-					</li>
-					<li>
-						• <strong className="text-white">Same API</strong> — Use the same logging API as server
-						and client
-					</li>
-				</ul>
-			</div>
-		</div>
+			<Card className="mt-6 bg-white/5 border-white/10">
+				<CardContent className="p-6">
+					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
+					<ul className="text-sm text-muted-foreground space-y-2">
+						<li>
+							• <strong className="text-foreground">Zero Config</strong> — Works automatically in
+							Vercel Edge and Cloudflare Workers
+						</li>
+						<li>
+							• <strong className="text-foreground">Auto Detection</strong> — Vestig detects edge
+							runtime and adapts accordingly
+						</li>
+						<li>
+							• <strong className="text-foreground">Correlation IDs</strong> — Request correlation
+							works across edge and origin
+						</li>
+						<li>
+							• <strong className="text-foreground">Minimal Bundle</strong> — Tree-shakeable design
+							keeps edge bundles small
+						</li>
+						<li>
+							• <strong className="text-foreground">Same API</strong> — Use the same logging API as
+							server and client
+						</li>
+					</ul>
+				</CardContent>
+			</Card>
+		</Container>
 	)
 }

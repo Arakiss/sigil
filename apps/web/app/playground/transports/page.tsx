@@ -1,5 +1,9 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Container } from '@/components/layout'
+import { Antenna, Terminal, Globe, Folder, Database, Shuffle, Settings } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
 import { IS_SERVER, RUNTIME } from 'vestig'
 
@@ -9,7 +13,7 @@ import { IS_SERVER, RUNTIME } from 'vestig'
 const transports = [
 	{
 		name: 'ConsoleTransport',
-		icon: '🖥️',
+		icon: <Terminal className="h-6 w-6" />,
 		description: 'Output logs to the console with colors and formatting',
 		config: `new ConsoleTransport({
   level: 'debug',
@@ -20,21 +24,21 @@ const transports = [
 	},
 	{
 		name: 'HTTPTransport',
-		icon: '🌐',
+		icon: <Globe className="h-6 w-6" />,
 		description: 'Send logs to any HTTP endpoint with batching',
 		config: `new HTTPTransport({
   endpoint: 'https://logs.example.com/ingest',
   batchSize: 100,
   flushInterval: 5000,
   headers: {
-    'Authorization': 'Bearer ${'${API_KEY}'}',
+    'Authorization': 'Bearer \${API_KEY}',
   },
 })`,
 		features: ['Batch processing', 'Retry with backoff', 'Custom headers'],
 	},
 	{
 		name: 'FileTransport',
-		icon: '📁',
+		icon: <Folder className="h-6 w-6" />,
 		description: 'Write logs to files with rotation and compression',
 		config: `new FileTransport({
   filename: './logs/app.log',
@@ -46,7 +50,7 @@ const transports = [
 	},
 	{
 		name: 'DatadogTransport',
-		icon: '🐕',
+		icon: <Database className="h-6 w-6" />,
 		description: 'Send logs directly to Datadog Log Management',
 		config: `new DatadogTransport({
   apiKey: process.env.DD_API_KEY,
@@ -75,14 +79,14 @@ export default async function TransportsPage() {
 	})
 
 	return (
-		<div className="max-w-4xl mx-auto">
+		<Container size="default">
 			{/* Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-4">
-					<span className="text-3xl">📡</span>
-					<h1 className="text-2xl font-bold text-white">Transports</h1>
+					<Antenna className="h-8 w-8 text-foreground" />
+					<h1 className="text-2xl font-bold text-foreground">Transports</h1>
 				</div>
-				<p className="text-gray-400 mb-4">
+				<p className="text-muted-foreground mb-4">
 					Configure multiple log destinations with different transports. Vestig supports console,
 					HTTP, file, and Datadog out of the box.
 				</p>
@@ -92,45 +96,43 @@ export default async function TransportsPage() {
 			{/* Transport cards */}
 			<div className="space-y-6">
 				{transports.map((transport) => (
-					<div
-						key={transport.name}
-						className="bg-gray-900/50 border border-white/10 rounded-lg overflow-hidden"
-					>
-						<div className="px-5 py-4 border-b border-white/10 bg-gray-800/30">
+					<Card key={transport.name} className="bg-surface overflow-hidden">
+						<CardHeader className="bg-surface-elevated">
 							<div className="flex items-center gap-3">
-								<span className="text-2xl">{transport.icon}</span>
+								<span className="text-muted-foreground">{transport.icon}</span>
 								<div>
-									<h3 className="text-lg font-semibold text-white">{transport.name}</h3>
-									<p className="text-sm text-gray-400">{transport.description}</p>
+									<CardTitle className="text-base">{transport.name}</CardTitle>
+									<CardDescription>{transport.description}</CardDescription>
 								</div>
 							</div>
-						</div>
+						</CardHeader>
 
-						<div className="p-5 space-y-4">
+						<CardContent className="pt-4 space-y-4">
 							{/* Config */}
 							<div>
-								<h4 className="text-sm font-medium text-gray-400 mb-2">Configuration</h4>
-								<pre className="bg-gray-950 rounded-lg p-4 text-sm text-gray-300 overflow-x-auto">
+								<h4 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">
+									Configuration
+								</h4>
+								<pre className="bg-black/40 p-4 text-sm text-muted-foreground overflow-x-auto border border-white/10">
 									{transport.config}
 								</pre>
 							</div>
 
 							{/* Features */}
 							<div>
-								<h4 className="text-sm font-medium text-gray-400 mb-2">Features</h4>
+								<h4 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">
+									Features
+								</h4>
 								<div className="flex flex-wrap gap-2">
 									{transport.features.map((feature) => (
-										<span
-											key={feature}
-											className="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs"
-										>
+										<Badge key={feature} variant="secondary">
 											{feature}
-										</span>
+										</Badge>
 									))}
 								</div>
 							</div>
-						</div>
-					</div>
+						</CardContent>
+					</Card>
 				))}
 			</div>
 
@@ -139,7 +141,7 @@ export default async function TransportsPage() {
 				<DemoCard
 					title="Multi-Transport Configuration"
 					description="Send logs to multiple destinations simultaneously"
-					icon="🔀"
+					icon={<Shuffle className="h-5 w-5" />}
 					code={`import {
   createLogger,
   ConsoleTransport,
@@ -184,30 +186,30 @@ log.info('Application started', { version: '1.0.0' })`}
 				<DemoCard
 					title="Common Transport Options"
 					description="Options shared across all transport types"
-					icon="⚙️"
+					icon={<Settings className="h-5 w-5" />}
 				>
 					<DemoResult>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 							<div className="space-y-2">
-								<div className="text-gray-400">
-									<strong className="text-white">level</strong> — Minimum log level
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">level</strong> — Minimum log level
 								</div>
-								<div className="text-gray-400">
-									<strong className="text-white">enabled</strong> — Toggle transport on/off
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">enabled</strong> — Toggle transport on/off
 								</div>
-								<div className="text-gray-400">
-									<strong className="text-white">filter</strong> — Custom filter function
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">filter</strong> — Custom filter function
 								</div>
 							</div>
 							<div className="space-y-2">
-								<div className="text-gray-400">
-									<strong className="text-white">batchSize</strong> — Logs per batch
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">batchSize</strong> — Logs per batch
 								</div>
-								<div className="text-gray-400">
-									<strong className="text-white">flushInterval</strong> — Auto-flush timing
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">flushInterval</strong> — Auto-flush timing
 								</div>
-								<div className="text-gray-400">
-									<strong className="text-white">maxRetries</strong> — Retry attempts
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">maxRetries</strong> — Retry attempts
 								</div>
 							</div>
 						</div>
@@ -216,31 +218,33 @@ log.info('Application started', { version: '1.0.0' })`}
 			</div>
 
 			{/* Key points */}
-			<div className="mt-8 bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features</h3>
-				<ul className="text-sm text-gray-400 space-y-2">
-					<li>
-						• <strong className="text-white">Multiple Destinations</strong> — Send logs to console,
-						files, HTTP, and Datadog simultaneously
-					</li>
-					<li>
-						• <strong className="text-white">Batch Processing</strong> — Efficient batching with
-						configurable size and flush intervals
-					</li>
-					<li>
-						• <strong className="text-white">Retry Logic</strong> — Automatic retries with
-						exponential backoff for network transports
-					</li>
-					<li>
-						• <strong className="text-white">Level Filtering</strong> — Each transport can have its
-						own minimum log level
-					</li>
-					<li>
-						• <strong className="text-white">Custom Transports</strong> — Extend BatchTransport to
-						create your own
-					</li>
-				</ul>
-			</div>
-		</div>
+			<Card className="mt-8 bg-white/5 border-white/10">
+				<CardContent className="p-6">
+					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
+					<ul className="text-sm text-muted-foreground space-y-2">
+						<li>
+							• <strong className="text-foreground">Multiple Destinations</strong> — Send logs to
+							console, files, HTTP, and Datadog simultaneously
+						</li>
+						<li>
+							• <strong className="text-foreground">Batch Processing</strong> — Efficient batching
+							with configurable size and flush intervals
+						</li>
+						<li>
+							• <strong className="text-foreground">Retry Logic</strong> — Automatic retries with
+							exponential backoff for network transports
+						</li>
+						<li>
+							• <strong className="text-foreground">Level Filtering</strong> — Each transport can
+							have its own minimum log level
+						</li>
+						<li>
+							• <strong className="text-foreground">Custom Transports</strong> — Extend
+							BatchTransport to create your own
+						</li>
+					</ul>
+				</CardContent>
+			</Card>
+		</Container>
 	)
 }

@@ -1,5 +1,9 @@
 import { DemoCard, DemoResult } from '@/app/components/demo-card'
 import { FullRuntimeBadge } from '@/app/components/runtime-badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Container } from '@/components/layout'
+import { Lock, Copy, Code, Search } from 'iconoir-react'
 import { getLogger, getRequestContext } from '@vestig/next'
 import { IS_SERVER, RUNTIME, Sanitizer, PRESETS, type SanitizePreset } from 'vestig'
 
@@ -42,6 +46,15 @@ const presetDescriptions: Record<string, string> = {
 	'pci-dss': 'PCI-DSS compliant - Payment card industry standards',
 }
 
+const presetVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
+	none: 'outline',
+	minimal: 'secondary',
+	default: 'default',
+	gdpr: 'default',
+	hipaa: 'default',
+	'pci-dss': 'default',
+}
+
 /**
  * PII Sanitization Demo Page
  *
@@ -69,14 +82,14 @@ export default async function SanitizationPage() {
 	})
 
 	return (
-		<div className="max-w-5xl mx-auto">
+		<Container size="wide">
 			{/* Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-4">
-					<span className="text-3xl">🔒</span>
-					<h1 className="text-2xl font-bold text-white">PII Sanitization</h1>
+					<Lock className="h-8 w-8 text-foreground" />
+					<h1 className="text-2xl font-bold text-foreground">PII Sanitization</h1>
 				</div>
-				<p className="text-gray-400 mb-4">
+				<p className="text-muted-foreground mb-4">
 					Compare all sanitization presets side-by-side. See how different compliance requirements
 					affect data masking.
 				</p>
@@ -87,10 +100,10 @@ export default async function SanitizationPage() {
 			<DemoCard
 				title="Sample Data (Unsanitized)"
 				description="This is the raw data that will be sanitized with each preset"
-				icon="📋"
+				icon={<Copy className="h-5 w-5" />}
 			>
 				<DemoResult>
-					<pre className="text-xs text-gray-300 overflow-x-auto">
+					<pre className="text-xs text-muted-foreground overflow-x-auto">
 						{JSON.stringify(sampleData, null, 2)}
 					</pre>
 				</DemoResult>
@@ -98,38 +111,23 @@ export default async function SanitizationPage() {
 
 			{/* Preset comparisons */}
 			<div className="mt-8 space-y-6">
-				<h2 className="text-xl font-semibold text-white">Preset Comparison</h2>
+				<h2 className="text-xl font-semibold text-foreground">Preset Comparison</h2>
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					{sanitizedResults.map(({ name, description, result }) => (
-						<div
-							key={name}
-							className="bg-gray-900/50 border border-white/10 rounded-lg overflow-hidden"
-						>
-							<div className="px-4 py-3 border-b border-white/10 bg-gray-800/50">
+						<Card key={name} className="bg-surface overflow-hidden">
+							<CardHeader className="pb-2 bg-surface-elevated">
 								<div className="flex items-center gap-2">
-									<span
-										className={`px-2 py-0.5 rounded text-xs font-medium ${
-											name === 'none'
-												? 'bg-red-500/20 text-red-400'
-												: name === 'minimal'
-													? 'bg-yellow-500/20 text-yellow-400'
-													: name === 'default'
-														? 'bg-blue-500/20 text-blue-400'
-														: 'bg-green-500/20 text-green-400'
-										}`}
-									>
-										{name.toUpperCase()}
-									</span>
+									<Badge variant={presetVariants[name] || 'default'}>{name.toUpperCase()}</Badge>
 								</div>
-								<p className="text-xs text-gray-500 mt-1">{description}</p>
-							</div>
-							<div className="p-4">
-								<pre className="text-xs text-gray-300 overflow-x-auto max-h-64 overflow-y-auto">
+								<CardDescription className="mt-1">{description}</CardDescription>
+							</CardHeader>
+							<CardContent className="pt-4">
+								<pre className="text-xs text-muted-foreground overflow-x-auto max-h-64 overflow-y-auto">
 									{JSON.stringify(result, null, 2)}
 								</pre>
-							</div>
-						</div>
+							</CardContent>
+						</Card>
 					))}
 				</div>
 			</div>
@@ -139,7 +137,7 @@ export default async function SanitizationPage() {
 				<DemoCard
 					title="Code Example"
 					description="How to use sanitization presets in your code"
-					icon="📝"
+					icon={<Code className="h-5 w-5" />}
 					code={`import { createLogger, sanitize } from 'vestig'
 
 // Using preset in logger config
@@ -164,27 +162,26 @@ const cleanData = sanitize(userData, { preset: 'hipaa' })`}
 				<DemoCard
 					title="Sanitized Field Types"
 					description="Types of data automatically detected and sanitized"
-					icon="🔍"
+					icon={<Search className="h-5 w-5" />}
 				>
 					<DemoResult>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+						<div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 text-sm">
 							{[
-								{ field: 'password', icon: '🔐' },
-								{ field: 'email', icon: '📧' },
-								{ field: 'creditCard', icon: '💳' },
-								{ field: 'ssn', icon: '🆔' },
-								{ field: 'phone', icon: '📱' },
-								{ field: 'apiKey', icon: '🔑' },
-								{ field: 'token', icon: '🎫' },
-								{ field: 'secret', icon: '🤫' },
-								{ field: 'address', icon: '🏠' },
-							].map(({ field, icon }) => (
+								'password',
+								'email',
+								'creditCard',
+								'ssn',
+								'phone',
+								'apiKey',
+								'token',
+								'secret',
+								'address',
+							].map((field) => (
 								<div
 									key={field}
-									className="flex items-center gap-2 bg-gray-800/50 px-3 py-2 rounded"
+									className="flex items-center justify-center bg-white/5 px-3 py-2 text-muted-foreground"
 								>
-									<span>{icon}</span>
-									<span className="text-gray-300">{field}</span>
+									{field}
 								</div>
 							))}
 						</div>
@@ -193,31 +190,33 @@ const cleanData = sanitize(userData, { preset: 'hipaa' })`}
 			</div>
 
 			{/* Key points */}
-			<div className="mt-8 bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-				<h3 className="text-sm font-semibold text-green-400 mb-3">✅ Key Features</h3>
-				<ul className="text-sm text-gray-400 space-y-2">
-					<li>
-						• <strong className="text-white">6 Built-in Presets</strong> — From minimal to
-						compliance-ready (GDPR, HIPAA, PCI-DSS)
-					</li>
-					<li>
-						• <strong className="text-white">Automatic Detection</strong> — Recognizes emails,
-						credit cards, SSNs, tokens, and more
-					</li>
-					<li>
-						• <strong className="text-white">Deep Object Sanitization</strong> — Recursively
-						sanitizes nested objects and arrays
-					</li>
-					<li>
-						• <strong className="text-white">Custom Patterns</strong> — Add your own field matchers
-						and regex patterns
-					</li>
-					<li>
-						• <strong className="text-white">Zero Dependencies</strong> — Lightweight and fast, no
-						external libraries
-					</li>
-				</ul>
-			</div>
-		</div>
+			<Card className="mt-8 bg-white/5 border-white/10">
+				<CardContent className="p-6">
+					<h3 className="text-sm font-semibold text-foreground mb-3">✓ Key Features</h3>
+					<ul className="text-sm text-muted-foreground space-y-2">
+						<li>
+							• <strong className="text-foreground">6 Built-in Presets</strong> — From minimal to
+							compliance-ready (GDPR, HIPAA, PCI-DSS)
+						</li>
+						<li>
+							• <strong className="text-foreground">Automatic Detection</strong> — Recognizes
+							emails, credit cards, SSNs, tokens, and more
+						</li>
+						<li>
+							• <strong className="text-foreground">Deep Object Sanitization</strong> — Recursively
+							sanitizes nested objects and arrays
+						</li>
+						<li>
+							• <strong className="text-foreground">Custom Patterns</strong> — Add your own field
+							matchers and regex patterns
+						</li>
+						<li>
+							• <strong className="text-foreground">Zero Dependencies</strong> — Lightweight and
+							fast, no external libraries
+						</li>
+					</ul>
+				</CardContent>
+			</Card>
+		</Container>
 	)
 }
