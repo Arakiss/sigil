@@ -67,7 +67,14 @@ export {
 	generateSpanId,
 	parseTraceparent,
 	createTraceparent,
+	// W3C Trace Context tracestate support
+	parseTracestate,
+	createTracestate,
+	getTracestateValue,
+	setTracestateValue,
+	deleteTracestateKey,
 } from './context'
+export type { TracestateEntry } from './context'
 
 // Utilities
 export { serializeError, isError, getErrorMessage } from './utils/error'

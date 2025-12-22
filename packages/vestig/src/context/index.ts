@@ -4,6 +4,14 @@ import { generateRequestId, generateSpanId, generateTraceId } from './correlatio
 
 export { generateRequestId, generateSpanId, generateTraceId } from './correlation'
 export { parseTraceparent, createTraceparent } from './correlation'
+export {
+	parseTracestate,
+	createTracestate,
+	getTracestateValue,
+	setTracestateValue,
+	deleteTracestateKey,
+} from './correlation'
+export type { TracestateEntry } from './correlation'
 
 /**
  * Context manager interface
