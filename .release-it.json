@@ -32,7 +32,7 @@
 			"bun run test",
 			"bun run build"
 		],
-		"after:bump": "node -e \"const fs=require('fs');['packages/vestig/package.json','packages/vestig-next/package.json','packages/vestig-express/package.json'].forEach(p=>{const pkg=JSON.parse(fs.readFileSync(p));pkg.version='${version}';fs.writeFileSync(p,JSON.stringify(pkg,null,'\\t')+'\\n');});\" && git add packages/vestig/package.json packages/vestig-next/package.json packages/vestig-express/package.json"
+		"after:bump": "node -e \"const fs=require('fs');['packages/vestig/package.json','packages/vestig-next/package.json'].forEach(p=>{const pkg=JSON.parse(fs.readFileSync(p));pkg.version='${version}';fs.writeFileSync(p,JSON.stringify(pkg,null,'\\t')+'\\n');});\" && git add packages/vestig/package.json packages/vestig-next/package.json"
 	},
 	"plugins": {
 		"@release-it/conventional-changelog": {
