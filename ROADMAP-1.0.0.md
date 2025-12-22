@@ -4,7 +4,7 @@
 
 ---
 
-## 📊 Current State Analysis (v0.6.0)
+## 📊 Current State Analysis (v0.7.0)
 
 ### Current Strengths
 
@@ -23,7 +23,7 @@
 
 ### Current Metrics
 
-- **Tests**: 897+ passing (1,705 assertions), ~90% coverage
+- **Tests**: 898+ passing (1,706 assertions), ~90% coverage
 - **Packages**: 3 published (vestig, @vestig/next, @vestig/express)
 - **Production dependencies**: 0 (!!!)
 - **Size**: ~8,500 LOC
@@ -98,8 +98,8 @@
 - [x] `useLogger()` hook fully functional ✅
 - [x] `VestigProvider` with configuration ✅
 - [x] `ClientHTTPTransport` with batching ✅
-- [ ] Offline queue persistence (→ v0.7.0)
-- [ ] Automatic error boundary integration (→ v0.7.0)
+- [x] Offline queue persistence ✅
+- [x] Automatic error boundary integration (VestigErrorBoundary) ✅
 - [ ] Browser performance marks integration (→ v0.8.0)
 
 #### 1.2 Testing Infrastructure
@@ -118,7 +118,7 @@
 
 ---
 
-### Phase 2: Tracing Revolution (v0.6.0 - v0.7.0) 🔄 IN PROGRESS
+### Phase 2: Tracing Revolution (v0.6.0 - v0.7.0) ✅ COMPLETED
 **Goal**: Unify logging and tracing in a simple API
 
 #### 2.1 🏆 Native Tracing (KEY DIFFERENTIATOR) ✅ COMPLETED
@@ -165,9 +165,9 @@ Features:
 - [ ] Baggage propagation (→ v0.8.0)
 
 #### 2.3 Distributed Tracing
-- [ ] Trace visualization in console (ASCII art)
-- [ ] Trace export to Jaeger/Zipkin format
-- [ ] Sampling strategies (head, tail, adaptive) (→ v0.7.0)
+- [ ] Trace visualization in console (ASCII art) (→ v0.8.0)
+- [ ] Trace export to Jaeger/Zipkin format (→ v0.8.0)
+- [x] Sampling strategies (probability, rate-limit, namespace-based, composite) ✅
 
 ---
 
@@ -392,28 +392,33 @@ vestig audit --pii-check ./src
 
 ---
 
-## 🎯 Immediate Next Steps (v0.7.0)
+## 🎯 Immediate Next Steps (v0.8.0)
 
-### Current Sprint: v0.7.0 Features
-1. [x] Sampling strategies (probability, rate-limit, namespace-based) ✅
-2. [x] Offline queue with localStorage persistence ✅
-3. [x] VestigErrorBoundary component ✅
-4. [x] W3C tracestate support ✅
+### Recently Completed: v0.7.0 Features ✅
+1. [x] Full Deno runtime support ✅
+2. [x] Sampling strategies (probability, rate-limit, namespace-based, composite) ✅
+3. [x] Offline queue with localStorage persistence ✅
+4. [x] VestigErrorBoundary component with breadcrumb trail ✅
+5. [x] W3C tracestate support ✅
 
-### Next Sprint: v0.8.0 Prep
-1. [ ] Trace visualization in console (ASCII waterfall)
-2. [ ] Browser performance marks integration
-3. [ ] Baggage propagation
+### Current Sprint: v0.8.0 Features
+1. [ ] OpenTelemetry Bridge (OTLP HTTP/gRPC exporters)
+2. [ ] Trace visualization in console (ASCII waterfall)
+3. [ ] Browser performance marks integration
+4. [ ] Baggage propagation
 
-### Recently Completed (v0.4.0 - v0.6.0)
-- ✅ Comprehensive tests for `@vestig/next` (232 tests)
-- ✅ Comprehensive tests for `@vestig/express` (74 tests)
-- ✅ `useLogger()` hook functional
-- ✅ `VestigProvider` complete
-- ✅ `ClientHTTPTransport` with batching
-- ✅ Native tracing API: `span()`, `spanSync()`, `startSpan()`
-- ✅ W3C traceparent parsing/generation
-- ✅ Span support in route handlers and server actions
+### Recently Completed (v0.4.0 - v0.7.0)
+- ✅ **v0.7.0**: Full Deno runtime support (detection + AsyncLocalStorage)
+- ✅ **v0.7.0**: W3C tracestate support (parse/create/get/set/delete)
+- ✅ **v0.7.0**: VestigErrorBoundary with breadcrumb trail
+- ✅ **v0.7.0**: Offline queue with localStorage persistence
+- ✅ **v0.7.0**: Advanced samplers (probability, rate-limit, namespace, composite)
+- ✅ **v0.6.0**: Native tracing API: `span()`, `spanSync()`, `startSpan()`
+- ✅ **v0.6.0**: W3C traceparent parsing/generation
+- ✅ **v0.6.0**: Span support in route handlers and server actions
+- ✅ **v0.5.0**: Comprehensive tests for `@vestig/next` (232 tests)
+- ✅ **v0.5.0**: Comprehensive tests for `@vestig/express` (74 tests)
+- ✅ **v0.4.0**: `useLogger()` hook, `VestigProvider`, `ClientHTTPTransport`
 
 ---
 
@@ -453,6 +458,6 @@ await vestig.replay({
 *This is a living document. Update as development progresses.*
 
 **Last updated**: 2025-12-22
-**Current version**: 0.6.0
+**Current version**: 0.7.0
 **Target**: 1.0.0
-**Next version**: 0.7.0 (sampling, offline queue, error boundary)
+**Next version**: 0.8.0 (OpenTelemetry Bridge, trace visualization, baggage)

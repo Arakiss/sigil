@@ -8,10 +8,10 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 [![npm version](https://img.shields.io/npm/v/vestig.svg)](https://www.npmjs.com/package/vestig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/tests-737%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
+[![Test Coverage](https://img.shields.io/badge/tests-898%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**v0.6.0** · Beta · Active Development
+**v0.7.0** · Beta · Active Development
 
 </div>
 
@@ -23,11 +23,11 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 
 | Metric | Status |
 |--------|--------|
-| **Version** | v0.6.0 |
+| **Version** | v0.7.0 |
 | **Stage** | Beta - API stable |
-| **Tests** | 737 passing (1,439 assertions) |
+| **Tests** | 898 passing (1,706 assertions) |
 | **Core Coverage** | 90%+ |
-| **Releases** | 9 versions published |
+| **Releases** | 10 versions published |
 | **Packages** | 3 (`vestig`, `@vestig/next`, `@vestig/express`) |
 
 ### Packages
