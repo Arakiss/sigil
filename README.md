@@ -44,18 +44,18 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 
 *Vestig* — from Latin *vestigium* (trace, footprint). Leave a trace of what happened.
 
-| Feature | Vestig | Pino | Winston |
-|---------|:-----:|:----:|:-------:|
-| Runtime Agnostic | ✅ | ❌ | ❌ |
-| Auto PII Sanitization | ✅ | ❌ | ❌ |
-| GDPR/HIPAA/PCI-DSS Presets | ✅ | ❌ | ❌ |
-| Zero Config | ✅ | ✅ | ❌ |
-| TypeScript First | ✅ | ✅ | ⚠️ |
-| Edge Runtime Support | ✅ | ❌ | ❌ |
-| Browser Support | ✅ | ❌ | ⚠️ |
-| Context Propagation | ✅ | ❌ | ❌ |
-| Multiple Transports | ✅ | ✅ | ✅ |
-| Zero Dependencies | ✅ | ❌ | ❌ |
+| Feature | Vestig | Pino | Winston | Bunyan |
+|---------|:-----:|:----:|:-------:|:------:|
+| Runtime Agnostic | ✅ | ❌ | ❌ | ❌ |
+| Auto PII Sanitization | ✅ | ❌ | ❌ | ❌ |
+| GDPR/HIPAA/PCI-DSS Presets | ✅ | ❌ | ❌ | ❌ |
+| Zero Config | ✅ | ✅ | ❌ | ❌ |
+| TypeScript First | ✅ | ✅ | ⚠️ | ❌ |
+| Edge Runtime Support | ✅ | ❌ | ❌ | ❌ |
+| Browser Support | ✅ | ❌ | ⚠️ | ❌ |
+| Context Propagation | ✅ | ❌ | ❌ | ❌ |
+| Multiple Transports | ✅ | ✅ | ✅ | ✅ |
+| Zero Dependencies | ✅ | ❌ | ❌ | ❌ |
 
 **Vestig is the only logging library that:**
 - Works everywhere (Node.js, Bun, Deno, Edge, Browser)
