@@ -58,10 +58,12 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 | Zero Dependencies | ✅ | ❌ | ❌ | ❌ |
 
 **Vestig is the only logging library that:**
-- Works everywhere (Node.js, Bun, Deno, Edge, Browser)
+- Works everywhere (Node.js, Bun, Edge, Browser)
 - Automatically sanitizes PII with compliance presets
 - Propagates context through async operations
 - Has zero runtime dependencies
+
+> **Note:** Deno support is planned for v0.7.0. Currently detected as `unknown` runtime.
 
 ## Installation
 
@@ -209,6 +211,40 @@ await span('api:request', async (s) => {
 })
 ```
 
+### Sampling
+
+Control log volume in high-throughput applications:
+
+```typescript
+import { createLogger, createProbabilitySampler, createRateLimitSampler } from 'vestig'
+
+// Probability sampling - keep 10% of logs
+const logger = createLogger({
+  sampling: {
+    sampler: createProbabilitySampler({ rate: 0.1 }),
+    alwaysSample: ['error', 'warn']  // Always keep errors and warnings
+  }
+})
+
+// Rate limit sampling - max 100 logs per second
+const rateLimitedLogger = createLogger({
+  sampling: {
+    sampler: createRateLimitSampler({ maxPerSecond: 100 })
+  }
+})
+```
+
+**Available Samplers:**
+
+| Sampler | Description | Use Case |
+|---------|-------------|----------|
+| `createProbabilitySampler` | Random sampling by percentage | General log reduction |
+| `createRateLimitSampler` | Max logs per time window | Protect against log storms |
+| `createNamespaceSampler` | Different rates per namespace | Fine-grained control |
+| `createCompositeSampler` | Combine multiple samplers | Complex sampling logic |
+
+For more details, see the [Sampling documentation](https://vestig.dev/docs/sampling).
+
 ### Custom Sanitization
 
 ```typescript
@@ -311,15 +347,16 @@ Vestig automatically detects and adapts to:
 
 - **Node.js** - Full features with AsyncLocalStorage
 - **Bun** - Full features with AsyncLocalStorage
-- **Deno** - Full features with AsyncLocalStorage
 - **Edge Runtime** - Vercel Edge, Cloudflare Workers
-- **Browser** - Client-side logging with sanitization
+- **Browser** - Client-side logging (use with `@vestig/next` or custom HTTPTransport)
 
 ```typescript
 import { RUNTIME, IS_SERVER, IS_EDGE } from 'vestig'
 
-console.log(RUNTIME) // 'node' | 'bun' | 'deno' | 'edge' | 'browser'
+console.log(RUNTIME) // 'node' | 'bun' | 'edge' | 'browser' | 'worker' | 'unknown'
 ```
+
+> **Browser Usage:** For client-side logging, we recommend using `@vestig/next` which provides `VestigProvider` and `useLogger()` hook with automatic server sync. For other frameworks, configure `HTTPTransport` to send logs to your backend.
 
 ## Auto-Production Mode
 

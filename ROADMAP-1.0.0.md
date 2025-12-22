@@ -11,7 +11,7 @@
 | Feature | Status | Differentiator |
 |---------|--------|---------------|
 | Zero Dependencies | ✅ Complete | 🏆 Unique in market |
-| Runtime Agnostic | ✅ Complete | 🏆 Node, Bun, Deno, Edge, Browser |
+| Runtime Agnostic | ✅ Complete | 🏆 Node, Bun, Edge, Browser (Deno v0.7.0) |
 | PII Sanitization | ✅ Complete | 🏆 6 presets (GDPR, HIPAA, PCI-DSS) |
 | TypeScript-First | ✅ Complete | 🏆 100% type-safe |
 | Context Propagation | ✅ Complete | AsyncLocalStorage + fallback |
@@ -23,7 +23,7 @@
 
 ### Current Metrics
 
-- **Tests**: 737+ passing (1,439 assertions), ~90% coverage
+- **Tests**: 897+ passing (1,705 assertions), ~90% coverage
 - **Packages**: 3 published (vestig, @vestig/next, @vestig/express)
 - **Production dependencies**: 0 (!!!)
 - **Size**: ~8,500 LOC
@@ -156,9 +156,9 @@ Features:
 - [x] Span attributes type-safe ✅
 - [x] Span events support ✅
 
-#### 2.2 🏆 W3C Trace Context (Full Compliance) 🔄 PARTIAL
+#### 2.2 🏆 W3C Trace Context (Full Compliance) ✅ COMPLETED
 - [x] `traceparent` header parsing/generation ✅
-- [ ] `tracestate` support (→ v0.7.0)
+- [x] `tracestate` support ✅
 - [x] Cross-service correlation ✅
 - [ ] Baggage propagation (→ v0.8.0)
 
@@ -393,10 +393,10 @@ vestig audit --pii-check ./src
 ## 🎯 Immediate Next Steps (v0.7.0)
 
 ### Current Sprint: v0.7.0 Features
-1. [ ] Sampling strategies (probability, rate-limit, namespace-based)
-2. [ ] Offline queue with localStorage persistence
-3. [ ] VestigErrorBoundary component
-4. [ ] W3C tracestate support
+1. [x] Sampling strategies (probability, rate-limit, namespace-based) ✅
+2. [x] Offline queue with localStorage persistence ✅
+3. [x] VestigErrorBoundary component ✅
+4. [x] W3C tracestate support ✅
 
 ### Next Sprint: v0.8.0 Prep
 1. [ ] Trace visualization in console (ASCII waterfall)
