@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="Vestig - Leave a trace" width="100%" />
+<img src="assets/logo-wordmark.svg" alt="Vestig - Leave a trace" width="400" />
 
 A modern, runtime-agnostic structured logging library with automatic PII sanitization and context propagation.
 
