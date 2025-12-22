@@ -7,8 +7,8 @@ export const footerContent: FooterContent = {
 			links: [
 				{ label: 'Getting Started', href: '/docs/getting-started' },
 				{ label: 'API Reference', href: '/docs/api' },
-				{ label: 'Examples', href: '/examples' },
-				{ label: 'Changelog', href: '/changelog' },
+				{ label: 'Playground', href: '/playground' },
+				{ label: 'Features', href: '/docs/features' },
 			],
 		},
 		{

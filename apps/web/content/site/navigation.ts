@@ -4,7 +4,6 @@ export const navigationConfig: NavigationConfig = {
 	header: [
 		{ label: 'Docs', href: '/docs' },
 		{ label: 'Playground', href: '/playground' },
-		{ label: 'Examples', href: '/examples' },
 		{ label: 'GitHub', href: 'https://github.com/Arakiss/vestig', external: true },
 	],
 	footer: [
@@ -14,7 +13,7 @@ export const navigationConfig: NavigationConfig = {
 				{ label: 'Getting Started', href: '/docs/getting-started' },
 				{ label: 'API Reference', href: '/docs/api' },
 				{ label: 'Features', href: '/docs/features' },
-				{ label: 'Guides', href: '/docs/guides' },
+				{ label: 'Core Concepts', href: '/docs/core/logging' },
 			],
 		},
 		{
@@ -43,7 +42,7 @@ export const navigationConfig: NavigationConfig = {
 					href: 'https://github.com/Arakiss/vestig/discussions',
 					external: true,
 				},
-				{ label: 'Changelog', href: '/changelog' },
+				{ label: 'Issues', href: 'https://github.com/Arakiss/vestig/issues', external: true },
 			],
 		},
 	],
