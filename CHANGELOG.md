@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.0](https://github.com/Arakiss/vestig/compare/v0.6.0...v0.7.0) (2025-12-22)
+
+### ✨ Features
+
+* **runtime:** add full Deno support with runtime detection and AsyncLocalStorage
+* **tracing:** add W3C Trace Context tracestate support (parseTracestate, createTracestate, get/set/delete utilities)
+* **next:** export VestigErrorBoundary component with breadcrumb trail for error context
+* **next:** add offline queue with localStorage persistence for client-side logs
+* **sampling:** add probability, rate-limit, namespace-based, and composite samplers
+
+### 📚 Documentation
+
+* update README with Sampling documentation section
+* clarify browser support requirements
+* mark Deno as fully supported runtime
+
+### ✅ Tests
+
+* add 47 tests for W3C tracestate support
+* add 38 tests for DatadogTransport
+* add 41 tests for FileTransport
+* add 29 tests for VestigErrorBoundary component
+* add 15 tests for offline queue persistence
+* add React hooks tests for @vestig/next/client
+* **total:** 898 tests passing (1,706 assertions)
+
 ## [0.6.0](https://github.com/Arakiss/vestig/compare/v0.5.0...v0.6.0) (2025-12-21)
 
 ### ✨ Features

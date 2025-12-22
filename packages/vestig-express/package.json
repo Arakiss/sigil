@@ -1,6 +1,6 @@
 {
 	"name": "@vestig/express",
-	"version": "0.6.0",
+	"version": "0.7.0",
 	"description": "Express.js middleware integration for vestig logging. Automatic request correlation, structured logging, and error handling.",
 	"type": "module",
 	"main": "./dist/index.js",
