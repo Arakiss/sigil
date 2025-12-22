@@ -43,7 +43,7 @@ const wordmarkSizes = {
 
 /**
  * Vestig Wordmark - Logo icon + "vestig" text
- * Uses Outfit font via font-display class
+ * Uses Outfit font via font-logo class (reserved ONLY for the logo)
  */
 export function Wordmark({ size = 'md', className, iconClassName, textClassName }: WordmarkProps) {
 	const config = wordmarkSizes[size]
@@ -53,7 +53,7 @@ export function Wordmark({ size = 'md', className, iconClassName, textClassName 
 			<LogoIcon size={config.icon} className={cn('translate-y-[1px]', iconClassName)} />
 			<span
 				className={cn(
-					'font-display font-semibold tracking-tight leading-none',
+					'font-logo font-semibold tracking-tight leading-none',
 					config.text,
 					textClassName,
 				)}
@@ -87,13 +87,13 @@ export function Banner({ className }: BannerProps) {
 				{/* Logo + Wordmark */}
 				<div className="flex items-center gap-3">
 					<LogoIcon size={52} className="text-white translate-y-[2px]" />
-					<span className="font-display font-semibold text-white text-5xl tracking-tight leading-none">
+					<span className="font-logo font-semibold text-white text-5xl tracking-tight leading-none">
 						vestig
 					</span>
 				</div>
 
 				{/* Tagline */}
-				<span className="font-display text-sm font-normal tracking-[0.25em] text-neutral-500 uppercase">
+				<span className="font-logo text-sm font-normal tracking-[0.25em] text-neutral-500 uppercase">
 					Leave a trace
 				</span>
 
