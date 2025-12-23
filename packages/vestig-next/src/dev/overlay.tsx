@@ -2,12 +2,6 @@
 
 import { useEffect, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import {
-	useLogStore,
-	useServerLogs,
-	useClientLogCapture,
-	useDevOverlayShortcuts,
-} from './hooks/use-logs'
 import { Filters } from './filters'
 import { LogViewer } from './log-viewer'
 import { MetricsPanel } from './metrics-panel'
@@ -69,14 +63,40 @@ export interface VestigDevOverlayProps {
  * }
  * ```
  */
-export function VestigDevOverlay({
+export function VestigDevOverlay(props: VestigDevOverlayProps) {
+	const [mounted, setMounted] = useState(false)
+
+	// Only mount on client - prevents SSR issues
+	useEffect(() => {
+		setMounted(true)
+	}, [])
+
+	if (!mounted) {
+		return null
+	}
+
+	// Render the actual overlay only on client
+	return <VestigDevOverlayClient {...props} />
+}
+
+/**
+ * Client-only component that uses the hooks
+ */
+function VestigDevOverlayClient({
 	position = 'bottom-right',
 	endpoint = '/api/vestig/logs',
 	toggleKey = 'l',
 	defaultSize = { width: 500, height: 400 },
 	defaultOpen = false,
 }: VestigDevOverlayProps) {
-	const [mounted, setMounted] = useState(false)
+	// Import hooks lazily to ensure they're only used on client
+	const {
+		useLogStore,
+		useServerLogs,
+		useClientLogCapture,
+		useDevOverlayShortcuts,
+	} = require('./hooks/use-logs')
+
 	const [size, setSize] = useState(defaultSize)
 	const [activeTab, setActiveTab] = useState<TabType>('logs')
 
@@ -109,15 +129,6 @@ export function VestigDevOverlay({
 			setOpen(true)
 		}
 	}, [defaultOpen, setOpen])
-
-	// Portal mounting
-	useEffect(() => {
-		setMounted(true)
-	}, [])
-
-	if (!mounted) {
-		return null
-	}
 
 	const positionStyles: Record<string, CSSProperties> = {
 		'bottom-right': { bottom: '16px', right: '16px' },

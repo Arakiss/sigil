@@ -1,8 +1,8 @@
 /**
  * Metrics Store
  *
- * Global store for capturing and managing performance metrics.
- * Follows the same pub/sub pattern as the log store for consistency.
+ * Simple pub/sub store for performance metrics.
+ * Designed for reliability over cleverness - no useSyncExternalStore magic.
  *
  * @packageDocumentation
  */
@@ -13,7 +13,6 @@ import type {
 	MetricRating,
 	MetricSummary,
 	MetricsState,
-	MetricsStore,
 	WebVitalName,
 } from './types'
 import { getRating, THRESHOLDS } from './thresholds'
@@ -35,20 +34,33 @@ function percentile(sorted: number[], p: number): number {
 	return sorted[clampedIndex] ?? 0
 }
 
+type Listener = () => void
+
 /**
- * Create the metrics store singleton
+ * Simple metrics store - no React magic, just data + subscriptions
  */
-function createMetricsStore(): MetricsStore {
-	const state: MetricsState = {
+class SimpleMetricsStore {
+	private state: MetricsState = {
 		metrics: [],
 		maxMetrics: 500,
 		latestVitals: {},
 	}
 
-	const listeners = new Set<() => void>()
+	private listeners = new Set<Listener>()
 
-	function notify(): void {
-		for (const listener of listeners) {
+	/**
+	 * Subscribe to store changes
+	 */
+	subscribe(listener: Listener): () => void {
+		this.listeners.add(listener)
+		return () => this.listeners.delete(listener)
+	}
+
+	/**
+	 * Notify all listeners of a change
+	 */
+	private notify(): void {
+		for (const listener of this.listeners) {
 			try {
 				listener()
 			} catch (error) {
@@ -57,151 +69,157 @@ function createMetricsStore(): MetricsStore {
 		}
 	}
 
-	return {
-		subscribe(listener: () => void): () => void {
-			listeners.add(listener)
-			return () => listeners.delete(listener)
-		},
+	/**
+	 * Add a new metric to the store
+	 */
+	addMetric(entry: Omit<MetricEntry, 'id' | 'timestamp'>): void {
+		const metric: MetricEntry = {
+			...entry,
+			id: createMetricId(),
+			timestamp: new Date().toISOString(),
+		}
 
-		getSnapshot(): MetricsState {
-			return state
-		},
+		this.state.metrics.push(metric)
 
-		addMetric(entry: Omit<MetricEntry, 'id' | 'timestamp'>): void {
-			const metric: MetricEntry = {
-				...entry,
-				id: createMetricId(),
-				timestamp: new Date().toISOString(),
+		// Update latest vitals
+		if (entry.type === 'web-vital') {
+			this.state.latestVitals[entry.name as WebVitalName] = metric
+		}
+
+		// Trim if over limit
+		if (this.state.metrics.length > this.state.maxMetrics) {
+			this.state.metrics = this.state.metrics.slice(-this.state.maxMetrics)
+		}
+
+		this.notify()
+	}
+
+	/**
+	 * Get latest vitals - returns a new object each time (React will handle memoization)
+	 */
+	getLatestVitals(): Partial<Record<WebVitalName, MetricEntry>> {
+		return { ...this.state.latestVitals }
+	}
+
+	/**
+	 * Get vitals summary
+	 */
+	getVitalsSummary(): Partial<Record<WebVitalName, MetricSummary>> {
+		const result: Partial<Record<WebVitalName, MetricSummary>> = {}
+		const vitals: WebVitalName[] = ['LCP', 'CLS', 'INP', 'TTFB', 'FCP']
+
+		for (const name of vitals) {
+			const summary = this.getSummary(name)
+			if (summary) {
+				result[name] = summary
 			}
+		}
 
-			state.metrics.push(metric)
+		return result
+	}
 
-			// Update latest vitals cache
-			if (entry.type === 'web-vital') {
-				state.latestVitals[entry.name as WebVitalName] = metric
-			}
+	/**
+	 * Get route metrics
+	 */
+	getRouteMetrics(): MetricEntry[] {
+		return this.state.metrics.filter((m) => m.type === 'route')
+	}
 
-			// Trim if over limit
-			if (state.metrics.length > state.maxMetrics) {
-				state.metrics = state.metrics.slice(-state.maxMetrics)
-			}
+	/**
+	 * Get histogram for a specific metric
+	 */
+	getHistogram(name: string, bucketCount = 10): HistogramBucket[] {
+		const values = this.state.metrics.filter((m) => m.name === name).map((m) => m.value)
 
-			notify()
-		},
+		if (values.length === 0) return []
 
-		getHistogram(name: string, bucketCount = 10): HistogramBucket[] {
-			const values = state.metrics.filter((m) => m.name === name).map((m) => m.value)
+		const min = Math.min(...values)
+		const max = Math.max(...values)
+		const range = max - min || 1
+		const bucketSize = range / bucketCount
 
-			if (values.length === 0) return []
+		const buckets: HistogramBucket[] = Array.from({ length: bucketCount }, (_, i) => ({
+			min: min + i * bucketSize,
+			max: min + (i + 1) * bucketSize,
+			count: 0,
+			percentage: 0,
+		}))
 
-			const min = Math.min(...values)
-			const max = Math.max(...values)
-			const range = max - min || 1
-			const bucketSize = range / bucketCount
+		for (const value of values) {
+			const bucketIndex = Math.min(Math.floor((value - min) / bucketSize), bucketCount - 1)
+			const bucket = buckets[bucketIndex]
+			if (bucket) bucket.count++
+		}
 
-			const buckets: HistogramBucket[] = Array.from({ length: bucketCount }, (_, i) => ({
-				min: min + i * bucketSize,
-				max: min + (i + 1) * bucketSize,
-				count: 0,
-				percentage: 0,
-			}))
+		for (const bucket of buckets) {
+			bucket.percentage = (bucket.count / values.length) * 100
+		}
 
-			for (const value of values) {
-				const bucketIndex = Math.min(Math.floor((value - min) / bucketSize), bucketCount - 1)
-				const bucket = buckets[bucketIndex]
-				if (bucket) bucket.count++
-			}
+		return buckets
+	}
 
-			// Calculate percentages
-			for (const bucket of buckets) {
-				bucket.percentage = (bucket.count / values.length) * 100
-			}
+	/**
+	 * Get summary statistics for a metric
+	 */
+	getSummary(name: string): MetricSummary | null {
+		const values = this.state.metrics.filter((m) => m.name === name).map((m) => m.value)
 
-			return buckets
-		},
+		if (values.length === 0) return null
 
-		getSummary(name: string): MetricSummary | null {
-			const values = state.metrics.filter((m) => m.name === name).map((m) => m.value)
+		const sorted = [...values].sort((a, b) => a - b)
+		const sum = values.reduce((acc, v) => acc + v, 0)
+		const avg = sum / values.length
+		const p75 = percentile(sorted, 75)
 
-			if (values.length === 0) return null
+		let rating: MetricRating = 'needs-improvement'
+		if (name in THRESHOLDS) {
+			rating = getRating(name as WebVitalName, p75)
+		}
 
-			const sorted = [...values].sort((a, b) => a - b)
-			const sum = values.reduce((acc, v) => acc + v, 0)
-			const avg = sum / values.length
-			const p75 = percentile(sorted, 75)
+		return {
+			name,
+			count: values.length,
+			avg,
+			min: sorted[0] ?? 0,
+			max: sorted[sorted.length - 1] ?? 0,
+			p50: percentile(sorted, 50),
+			p75,
+			p95: percentile(sorted, 95),
+			p99: percentile(sorted, 99),
+			rating,
+		}
+	}
 
-			// Determine rating based on p75 for web vitals
-			let rating: MetricRating = 'needs-improvement'
-			if (name in THRESHOLDS) {
-				rating = getRating(name as WebVitalName, p75)
-			}
+	/**
+	 * Get the latest metric for a given name
+	 */
+	getLatest(name: string): MetricEntry | null {
+		if (name in this.state.latestVitals) {
+			return this.state.latestVitals[name as WebVitalName] ?? null
+		}
 
-			return {
-				name,
-				count: values.length,
-				avg,
-				min: sorted[0] ?? 0,
-				max: sorted[sorted.length - 1] ?? 0,
-				p50: percentile(sorted, 50),
-				p75,
-				p95: percentile(sorted, 95),
-				p99: percentile(sorted, 99),
-				rating,
-			}
-		},
+		const metrics = this.state.metrics.filter((m) => m.name === name)
+		return metrics[metrics.length - 1] ?? null
+	}
 
-		getVitalsSummary(): Partial<Record<WebVitalName, MetricSummary>> {
-			const result: Partial<Record<WebVitalName, MetricSummary>> = {}
-			const vitals: WebVitalName[] = ['LCP', 'CLS', 'INP', 'TTFB', 'FCP']
+	/**
+	 * Get current snapshot (for debugging)
+	 */
+	getSnapshot(): MetricsState {
+		return this.state
+	}
 
-			for (const name of vitals) {
-				const summary = this.getSummary(name)
-				if (summary) {
-					result[name] = summary
-				}
-			}
-
-			return result
-		},
-
-		getLatest(name: string): MetricEntry | null {
-			if (name in state.latestVitals) {
-				return state.latestVitals[name as WebVitalName] ?? null
-			}
-
-			const metrics = state.metrics.filter((m) => m.name === name)
-			return metrics[metrics.length - 1] ?? null
-		},
-
-		clear(): void {
-			state.metrics = []
-			state.latestVitals = {}
-			notify()
-		},
+	/**
+	 * Clear all metrics
+	 */
+	clear(): void {
+		this.state.metrics = []
+		this.state.latestVitals = {}
+		this.notify()
 	}
 }
 
 /**
  * Global metrics store singleton
- *
- * @example
- * ```ts
- * import { metricsStore } from '@vestig/next/metrics'
- *
- * // Subscribe to changes
- * const unsubscribe = metricsStore.subscribe(() => {
- *   const summary = metricsStore.getVitalsSummary()
- *   console.log('LCP p75:', summary.LCP?.p75)
- * })
- *
- * // Add a metric
- * metricsStore.addMetric({
- *   type: 'web-vital',
- *   name: 'LCP',
- *   value: 2500,
- *   rating: 'needs-improvement',
- *   metadata: { pathname: '/dashboard' }
- * })
- * ```
  */
-export const metricsStore = createMetricsStore()
+export const metricsStore = new SimpleMetricsStore()

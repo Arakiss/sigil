@@ -197,7 +197,7 @@ export interface MetricsState {
 export interface MetricsStore {
 	/** Subscribe to store changes */
 	subscribe: (listener: () => void) => () => void
-	/** Get current snapshot of state */
+	/** Get current snapshot of state (for debugging) */
 	getSnapshot: () => MetricsState
 	/** Add a new metric */
 	addMetric: (entry: Omit<MetricEntry, 'id' | 'timestamp'>) => void
@@ -207,6 +207,10 @@ export interface MetricsStore {
 	getSummary: (name: string) => MetricSummary | null
 	/** Get all summaries for web vitals */
 	getVitalsSummary: () => Partial<Record<WebVitalName, MetricSummary>>
+	/** Get latest vitals */
+	getLatestVitals: () => Partial<Record<WebVitalName, MetricEntry>>
+	/** Get route metrics */
+	getRouteMetrics: () => MetricEntry[]
 	/** Get the latest metric for a given name */
 	getLatest: (name: string) => MetricEntry | null
 	/** Clear all metrics */

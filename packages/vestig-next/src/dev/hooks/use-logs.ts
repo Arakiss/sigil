@@ -1,24 +1,31 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
-import { logStore, type DevLogEntry, type LogFilters } from '../store'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { logStore, type DevLogEntry, type LogFilters, type LogStoreState } from '../store'
 import type { LogLevel } from 'vestig'
 
 /**
  * Hook to subscribe to log store
+ *
+ * Uses simple useState + useEffect pattern - React Compiler handles memoization.
  */
 export function useLogStore() {
-	const logs = useSyncExternalStore(
-		logStore.subscribe,
-		() => logStore.getFilteredLogs(),
-		() => [], // SSR fallback
-	)
+	const [logs, setLogs] = useState<DevLogEntry[]>([])
+	const [state, setState] = useState<LogStoreState>(() => logStore.getSnapshot())
 
-	const state = useSyncExternalStore(
-		logStore.subscribe,
-		() => logStore.getSnapshot(),
-		() => ({ logs: [], filters: getDefaultFilters(), isOpen: false, maxLogs: 500 }),
-	)
+	useEffect(() => {
+		// Get initial state
+		setLogs(logStore.getFilteredLogs())
+		setState(logStore.getSnapshot())
+
+		// Subscribe to updates
+		const unsubscribe = logStore.subscribe(() => {
+			setLogs(logStore.getFilteredLogs())
+			setState(logStore.getSnapshot())
+		})
+
+		return unsubscribe
+	}, [])
 
 	return {
 		logs,
@@ -26,24 +33,16 @@ export function useLogStore() {
 		filters: state.filters,
 		namespaces: logStore.getNamespaces(),
 		levelCounts: logStore.getLevelCounts(),
-		// Actions
-		toggleOpen: logStore.toggleOpen,
-		setOpen: logStore.setOpen,
-		clearLogs: logStore.clearLogs,
-		setLevelFilter: logStore.setLevelFilter,
-		toggleAllLevels: logStore.toggleAllLevels,
-		setNamespaceFilter: logStore.setNamespaceFilter,
-		setSearch: logStore.setSearch,
-		setSourceFilter: logStore.setSourceFilter,
-	}
-}
-
-function getDefaultFilters(): LogFilters {
-	return {
-		levels: new Set(['trace', 'debug', 'info', 'warn', 'error'] as LogLevel[]),
-		namespaces: new Set(),
-		search: '',
-		source: 'all',
+		// Actions - bound methods from the store
+		toggleOpen: () => logStore.toggleOpen(),
+		setOpen: (isOpen: boolean) => logStore.setOpen(isOpen),
+		clearLogs: () => logStore.clearLogs(),
+		setLevelFilter: (level: LogLevel, enabled: boolean) => logStore.setLevelFilter(level, enabled),
+		toggleAllLevels: (enabled: boolean) => logStore.toggleAllLevels(enabled),
+		setNamespaceFilter: (namespace: string, enabled: boolean) =>
+			logStore.setNamespaceFilter(namespace, enabled),
+		setSearch: (search: string) => logStore.setSearch(search),
+		setSourceFilter: (source: 'all' | 'client' | 'server') => logStore.setSourceFilter(source),
 	}
 }
 
@@ -74,11 +73,9 @@ export function useServerLogs(options: {
 	const connectionStateRef = useRef<ConnectionState>('disconnected')
 
 	const connect = useCallback(() => {
-		// Only connect in browser
 		if (typeof window === 'undefined') return
 		if (!enabled) return
 
-		// Clean up existing connection
 		if (eventSourceRef.current) {
 			eventSourceRef.current.close()
 		}
@@ -144,7 +141,6 @@ export function useServerLogs(options: {
 				eventSource.close()
 				eventSourceRef.current = null
 
-				// Attempt reconnection
 				if (reconnectAttempts.current < maxReconnectAttempts) {
 					reconnectAttempts.current++
 					const delay = reconnectDelay * Math.pow(2, reconnectAttempts.current - 1)
@@ -207,10 +203,6 @@ export function useClientLogCapture(options: { enabled?: boolean } = {}) {
 		if (!enabled) return
 		if (typeof window === 'undefined') return
 
-		// Intercept client logs from VestigProvider
-		// This works by patching the transport's internal send
-		// We listen to a custom event dispatched by the transport
-
 		const handleClientLog = (event: CustomEvent<Omit<DevLogEntry, 'id' | 'source'>>) => {
 			logStore.addLog({
 				...event.detail,
@@ -237,13 +229,11 @@ export function useDevOverlayShortcuts(options: { toggleKey?: string; enabled?: 
 		if (typeof window === 'undefined') return
 
 		const handleKeyDown = (event: KeyboardEvent) => {
-			// Cmd/Ctrl + L to toggle
 			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === toggleKey) {
 				event.preventDefault()
 				logStore.toggleOpen()
 			}
 
-			// Escape to close
 			if (event.key === 'Escape' && logStore.getSnapshot().isOpen) {
 				logStore.setOpen(false)
 			}

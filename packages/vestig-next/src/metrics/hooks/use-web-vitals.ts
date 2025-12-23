@@ -2,18 +2,18 @@
  * Web Vitals Hook
  *
  * React hook for capturing Core Web Vitals metrics.
- * Integrates with the web-vitals library and the metrics store.
+ * Uses simple useState + useEffect pattern (React Compiler handles memoization).
  *
  * @packageDocumentation
  */
 
 'use client'
 
-import { useCallback, useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 import type { Metric } from 'web-vitals'
 import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals'
 import { metricsStore } from '../store'
-import type { MetricEntry, NavigationType, WebVitalName } from '../types'
+import type { MetricEntry, MetricSummary, NavigationType, WebVitalName } from '../types'
 import { MetricsReporter } from '../reporter'
 
 /**
@@ -75,21 +75,16 @@ export function useWebVitals(options: UseWebVitalsOptions = {}): void {
 	} = options
 
 	useEffect(() => {
-		// Skip if disabled or failed sample
 		if (!enabled) return
 		if (Math.random() > sampleRate) return
 
-		// Create reporter for this session
 		const reporter = new MetricsReporter({
 			endpoint: reportEndpoint,
 			debug,
 		})
 
-		// Handler for all metrics
 		const handleMetric = (metric: Metric): void => {
 			const entry = toMetricEntry(metric)
-
-			// Add to store
 			metricsStore.addMetric(entry)
 
 			if (debug) {
@@ -100,14 +95,12 @@ export function useWebVitals(options: UseWebVitalsOptions = {}): void {
 				})
 			}
 
-			// Create full entry with ID for reporter
 			const fullEntry: MetricEntry = {
 				...entry,
 				id: `m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
 				timestamp: new Date().toISOString(),
 			}
 
-			// Report immediately if poor, otherwise batch
 			if (reportPoorImmediately && metric.rating === 'poor') {
 				reporter.reportImmediate(fullEntry)
 			} else {
@@ -115,8 +108,6 @@ export function useWebVitals(options: UseWebVitalsOptions = {}): void {
 			}
 		}
 
-		// Subscribe to all Core Web Vitals
-		// Note: onFID is deprecated, use onINP instead
 		onLCP(handleMetric)
 		onCLS(handleMetric)
 		onINP(handleMetric)
@@ -131,6 +122,9 @@ export function useWebVitals(options: UseWebVitalsOptions = {}): void {
 
 /**
  * Hook to get the current Web Vitals from the store
+ *
+ * Simple useState + useEffect pattern - React Compiler handles memoization.
+ * No useSyncExternalStore = no hydration headaches.
  *
  * @returns Latest Web Vitals values
  *
@@ -150,19 +144,21 @@ export function useWebVitals(options: UseWebVitalsOptions = {}): void {
  * ```
  */
 export function useWebVitalsData(): Partial<Record<WebVitalName, MetricEntry>> {
-	const subscribe = useCallback((onStoreChange: () => void) => {
-		return metricsStore.subscribe(onStoreChange)
+	const [vitals, setVitals] = useState<Partial<Record<WebVitalName, MetricEntry>>>({})
+
+	useEffect(() => {
+		// Get initial state
+		setVitals(metricsStore.getLatestVitals())
+
+		// Subscribe to updates
+		const unsubscribe = metricsStore.subscribe(() => {
+			setVitals(metricsStore.getLatestVitals())
+		})
+
+		return unsubscribe
 	}, [])
 
-	const getSnapshot = useCallback(() => {
-		return metricsStore.getSnapshot().latestVitals
-	}, [])
-
-	const getServerSnapshot = useCallback(() => {
-		return {} as Partial<Record<WebVitalName, MetricEntry>>
-	}, [])
-
-	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+	return vitals
 }
 
 /**
@@ -170,22 +166,18 @@ export function useWebVitalsData(): Partial<Record<WebVitalName, MetricEntry>> {
  *
  * @returns Summary statistics for all Web Vitals
  */
-export function useWebVitalsSummary(): Partial<
-	Record<WebVitalName, import('../types').MetricSummary>
-> {
-	const subscribe = useCallback((onStoreChange: () => void) => {
-		return metricsStore.subscribe(onStoreChange)
+export function useWebVitalsSummary(): Partial<Record<WebVitalName, MetricSummary>> {
+	const [summary, setSummary] = useState<Partial<Record<WebVitalName, MetricSummary>>>({})
+
+	useEffect(() => {
+		setSummary(metricsStore.getVitalsSummary())
+
+		const unsubscribe = metricsStore.subscribe(() => {
+			setSummary(metricsStore.getVitalsSummary())
+		})
+
+		return unsubscribe
 	}, [])
 
-	const getSnapshot = useCallback(() => {
-		return metricsStore.getVitalsSummary()
-	}, [])
-
-	const getServerSnapshot = useCallback((): Partial<
-		Record<WebVitalName, import('../types').MetricSummary>
-	> => {
-		return {}
-	}, [])
-
-	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+	return summary
 }

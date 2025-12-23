@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { metricsStore } from '../store'
 import type { MetricEntry, RouteMetric } from '../types'
@@ -144,22 +144,24 @@ export function useRouteMetrics(options: UseRouteMetricsOptions = {}): void {
 /**
  * Hook to get route metrics from the store
  *
+ * Uses simple useState + useEffect pattern - React Compiler handles memoization.
+ *
  * @returns Array of route metrics
  */
 export function useRouteMetricsData(): MetricEntry[] {
-	const subscribe = useCallback((onStoreChange: () => void) => {
-		return metricsStore.subscribe(onStoreChange)
+	const [routeMetrics, setRouteMetrics] = useState<MetricEntry[]>([])
+
+	useEffect(() => {
+		setRouteMetrics(metricsStore.getRouteMetrics())
+
+		const unsubscribe = metricsStore.subscribe(() => {
+			setRouteMetrics(metricsStore.getRouteMetrics())
+		})
+
+		return unsubscribe
 	}, [])
 
-	const getSnapshot = useCallback(() => {
-		return metricsStore.getSnapshot().metrics.filter((m) => m.type === 'route')
-	}, [])
-
-	const getServerSnapshot = useCallback(() => {
-		return [] as MetricEntry[]
-	}, [])
-
-	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+	return routeMetrics
 }
 
 /**

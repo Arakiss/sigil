@@ -1,8 +1,8 @@
 /**
  * Dev Overlay Log Store
  *
- * Global store for logs that persists across component re-renders.
- * Uses a pub/sub pattern for efficient updates without React state.
+ * Simple pub/sub store for dev logs.
+ * Uses class-based architecture for clarity and reliability.
  */
 
 import type { LogLevel } from 'vestig'
@@ -23,7 +23,6 @@ export interface DevLogEntry {
 		message: string
 		stack?: string
 	}
-	// Dev-specific fields
 	source: 'client' | 'server'
 	traceId?: string
 	spanId?: string
@@ -43,23 +42,20 @@ export interface LogFilters {
 /**
  * Store state
  */
-interface StoreState {
+export interface LogStoreState {
 	logs: DevLogEntry[]
 	filters: LogFilters
 	isOpen: boolean
 	maxLogs: number
 }
 
-/**
- * Store listener callback
- */
 type Listener = () => void
 
 /**
- * Create the log store
+ * Simple log store - no useSyncExternalStore needed
  */
-function createLogStore() {
-	const state: StoreState = {
+class SimpleLogStore {
+	private state: LogStoreState = {
 		logs: [],
 		filters: {
 			levels: new Set(['trace', 'debug', 'info', 'warn', 'error']),
@@ -71,225 +67,220 @@ function createLogStore() {
 		maxLogs: 500,
 	}
 
-	const listeners = new Set<Listener>()
+	private listeners = new Set<Listener>()
 
-	function notify() {
-		listeners.forEach((listener) => listener())
+	/**
+	 * Subscribe to store changes
+	 */
+	subscribe(listener: Listener): () => void {
+		this.listeners.add(listener)
+		return () => this.listeners.delete(listener)
+	}
+
+	private notify(): void {
+		for (const listener of this.listeners) {
+			try {
+				listener()
+			} catch (error) {
+				console.error('[vestig-dev] Listener error:', error)
+			}
+		}
 	}
 
 	/**
-	 * Generate unique log ID
+	 * Get current state snapshot
 	 */
-	function generateId(): string {
+	getSnapshot(): LogStoreState {
+		return this.state
+	}
+
+	/**
+	 * Get filtered logs
+	 */
+	getFilteredLogs(): DevLogEntry[] {
+		return this.state.logs.filter((log) => {
+			if (!this.state.filters.levels.has(log.level)) return false
+
+			if (this.state.filters.source !== 'all' && log.source !== this.state.filters.source) {
+				return false
+			}
+
+			if (this.state.filters.namespaces.size > 0 && log.namespace) {
+				if (!this.state.filters.namespaces.has(log.namespace)) return false
+			}
+
+			if (this.state.filters.search) {
+				const searchLower = this.state.filters.search.toLowerCase()
+				const matchesMessage = log.message.toLowerCase().includes(searchLower)
+				const matchesNamespace = log.namespace?.toLowerCase().includes(searchLower)
+				const matchesMetadata = JSON.stringify(log.metadata ?? {})
+					.toLowerCase()
+					.includes(searchLower)
+
+				if (!matchesMessage && !matchesNamespace && !matchesMetadata) {
+					return false
+				}
+			}
+
+			return true
+		})
+	}
+
+	private generateId(): string {
 		return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 	}
 
-	return {
-		/**
-		 * Subscribe to store changes
-		 */
-		subscribe(listener: Listener): () => void {
-			listeners.add(listener)
-			return () => listeners.delete(listener)
-		},
+	/**
+	 * Add a log entry
+	 */
+	addLog(entry: Omit<DevLogEntry, 'id'>): void {
+		const log: DevLogEntry = {
+			...entry,
+			id: this.generateId(),
+		}
 
-		/**
-		 * Get current state snapshot
-		 */
-		getSnapshot(): StoreState {
-			return state
-		},
+		this.state.logs.push(log)
 
-		/**
-		 * Get filtered logs
-		 */
-		getFilteredLogs(): DevLogEntry[] {
-			return state.logs.filter((log) => {
-				// Level filter
-				if (!state.filters.levels.has(log.level)) return false
+		while (this.state.logs.length > this.state.maxLogs) {
+			this.state.logs.shift()
+		}
 
-				// Source filter
-				if (state.filters.source !== 'all' && log.source !== state.filters.source) {
-					return false
-				}
+		this.notify()
+	}
 
-				// Namespace filter (if any selected)
-				if (state.filters.namespaces.size > 0 && log.namespace) {
-					if (!state.filters.namespaces.has(log.namespace)) return false
-				}
-
-				// Search filter
-				if (state.filters.search) {
-					const searchLower = state.filters.search.toLowerCase()
-					const matchesMessage = log.message.toLowerCase().includes(searchLower)
-					const matchesNamespace = log.namespace?.toLowerCase().includes(searchLower)
-					const matchesMetadata = JSON.stringify(log.metadata ?? {})
-						.toLowerCase()
-						.includes(searchLower)
-
-					if (!matchesMessage && !matchesNamespace && !matchesMetadata) {
-						return false
-					}
-				}
-
-				return true
-			})
-		},
-
-		/**
-		 * Add a log entry
-		 */
-		addLog(entry: Omit<DevLogEntry, 'id'>): void {
-			const log: DevLogEntry = {
+	/**
+	 * Add multiple log entries
+	 */
+	addLogs(entries: Array<Omit<DevLogEntry, 'id'>>): void {
+		for (const entry of entries) {
+			this.state.logs.push({
 				...entry,
-				id: generateId(),
+				id: this.generateId(),
+			})
+		}
+
+		while (this.state.logs.length > this.state.maxLogs) {
+			this.state.logs.shift()
+		}
+
+		this.notify()
+	}
+
+	/**
+	 * Clear all logs
+	 */
+	clearLogs(): void {
+		this.state.logs = []
+		this.notify()
+	}
+
+	/**
+	 * Toggle overlay visibility
+	 */
+	toggleOpen(): void {
+		this.state.isOpen = !this.state.isOpen
+		this.notify()
+	}
+
+	/**
+	 * Set overlay visibility
+	 */
+	setOpen(isOpen: boolean): void {
+		this.state.isOpen = isOpen
+		this.notify()
+	}
+
+	/**
+	 * Update filter levels
+	 */
+	setLevelFilter(level: LogLevel, enabled: boolean): void {
+		if (enabled) {
+			this.state.filters.levels.add(level)
+		} else {
+			this.state.filters.levels.delete(level)
+		}
+		this.notify()
+	}
+
+	/**
+	 * Toggle all levels
+	 */
+	toggleAllLevels(enabled: boolean): void {
+		if (enabled) {
+			this.state.filters.levels = new Set(['trace', 'debug', 'info', 'warn', 'error'])
+		} else {
+			this.state.filters.levels.clear()
+		}
+		this.notify()
+	}
+
+	/**
+	 * Set namespace filter
+	 */
+	setNamespaceFilter(namespace: string, enabled: boolean): void {
+		if (enabled) {
+			this.state.filters.namespaces.add(namespace)
+		} else {
+			this.state.filters.namespaces.delete(namespace)
+		}
+		this.notify()
+	}
+
+	/**
+	 * Set search query
+	 */
+	setSearch(search: string): void {
+		this.state.filters.search = search
+		this.notify()
+	}
+
+	/**
+	 * Set source filter
+	 */
+	setSourceFilter(source: 'all' | 'client' | 'server'): void {
+		this.state.filters.source = source
+		this.notify()
+	}
+
+	/**
+	 * Get all unique namespaces
+	 */
+	getNamespaces(): string[] {
+		const namespaces = new Set<string>()
+		for (const log of this.state.logs) {
+			if (log.namespace) {
+				namespaces.add(log.namespace)
 			}
+		}
+		return Array.from(namespaces).sort()
+	}
 
-			state.logs.push(log)
+	/**
+	 * Get log counts by level
+	 */
+	getLevelCounts(): Record<LogLevel, number> {
+		const counts: Record<LogLevel, number> = {
+			trace: 0,
+			debug: 0,
+			info: 0,
+			warn: 0,
+			error: 0,
+		}
 
-			// Trim to max size (remove oldest)
-			while (state.logs.length > state.maxLogs) {
-				state.logs.shift()
-			}
+		for (const log of this.state.logs) {
+			counts[log.level]++
+		}
 
-			notify()
-		},
-
-		/**
-		 * Add multiple log entries (batch)
-		 */
-		addLogs(entries: Array<Omit<DevLogEntry, 'id'>>): void {
-			for (const entry of entries) {
-				state.logs.push({
-					...entry,
-					id: generateId(),
-				})
-			}
-
-			// Trim to max size
-			while (state.logs.length > state.maxLogs) {
-				state.logs.shift()
-			}
-
-			notify()
-		},
-
-		/**
-		 * Clear all logs
-		 */
-		clearLogs(): void {
-			state.logs = []
-			notify()
-		},
-
-		/**
-		 * Toggle overlay visibility
-		 */
-		toggleOpen(): void {
-			state.isOpen = !state.isOpen
-			notify()
-		},
-
-		/**
-		 * Set overlay visibility
-		 */
-		setOpen(isOpen: boolean): void {
-			state.isOpen = isOpen
-			notify()
-		},
-
-		/**
-		 * Update filter levels
-		 */
-		setLevelFilter(level: LogLevel, enabled: boolean): void {
-			if (enabled) {
-				state.filters.levels.add(level)
-			} else {
-				state.filters.levels.delete(level)
-			}
-			notify()
-		},
-
-		/**
-		 * Toggle all levels
-		 */
-		toggleAllLevels(enabled: boolean): void {
-			if (enabled) {
-				state.filters.levels = new Set(['trace', 'debug', 'info', 'warn', 'error'])
-			} else {
-				state.filters.levels.clear()
-			}
-			notify()
-		},
-
-		/**
-		 * Set namespace filter
-		 */
-		setNamespaceFilter(namespace: string, enabled: boolean): void {
-			if (enabled) {
-				state.filters.namespaces.add(namespace)
-			} else {
-				state.filters.namespaces.delete(namespace)
-			}
-			notify()
-		},
-
-		/**
-		 * Set search query
-		 */
-		setSearch(search: string): void {
-			state.filters.search = search
-			notify()
-		},
-
-		/**
-		 * Set source filter
-		 */
-		setSourceFilter(source: 'all' | 'client' | 'server'): void {
-			state.filters.source = source
-			notify()
-		},
-
-		/**
-		 * Get all unique namespaces from logs
-		 */
-		getNamespaces(): string[] {
-			const namespaces = new Set<string>()
-			for (const log of state.logs) {
-				if (log.namespace) {
-					namespaces.add(log.namespace)
-				}
-			}
-			return Array.from(namespaces).sort()
-		},
-
-		/**
-		 * Get log counts by level
-		 */
-		getLevelCounts(): Record<LogLevel, number> {
-			const counts: Record<LogLevel, number> = {
-				trace: 0,
-				debug: 0,
-				info: 0,
-				warn: 0,
-				error: 0,
-			}
-
-			for (const log of state.logs) {
-				counts[log.level]++
-			}
-
-			return counts
-		},
+		return counts
 	}
 }
 
 /**
  * Singleton store instance
  */
-export const logStore = createLogStore()
+export const logStore = new SimpleLogStore()
 
 /**
  * Type for the store
  */
-export type LogStore = ReturnType<typeof createLogStore>
+export type LogStore = SimpleLogStore
