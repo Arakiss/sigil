@@ -80,7 +80,7 @@ export const greetUserAction = vestigAction(
  * Example server action: Simulate an error
  */
 export const simulateErrorAction = vestigAction(
-	async (_input: void, { log, ctx }) => {
+	async (_input: undefined, { log, ctx }) => {
 		log.info('Starting error simulation', {
 			requestId: ctx.requestId,
 		})

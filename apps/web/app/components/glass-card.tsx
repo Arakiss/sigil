@@ -30,9 +30,19 @@ export function GlassCard({
 	padding = 'md',
 	onClick,
 }: GlassCardProps) {
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			e.preventDefault()
+			onClick()
+		}
+	}
+
 	return (
 		<div
 			onClick={onClick}
+			onKeyDown={onClick ? handleKeyDown : undefined}
+			role={onClick ? 'button' : undefined}
+			tabIndex={onClick ? 0 : undefined}
 			className={cn(
 				// Base glass styles
 				'relative overflow-hidden rounded-2xl',

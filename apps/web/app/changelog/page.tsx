@@ -156,9 +156,9 @@ function ChangeSection({
 				{config.emoji} {config.title}
 			</h4>
 			<ul className="space-y-1.5">
-				{items.map((item, i) => (
+				{items.map((item) => (
 					<li
-						key={i}
+						key={item}
 						className="text-sm text-white/70 pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-white/30"
 					>
 						{item}

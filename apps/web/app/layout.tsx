@@ -130,9 +130,10 @@ export default async function RootLayout({
 				{/* LLM-friendly content discovery */}
 				<link rel="llms" href="/llms.txt" />
 				<link rel="llms-full" href="/llms-full.txt" />
-				{/* JSON-LD Structured Data */}
+				{/* JSON-LD Structured Data - dangerouslySetInnerHTML is safe here as content is statically defined */}
 				<script
 					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is safe, content is static
 					dangerouslySetInnerHTML={{
 						__html: JSON.stringify({
 							'@context': 'https://schema.org',
@@ -163,6 +164,7 @@ export default async function RootLayout({
 				/>
 				<script
 					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is safe, content is static
 					dangerouslySetInnerHTML={{
 						__html: JSON.stringify({
 							'@context': 'https://schema.org',

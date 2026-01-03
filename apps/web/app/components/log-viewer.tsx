@@ -76,13 +76,11 @@ function LogRow({
 				isNew && 'animate-in fade-in slide-in-from-bottom-1 duration-300',
 			)}
 		>
-			{/* Main row */}
-			<div
-				className="flex items-start gap-2 px-3 py-1.5 cursor-pointer font-mono text-xs"
+			{/* Main row - using button for semantic accessibility */}
+			<button
+				type="button"
+				className="flex items-start gap-2 px-3 py-1.5 cursor-pointer font-mono text-xs w-full text-left bg-transparent border-none"
 				onClick={onToggle}
-				onKeyDown={(e) => e.key === 'Enter' && onToggle()}
-				role="button"
-				tabIndex={0}
 			>
 				{/* Timestamp */}
 				<span className="text-white/30 shrink-0 w-24 tabular-nums">
@@ -121,7 +119,7 @@ function LogRow({
 						)}
 					</div>
 				)}
-			</div>
+			</button>
 
 			{/* Expanded details */}
 			{isExpanded && hasDetails && (
@@ -281,6 +279,7 @@ export function LogViewer() {
 	const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
 	// Auto-scroll to bottom when new logs arrive
+	// biome-ignore lint/correctness/useExhaustiveDependencies: filteredLogs is intentionally included to trigger scroll on new logs
 	useEffect(() => {
 		if (state.autoScroll && containerRef.current) {
 			containerRef.current.scrollTop = containerRef.current.scrollHeight
@@ -348,6 +347,7 @@ export function CompactLogViewer() {
 	const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
 	// Auto-scroll to bottom when new logs arrive
+	// biome-ignore lint/correctness/useExhaustiveDependencies: filteredLogs is intentionally included to trigger scroll on new logs
 	useEffect(() => {
 		if (state.autoScroll && containerRef.current) {
 			containerRef.current.scrollTop = containerRef.current.scrollHeight

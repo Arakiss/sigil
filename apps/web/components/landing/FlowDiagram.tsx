@@ -247,7 +247,7 @@ export function SimpleFlowIndicator({ steps, className }: SimpleFlowIndicatorPro
 		<div ref={ref} className={cn('flex items-center gap-2 text-sm', className)}>
 			{steps.map((step, i) => (
 				<motion.div
-					key={i}
+					key={`${step}-${i}`}
 					className="flex items-center gap-2"
 					initial={{ opacity: 0 }}
 					animate={isInView ? { opacity: 1 } : { opacity: 0 }}
