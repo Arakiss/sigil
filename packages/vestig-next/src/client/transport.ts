@@ -80,6 +80,8 @@ export class ClientHTTPTransport implements Transport {
 	private isOnline = true
 	private boundOnlineHandler: () => void
 	private boundOfflineHandler: () => void
+	private flushQueue: Promise<void> = Promise.resolve()
+	private pendingFlush = false
 
 	constructor(config: ClientHTTPTransportConfig) {
 		this.name = config.name
@@ -197,10 +199,49 @@ export class ClientHTTPTransport implements Transport {
 				this.onDrop?.(excess)
 			}
 
-			localStorage.setItem(this.offlineStorageKey, JSON.stringify(toStore))
+			this.safeLocalStorageSet(this.offlineStorageKey, JSON.stringify(toStore))
 			this.onOfflinePersist?.(toStore.length)
 		} catch {
-			// Silently ignore storage errors (quota exceeded, etc.)
+			// Silently ignore storage errors
+		}
+	}
+
+	/**
+	 * Safely set localStorage with quota handling
+	 * Removes oldest entries if quota is exceeded
+	 */
+	private safeLocalStorageSet(key: string, value: string): boolean {
+		try {
+			localStorage.setItem(key, value)
+			return true
+		} catch (error) {
+			// Handle QuotaExceededError
+			if (
+				error instanceof Error &&
+				(error.name === 'QuotaExceededError' ||
+					error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+					// Safari private browsing
+					error.message.includes('quota'))
+			) {
+				// Try to make room by reducing stored entries
+				try {
+					const parsed: LogEntry[] = JSON.parse(value)
+					if (Array.isArray(parsed) && parsed.length > 1) {
+						// Remove half the entries and try again
+						const reduced = parsed.slice(Math.floor(parsed.length / 2))
+						const droppedCount = parsed.length - reduced.length
+						this.onDrop?.(droppedCount)
+
+						if (reduced.length > 0) {
+							return this.safeLocalStorageSet(key, JSON.stringify(reduced))
+						}
+					}
+				} catch {
+					// Parse failed, clear the key entirely
+					localStorage.removeItem(key)
+				}
+			}
+			return false
 		}
 	}
 
@@ -238,7 +279,7 @@ export class ClientHTTPTransport implements Transport {
 	}
 
 	async flush(): Promise<void> {
-		if (this.isFlushing || this.buffer.length === 0 || this.isDestroyed) {
+		if (this.buffer.length === 0 || this.isDestroyed) {
 			return
 		}
 
@@ -247,6 +288,26 @@ export class ClientHTTPTransport implements Transport {
 			if (this.offlineEnabled) {
 				this.persistOfflineQueue()
 			}
+			return
+		}
+
+		// If already flushing, queue this flush request
+		if (this.isFlushing) {
+			if (!this.pendingFlush) {
+				this.pendingFlush = true
+				this.flushQueue = this.flushQueue.then(() => {
+					this.pendingFlush = false
+					return this.doFlush()
+				})
+			}
+			return this.flushQueue
+		}
+
+		return this.doFlush()
+	}
+
+	private async doFlush(): Promise<void> {
+		if (this.buffer.length === 0 || this.isDestroyed || this.isFlushing) {
 			return
 		}
 
