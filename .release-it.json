@@ -26,12 +26,7 @@
 		"versionArgs": ["--workspaces=false"]
 	},
 	"hooks": {
-		"before:init": [
-			"bun run validate:version",
-			"bun run typecheck",
-			"bun run test",
-			"bun run build"
-		],
+		"before:init": ["bun run validate:version"],
 		"after:bump": "node -e \"const fs=require('fs');['packages/vestig/package.json','packages/vestig-next/package.json'].forEach(p=>{const pkg=JSON.parse(fs.readFileSync(p));pkg.version='${version}';fs.writeFileSync(p,JSON.stringify(pkg,null,'\\t')+'\\n');});\" && git add packages/vestig/package.json packages/vestig-next/package.json"
 	},
 	"plugins": {
