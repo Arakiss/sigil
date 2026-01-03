@@ -125,6 +125,7 @@ export function StickyNav({
 									'p-2 rounded-full',
 									'text-muted-foreground hover:text-foreground',
 									'hover:bg-brand/10 transition-all duration-200',
+									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 								)}
 								aria-label="View on GitHub"
 							>

@@ -8,20 +8,20 @@ import { DM_Sans, Hanken_Grotesk, JetBrains_Mono, Outfit } from 'next/font/googl
 import { VERSION as VESTIG_VERSION } from 'vestig'
 import './globals.css'
 
-// Display font for headings
+// Display font for headings (optimized: only essential weights)
 const hankenGrotesk = Hanken_Grotesk({
 	subsets: ['latin'],
 	display: 'swap',
 	variable: '--font-display',
-	weight: ['400', '500', '600', '700', '800'],
+	weight: ['600', '700'], // Reduced from 5 weights to 2
 })
 
-// Body font for text
+// Body font for text (optimized: only essential weights)
 const dmSans = DM_Sans({
 	subsets: ['latin'],
 	display: 'swap',
 	variable: '--font-sans',
-	weight: ['400', '500', '600', '700'],
+	weight: ['400', '500'], // Reduced from 4 weights to 2
 })
 
 // Logo font (Outfit - reserved ONLY for the logo)
@@ -29,14 +29,15 @@ const outfit = Outfit({
 	subsets: ['latin'],
 	display: 'swap',
 	variable: '--font-logo',
-	weight: ['500', '600', '700'],
+	weight: ['600'], // Reduced from 3 weights to 1
 })
 
-// Monospace font for code
+// Monospace font for code (optimized: only essential weight)
 const jetbrainsMono = JetBrains_Mono({
 	subsets: ['latin'],
 	display: 'swap',
 	variable: '--font-mono',
+	weight: ['400'], // Explicitly set to avoid loading all weights
 })
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vestig.dev'
