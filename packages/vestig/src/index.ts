@@ -1,3 +1,6 @@
+// Version
+export { VERSION } from './version'
+
 // Core exports
 export { createLogger, LoggerImpl } from './logger'
 export type {

@@ -4,6 +4,8 @@ import { getRequestContext } from '@vestig/next'
 import { VestigProvider } from '@vestig/next/client'
 import type { Metadata } from 'next'
 import { DM_Sans, Hanken_Grotesk, JetBrains_Mono, Outfit } from 'next/font/google'
+// Import version from vestig package for structured data
+import { VERSION as VESTIG_VERSION } from 'vestig'
 import './globals.css'
 
 // Display font for headings
@@ -145,7 +147,7 @@ export default async function RootLayout({
 								'Zero-dependency TypeScript logging library with automatic PII sanitization, native tracing, and multi-runtime support.',
 							url: 'https://vestig.dev',
 							downloadUrl: 'https://www.npmjs.com/package/vestig',
-							softwareVersion: '0.8.1',
+							softwareVersion: VESTIG_VERSION,
 							author: {
 								'@type': 'Person',
 								name: 'Arakiss',

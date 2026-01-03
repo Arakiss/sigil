@@ -27,6 +27,8 @@ import {
 } from 'iconoir-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+// Import version from vestig package
+import { VERSION as VESTIG_VERSION } from 'vestig'
 
 /**
  * New v0.8 feature demos - showcased prominently
@@ -252,7 +254,7 @@ export default function PlaygroundPage() {
 				<div className="relative text-center pt-8">
 					<div className="inline-flex items-center gap-2 mb-6">
 						<span className="px-3 py-1 text-xs font-medium uppercase tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-							v0.8.0
+							v{VESTIG_VERSION}
 						</span>
 						<span className="px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/50 bg-white/5 border border-white/10 rounded-full">
 							Interactive
