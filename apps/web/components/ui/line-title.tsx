@@ -25,6 +25,8 @@ interface LineTitleProps {
 	className?: string
 	/** Animation delay in seconds */
 	delay?: number
+	/** HTML heading level to render (default: h2) */
+	as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 }
 
 const sizeClasses = {
@@ -49,9 +51,11 @@ export function LineTitle({
 	accent = false,
 	className,
 	delay = 0,
+	as: Heading = 'h2',
 }: LineTitleProps) {
 	const ref = useRef(null)
 	const isInView = useInView(ref, { once: true, margin: '-100px' })
+	const MotionHeading = motion[Heading]
 
 	const { height, spacing } = lineHeights[size]
 	const strokeColor = accent ? 'hsl(var(--brand))' : 'hsl(0 0% 100% / 0.15)'
@@ -100,7 +104,7 @@ export function LineTitle({
 			</div>
 
 			{/* Main Text */}
-			<motion.h2
+			<MotionHeading
 				className={cn(
 					'relative font-display font-bold tracking-tight text-white',
 					sizeClasses[size],
@@ -110,7 +114,7 @@ export function LineTitle({
 				transition={{ duration: 0.5, delay: delay + 0.3 }}
 			>
 				{children}
-			</motion.h2>
+			</MotionHeading>
 		</div>
 	)
 }

@@ -7,7 +7,7 @@ import type { NavLink } from '@/lib/content/types'
 import { cn } from '@/lib/utils'
 import { Menu, OpenNewWindow, Xmark } from 'iconoir-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface NavbarProps {
 	links: NavLink[]
@@ -22,13 +22,20 @@ export function Navbar({
 }: NavbarProps) {
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+	const ticking = useRef(false)
 
 	useEffect(() => {
 		const handleScroll = () => {
-			setIsScrolled(window.scrollY > 20)
+			if (!ticking.current) {
+				requestAnimationFrame(() => {
+					setIsScrolled(window.scrollY > 20)
+					ticking.current = false
+				})
+				ticking.current = true
+			}
 		}
 
-		window.addEventListener('scroll', handleScroll)
+		window.addEventListener('scroll', handleScroll, { passive: true })
 		return () => window.removeEventListener('scroll', handleScroll)
 	}, [])
 

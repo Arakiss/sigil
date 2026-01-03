@@ -41,6 +41,12 @@ const jetbrainsMono = JetBrains_Mono({
 	weight: ['400'], // Explicitly set to avoid loading all weights
 })
 
+export const viewport = {
+	width: 'device-width',
+	initialScale: 1,
+	maximumScale: 5,
+}
+
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: {
