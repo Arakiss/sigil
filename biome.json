@@ -30,7 +30,8 @@
 				"useSemanticElements": "warn",
 				"noLabelWithoutControl": "warn",
 				"useFocusableInteractive": "warn",
-				"noSvgWithoutTitle": "warn"
+				"noSvgWithoutTitle": "warn",
+				"noNoninteractiveTabindex": "warn"
 			},
 			"style": {
 				"noNonNullAssertion": "warn"
