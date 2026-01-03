@@ -1,6 +1,7 @@
 'use client'
 
 import { Wordmark } from '@/components/ui/logo'
+import { GITHUB_URL, INSTALL_COMMAND } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Book, Check, Code, Copy, Github, Menu, Play, Xmark } from 'iconoir-react'
@@ -25,8 +26,8 @@ interface StickyNavProps {
 }
 
 export function StickyNav({
-	installCommand = 'bun add vestig',
-	githubUrl = 'https://github.com/Arakiss/vestig',
+	installCommand = INSTALL_COMMAND,
+	githubUrl = GITHUB_URL,
 	className,
 }: StickyNavProps) {
 	const [copied, setCopied] = useState(false)

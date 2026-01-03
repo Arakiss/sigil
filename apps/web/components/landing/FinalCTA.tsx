@@ -4,6 +4,7 @@ import { Container, Section } from '@/components/layout'
 import { BlueprintCard, BlueprintSection } from '@/components/ui/blueprint-grid'
 import { LineTitle } from '@/components/ui/line-title'
 import { PillCTA, PillCTAGroup } from '@/components/ui/pill-cta'
+import { GITHUB_URL, INSTALL_COMMAND } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { motion, useInView } from 'framer-motion'
 import { Book, Check, Copy, Github } from 'iconoir-react'
@@ -30,8 +31,8 @@ interface FinalCTAProps {
 export function FinalCTA({
 	headline = 'Start Logging Smarter',
 	subheadline = 'Zero config. Zero dependencies. Infinite possibilities.',
-	installCommand = 'bun add vestig',
-	githubUrl = 'https://github.com/Arakiss/vestig',
+	installCommand = INSTALL_COMMAND,
+	githubUrl = GITHUB_URL,
 	docsUrl = '/docs',
 }: FinalCTAProps) {
 	const [copied, setCopied] = useState(false)
