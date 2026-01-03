@@ -22,15 +22,22 @@ export interface LogFilter {
 }
 
 /**
+ * Connection state for SSE
+ */
+type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error'
+
+/**
  * Log context state
  */
 interface LogState {
 	logs: DemoLogEntry[]
 	filter: LogFilter
-	isConnected: boolean
+	connectionStatus: ConnectionStatus
 	isPanelOpen: boolean
 	autoScroll: boolean
 	maxLogs: number
+	reconnectAttempts: number
+	lastError: string | null
 }
 
 /**
@@ -41,7 +48,10 @@ type LogAction =
 	| { type: 'ADD_LOGS'; payload: DemoLogEntry[] }
 	| { type: 'CLEAR_LOGS' }
 	| { type: 'SET_FILTER'; payload: Partial<LogFilter> }
-	| { type: 'SET_CONNECTED'; payload: boolean }
+	| { type: 'SET_CONNECTION_STATUS'; payload: ConnectionStatus }
+	| { type: 'SET_ERROR'; payload: string }
+	| { type: 'INCREMENT_RECONNECT' }
+	| { type: 'RESET_RECONNECT' }
 	| { type: 'TOGGLE_PANEL' }
 	| { type: 'SET_PANEL_OPEN'; payload: boolean }
 	| { type: 'TOGGLE_AUTO_SCROLL' }
@@ -65,11 +75,18 @@ const initialFilter: LogFilter = {
 const initialState: LogState = {
 	logs: [],
 	filter: initialFilter,
-	isConnected: false,
+	connectionStatus: 'disconnected',
 	isPanelOpen: false,
 	autoScroll: true,
 	maxLogs: 500,
+	reconnectAttempts: 0,
+	lastError: null,
 }
+
+// Maximum reconnection attempts before giving up
+const MAX_RECONNECT_ATTEMPTS = 10
+// Base delay for exponential backoff (ms)
+const BASE_RECONNECT_DELAY = 1000
 
 /**
  * Reducer for log state management
@@ -78,26 +95,37 @@ function logReducer(state: LogState, action: LogAction): LogState {
 	switch (action.type) {
 		case 'ADD_LOG': {
 			const newLogs = [...state.logs, action.payload]
-			// Keep memory bounded
-			if (newLogs.length > state.maxLogs) {
-				newLogs.shift()
+			// Keep memory bounded - use slice for O(1) instead of shift O(n)
+			return {
+				...state,
+				logs: newLogs.length > state.maxLogs ? newLogs.slice(-state.maxLogs) : newLogs,
 			}
-			return { ...state, logs: newLogs }
 		}
 		case 'ADD_LOGS': {
 			const newLogs = [...state.logs, ...action.payload]
-			// Keep memory bounded
-			while (newLogs.length > state.maxLogs) {
-				newLogs.shift()
+			// Keep memory bounded - use slice for efficiency
+			return {
+				...state,
+				logs: newLogs.length > state.maxLogs ? newLogs.slice(-state.maxLogs) : newLogs,
 			}
-			return { ...state, logs: newLogs }
 		}
 		case 'CLEAR_LOGS':
-			return { ...state, logs: [] }
+			return { ...state, logs: [], lastError: null }
 		case 'SET_FILTER':
 			return { ...state, filter: { ...state.filter, ...action.payload } }
-		case 'SET_CONNECTED':
-			return { ...state, isConnected: action.payload }
+		case 'SET_CONNECTION_STATUS':
+			return {
+				...state,
+				connectionStatus: action.payload,
+				// Clear error on successful connection
+				lastError: action.payload === 'connected' ? null : state.lastError,
+			}
+		case 'SET_ERROR':
+			return { ...state, lastError: action.payload, connectionStatus: 'error' }
+		case 'INCREMENT_RECONNECT':
+			return { ...state, reconnectAttempts: state.reconnectAttempts + 1 }
+		case 'RESET_RECONNECT':
+			return { ...state, reconnectAttempts: 0, lastError: null }
 		case 'TOGGLE_PANEL':
 			return { ...state, isPanelOpen: !state.isPanelOpen }
 		case 'SET_PANEL_OPEN':
@@ -161,33 +189,78 @@ export function LogProvider({ children }: { children: ReactNode }) {
 		return true
 	})
 
-	// Connect to SSE stream
+	// Connect to SSE stream with exponential backoff reconnection
 	useEffect(() => {
-		const eventSource = new EventSource('/api/logs')
+		let eventSource: EventSource | null = null
+		let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
+		let isMounted = true
 
-		eventSource.onopen = () => {
-			dispatch({ type: 'SET_CONNECTED', payload: true })
-		}
+		const connect = () => {
+			if (!isMounted) return
 
-		eventSource.onmessage = (event) => {
-			try {
-				const log = JSON.parse(event.data) as DemoLogEntry
-				dispatch({ type: 'ADD_LOG', payload: log })
-			} catch {
-				console.error('[LogProvider] Failed to parse log entry')
+			dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'connecting' })
+			eventSource = new EventSource('/api/logs')
+
+			eventSource.onopen = () => {
+				if (!isMounted) return
+				dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'connected' })
+				dispatch({ type: 'RESET_RECONNECT' })
+			}
+
+			eventSource.onmessage = (event) => {
+				if (!isMounted) return
+				try {
+					const log = JSON.parse(event.data) as DemoLogEntry
+					dispatch({ type: 'ADD_LOG', payload: log })
+				} catch (error) {
+					console.error(
+						'[LogProvider] Failed to parse log entry:',
+						error instanceof Error ? error.message : 'Unknown error',
+					)
+				}
+			}
+
+			eventSource.onerror = (error) => {
+				if (!isMounted) return
+
+				// Close current connection
+				eventSource?.close()
+				eventSource = null
+
+				dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'disconnected' })
+				dispatch({ type: 'INCREMENT_RECONNECT' })
+
+				// Check if we should retry
+				if (state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+					// Calculate delay with exponential backoff (max 30s)
+					const delay = Math.min(BASE_RECONNECT_DELAY * 2 ** state.reconnectAttempts, 30000)
+					console.warn(
+						`[LogProvider] Connection lost. Reconnecting in ${delay}ms (attempt ${state.reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS})`,
+					)
+					reconnectTimeout = setTimeout(connect, delay)
+				} else {
+					dispatch({
+						type: 'SET_ERROR',
+						payload: 'Maximum reconnection attempts reached. Please refresh the page.',
+					})
+					console.error('[LogProvider] Max reconnection attempts reached')
+				}
 			}
 		}
 
-		eventSource.onerror = () => {
-			dispatch({ type: 'SET_CONNECTED', payload: false })
-			// EventSource will auto-reconnect
-		}
+		connect()
 
 		return () => {
-			eventSource.close()
-			dispatch({ type: 'SET_CONNECTED', payload: false })
+			isMounted = false
+			if (reconnectTimeout) {
+				clearTimeout(reconnectTimeout)
+			}
+			if (eventSource) {
+				eventSource.close()
+			}
+			dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'disconnected' })
 		}
-	}, [])
+	}, [state.reconnectAttempts])
 
 	// Action creators
 	const addLog = useCallback((log: DemoLogEntry) => {
@@ -245,8 +318,22 @@ export function LogProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	const clearServerLogs = useCallback(async () => {
-		await fetch('/api/logs', { method: 'DELETE' })
-		dispatch({ type: 'CLEAR_LOGS' })
+		try {
+			const response = await fetch('/api/logs', { method: 'DELETE' })
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}))
+				throw new Error(errorData.error || `HTTP ${response.status}`)
+			}
+			dispatch({ type: 'CLEAR_LOGS' })
+		} catch (error) {
+			console.error(
+				'[LogProvider] Failed to clear server logs:',
+				error instanceof Error ? error.message : 'Unknown error',
+			)
+			// Still clear local logs even if server clear fails
+			dispatch({ type: 'CLEAR_LOGS' })
+			throw error // Re-throw so caller can handle
+		}
 	}, [])
 
 	const value: LogContextValue = {
@@ -296,6 +383,9 @@ export function useLogPanel() {
 		toggle: togglePanel,
 		setOpen: setPanelOpen,
 		logCount: filteredLogs.length,
-		isConnected: state.isConnected,
+		isConnected: state.connectionStatus === 'connected',
+		connectionStatus: state.connectionStatus,
+		lastError: state.lastError,
+		reconnectAttempts: state.reconnectAttempts,
 	}
 }

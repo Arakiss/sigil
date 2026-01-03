@@ -24,9 +24,9 @@ class LogStore {
 	 */
 	add(entry: DemoLogEntry): void {
 		this.logs.push(entry)
-		// Keep memory bounded
+		// Keep memory bounded - use slice for O(1) amortized instead of shift O(n)
 		if (this.logs.length > this.maxLogs) {
-			this.logs.shift()
+			this.logs = this.logs.slice(-this.maxLogs)
 		}
 		// Notify all SSE subscribers
 		this.subscribers.forEach((callback) => callback(entry))
@@ -55,15 +55,29 @@ class LogStore {
 	}
 
 	/**
-	 * Get subscriber count (for debugging)
+	 * Get current log count
 	 */
-	get subscriberCount(): number {
+	getSize(): number {
+		return this.logs.length
+	}
+
+	/**
+	 * Get subscriber count (for monitoring)
+	 */
+	getSubscriberCount(): number {
 		return this.subscribers.size
 	}
 }
 
 // Global singleton for log collection (demo-specific)
 export const logStore = new LogStore()
+
+/**
+ * Get current subscriber count (for connection limiting)
+ */
+export function getSubscriberCount(): number {
+	return logStore.getSubscriberCount()
+}
 
 /**
  * Create an SSE stream for log entries
