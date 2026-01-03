@@ -69,8 +69,13 @@ export function Callout({ type = 'info', title, children, className }: CalloutPr
 	const config = calloutConfig[type]
 	const Icon = config.icon
 
+	// Generate accessible label based on type and title
+	const ariaLabel = title ? `${type}: ${title}` : `${type} callout`
+
 	return (
-		<div
+		<aside
+			role="note"
+			aria-label={ariaLabel}
 			className={cn(
 				'relative p-4 my-6 border border-white/[0.06] border-l-2',
 				config.borderClass,
@@ -79,12 +84,12 @@ export function Callout({ type = 'info', title, children, className }: CalloutPr
 			)}
 		>
 			<div className="flex gap-3">
-				<Icon className={cn('h-5 w-5 shrink-0 mt-0.5', config.iconClass)} />
+				<Icon className={cn('h-5 w-5 shrink-0 mt-0.5', config.iconClass)} aria-hidden="true" />
 				<div className="flex-1 min-w-0">
 					{title && <div className="font-semibold text-white mb-1">{title}</div>}
 					<div className="text-sm text-white/60 leading-relaxed [&>p]:m-0">{children}</div>
 				</div>
 			</div>
-		</div>
+		</aside>
 	)
 }
