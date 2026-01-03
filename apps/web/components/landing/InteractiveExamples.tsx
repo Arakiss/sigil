@@ -7,7 +7,7 @@ import { LineTitle } from '@/components/ui/line-title'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion, useInView } from 'framer-motion'
 import { ArrowRight, Check, Play } from 'iconoir-react'
-import { useRef, useState } from 'react'
+import { forwardRef, useCallback, useRef, useState } from 'react'
 import { SimpleFlowIndicator } from './FlowDiagram'
 
 /**
@@ -126,8 +126,43 @@ export const GET = withLogging(async (request) => {
 
 export function InteractiveExamples() {
 	const [activeExample, setActiveExample] = useState(examples[0])
+	const [activeIndex, setActiveIndex] = useState(0)
 	const headerRef = useRef(null)
+	const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 	const isHeaderInView = useInView(headerRef, { once: true, margin: '-100px' })
+
+	// Handle keyboard navigation for tabs (Up/Down for vertical tabs)
+	const handleTabKeyDown = useCallback(
+		(event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+			let newIndex = index
+
+			switch (event.key) {
+				case 'ArrowDown':
+					event.preventDefault()
+					newIndex = (index + 1) % examples.length
+					break
+				case 'ArrowUp':
+					event.preventDefault()
+					newIndex = (index - 1 + examples.length) % examples.length
+					break
+				case 'Home':
+					event.preventDefault()
+					newIndex = 0
+					break
+				case 'End':
+					event.preventDefault()
+					newIndex = examples.length - 1
+					break
+				default:
+					return
+			}
+
+			setActiveIndex(newIndex)
+			setActiveExample(examples[newIndex])
+			tabRefs.current[newIndex]?.focus()
+		},
+		[],
+	)
 
 	return (
 		<Section className="py-24 md:py-32 bg-background">
@@ -158,21 +193,39 @@ export function InteractiveExamples() {
 				>
 					{/* Tab List - Left Side */}
 					<div className="lg:col-span-4 xl:col-span-3">
-						<div className="space-y-2">
+						<div
+							role="tablist"
+							aria-label="Code examples"
+							aria-orientation="vertical"
+							className="space-y-2"
+						>
 							{examples.map((example, i) => (
 								<TabButton
 									key={example.id}
+									ref={(el) => {
+										tabRefs.current[i] = el
+									}}
 									example={example}
-									isActive={activeExample.id === example.id}
-									onClick={() => setActiveExample(example)}
+									isActive={activeIndex === i}
+									onClick={() => {
+										setActiveIndex(i)
+										setActiveExample(example)
+									}}
+									onKeyDown={(e) => handleTabKeyDown(e, i)}
 									index={i}
 								/>
 							))}
 						</div>
 					</div>
 
-					{/* Code + Output - Right Side */}
-					<div className="lg:col-span-8 xl:col-span-9">
+					{/* Code + Output - Right Side (Tab Panel) */}
+					<div
+						className="lg:col-span-8 xl:col-span-9"
+						role="tabpanel"
+						id={`tabpanel-${activeExample.id}`}
+						aria-labelledby={`tab-${activeExample.id}`}
+						tabIndex={0}
+					>
 						<BlueprintCard corners glow className="overflow-hidden">
 							<AnimatePresence mode="wait">
 								<motion.div
@@ -237,54 +290,67 @@ export function InteractiveExamples() {
 }
 
 /**
- * Tab Button Component
+ * Tab Button Component with full ARIA support
  */
 interface TabButtonProps {
 	example: Example
 	isActive: boolean
 	onClick: () => void
+	onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void
 	index: number
 }
 
-function TabButton({ example, isActive, onClick, index }: TabButtonProps) {
-	return (
-		<motion.button
-			onClick={onClick}
-			className={cn(
-				'w-full text-left p-4 rounded-lg transition-all duration-200',
-				'border border-transparent',
-				isActive
-					? 'bg-brand/10 border-brand/30 text-foreground'
-					: 'bg-surface hover:bg-surface-elevated text-muted-foreground hover:text-foreground',
-			)}
-			initial={{ opacity: 0, x: -20 }}
-			animate={{ opacity: 1, x: 0 }}
-			transition={{ duration: 0.3, delay: index * 0.1 }}
-			whileHover={{ x: isActive ? 0 : 4 }}
-		>
-			<div className="flex items-start gap-3">
-				{/* Step indicator */}
-				<div
-					className={cn(
-						'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5',
-						isActive
-							? 'bg-brand text-brand-foreground'
-							: 'bg-surface-elevated text-muted-foreground',
-					)}
-				>
-					{isActive ? <Check className="w-3 h-3" /> : index + 1}
-				</div>
-
-				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2">
-						<span className={cn('font-medium', isActive && 'text-brand')}>{example.title}</span>
-						{isActive && <ArrowRight className="w-4 h-4 text-brand" />}
+const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
+	({ example, isActive, onClick, onKeyDown, index }, ref) => {
+		return (
+			<motion.button
+				ref={ref}
+				id={`tab-${example.id}`}
+				role="tab"
+				aria-selected={isActive}
+				aria-controls={`tabpanel-${example.id}`}
+				tabIndex={isActive ? 0 : -1}
+				onClick={onClick}
+				onKeyDown={onKeyDown}
+				className={cn(
+					'w-full text-left p-4 rounded-lg transition-all duration-200',
+					'border border-transparent',
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50',
+					isActive
+						? 'bg-brand/10 border-brand/30 text-foreground'
+						: 'bg-surface hover:bg-surface-elevated text-muted-foreground hover:text-foreground',
+				)}
+				initial={{ opacity: 0, x: -20 }}
+				animate={{ opacity: 1, x: 0 }}
+				transition={{ duration: 0.3, delay: index * 0.1 }}
+				whileHover={{ x: isActive ? 0 : 4 }}
+			>
+				<div className="flex items-start gap-3">
+					{/* Step indicator */}
+					<div
+						className={cn(
+							'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5',
+							isActive
+								? 'bg-brand text-brand-foreground'
+								: 'bg-surface-elevated text-muted-foreground',
+						)}
+					>
+						{isActive ? <Check className="w-3 h-3" /> : index + 1}
 					</div>
-					<p className="text-sm text-muted-foreground mt-1 line-clamp-2">{example.description}</p>
+
+					<div className="flex-1 min-w-0">
+						<div className="flex items-center gap-2">
+							<span className={cn('font-medium', isActive && 'text-brand')}>{example.title}</span>
+							{isActive && <ArrowRight className="w-4 h-4 text-brand" />}
+						</div>
+						<p className="text-sm text-muted-foreground mt-1 line-clamp-2">{example.description}</p>
+					</div>
 				</div>
-			</div>
-		</motion.button>
-	)
-}
+			</motion.button>
+		)
+	},
+)
+
+TabButton.displayName = 'TabButton'
 
 export default InteractiveExamples

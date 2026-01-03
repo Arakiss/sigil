@@ -46,6 +46,14 @@ export const PERFORMANCE_THRESHOLDS = {
 } as const
 
 /**
+ * UI Constants
+ */
+export const UI_CONSTANTS = {
+	/** Duration to show "Copied!" feedback (ms) */
+	COPY_FEEDBACK_DURATION: 2000,
+} as const
+
+/**
  * Default install command
  */
 export const INSTALL_COMMAND = 'bun add vestig'

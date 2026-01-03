@@ -40,9 +40,13 @@ export function FinalCTA({
 	const isInView = useInView(ref, { once: true, margin: '-100px' })
 
 	const handleCopy = useCallback(async () => {
-		await navigator.clipboard.writeText(installCommand)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			await navigator.clipboard.writeText(installCommand)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}, [installCommand])
 
 	return (

@@ -87,9 +87,13 @@ export function PreWrapper({
 	}, [rawCode, language])
 
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(rawCode)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			await navigator.clipboard.writeText(rawCode)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}
 
 	return (
@@ -131,6 +135,7 @@ export function PreWrapper({
 
 			{/* Copy button */}
 			<button
+				type="button"
 				onClick={handleCopy}
 				className={cn(
 					'absolute top-2 right-2 p-2 bg-white/5 border border-white/10',

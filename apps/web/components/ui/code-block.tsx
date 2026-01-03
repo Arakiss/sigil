@@ -48,9 +48,13 @@ export function CodeBlock({
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = useCallback(async () => {
-		await navigator.clipboard.writeText(code)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			await navigator.clipboard.writeText(code)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}, [code])
 
 	const lines = code.split('\n')
@@ -290,10 +294,14 @@ export function TerminalBlock({ commands, className }: TerminalBlockProps) {
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = useCallback(async () => {
-		const text = commands.join('\n')
-		await navigator.clipboard.writeText(text)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			const text = commands.join('\n')
+			await navigator.clipboard.writeText(text)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}, [commands])
 
 	return (

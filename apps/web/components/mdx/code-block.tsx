@@ -24,9 +24,13 @@ export function CodeBlock({
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(children)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			await navigator.clipboard.writeText(children)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}
 
 	const lines = children.trim().split('\n')
@@ -76,6 +80,7 @@ export function CodeBlock({
 
 			{/* Copy button */}
 			<button
+				type="button"
 				onClick={handleCopy}
 				className={cn(
 					'absolute top-2 right-2 p-2 bg-white/5 border border-white/10',
