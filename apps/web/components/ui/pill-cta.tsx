@@ -83,6 +83,7 @@ export function PillCTA({
 	const buttonClasses = cn(
 		'inline-flex items-center justify-center font-medium',
 		'rounded-full transition-all duration-200',
+		'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 		variants[variant],
 		sizes[size],
 		className,
@@ -162,7 +163,11 @@ interface InstallCommandProps {
 
 export function InstallCommand({ command, size = 'md', className }: InstallCommandProps) {
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(command)
+		try {
+			await navigator.clipboard.writeText(command)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}
 
 	const sizeClasses = {
@@ -173,12 +178,14 @@ export function InstallCommand({ command, size = 'md', className }: InstallComma
 
 	return (
 		<button
+			type="button"
 			onClick={handleCopy}
 			className={cn(
 				'inline-flex items-center gap-3 font-mono',
 				'rounded-full transition-all duration-200',
 				'bg-surface border border-brand/30',
 				'hover:border-brand/60 hover:bg-surface-elevated',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 				'group',
 				sizeClasses[size],
 				className,

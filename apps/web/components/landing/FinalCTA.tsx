@@ -89,6 +89,7 @@ export function FinalCTA({
 								'font-mono text-lg',
 								'bg-surface border-2 border-brand/30 rounded-full',
 								'hover:border-brand/60 hover:glow-brand transition-all duration-200',
+								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 								'group',
 							)}
 						>
