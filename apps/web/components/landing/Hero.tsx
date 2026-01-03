@@ -3,11 +3,11 @@
 import { Container } from '@/components/layout'
 import { LineTitle } from '@/components/ui/line-title'
 import { PillCTA, PillCTAGroup } from '@/components/ui/pill-cta'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import type { HeroContent } from '@/lib/content/types'
 import { motion } from 'framer-motion'
 import { ArrowRight, Check, Copy } from 'iconoir-react'
 import Link from 'next/link'
-import { useCallback, useState } from 'react'
 import { AnimatedLogs } from './AnimatedLogs'
 
 /**
@@ -26,18 +26,9 @@ interface HeroProps {
 }
 
 export function Hero({ content }: HeroProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = useCallback(async () => {
-		try {
-			await navigator.clipboard.writeText(content.installCommand)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch {
-			// Clipboard API may fail in some contexts (e.g., insecure origins)
-			console.warn('Failed to copy to clipboard')
-		}
-	}, [content.installCommand])
+	const handleCopy = () => copy(content.installCommand)
 
 	return (
 		<section className="relative pt-8 pb-16 md:pt-12 md:pb-24 overflow-hidden blueprint-grid-sparse">
@@ -69,7 +60,7 @@ export function Hero({ content }: HeroProps) {
 
 					{/* Massive Title with Line Effect */}
 					<div className="mb-6">
-						<LineTitle variant="arc" size="2xl" lines={5} accent className="mb-2">
+						<LineTitle variant="arc" size="2xl" lines={5} accent className="mb-2" as="h1">
 							{content.headline.primary}
 						</LineTitle>
 						<motion.p

@@ -1,8 +1,8 @@
 'use client'
 
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { Check, Copy, Terminal } from 'iconoir-react'
-import { useState } from 'react'
 
 interface CodeBlockProps {
 	children: string
@@ -21,17 +21,9 @@ export function CodeBlock({
 	highlight = [],
 	className,
 }: CodeBlockProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(children)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}
+	const handleCopy = () => copy(children)
 
 	const lines = children.trim().split('\n')
 

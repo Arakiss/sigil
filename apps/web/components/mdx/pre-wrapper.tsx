@@ -1,5 +1,6 @@
 'use client'
 
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { Check, Copy } from 'iconoir-react'
 import { type ReactElement, type ReactNode, useEffect, useRef, useState } from 'react'
@@ -17,7 +18,7 @@ export function PreWrapper({
 	'data-language': dataLang,
 	...props
 }: PreWrapperProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 	const [highlightedCode, setHighlightedCode] = useState<string | null>(null)
 	const preRef = useRef<HTMLDivElement>(null)
 
@@ -86,15 +87,7 @@ export function PreWrapper({
 		}
 	}, [rawCode, language])
 
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(rawCode)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}
+	const handleCopy = () => copy(rawCode)
 
 	return (
 		<div

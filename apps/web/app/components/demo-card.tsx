@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { ArrowRight, Check, Copy, Play } from 'iconoir-react'
 import Link from 'next/link'
@@ -56,17 +57,9 @@ function DecorativeCorners({ size = 'default' }: { size?: 'default' | 'large' })
  * Code block with terminal styling and copy button
  */
 function TerminalCodeBlock({ code, language = 'typescript' }: { code: string; language?: string }) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(code)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}
+	const handleCopy = () => copy(code)
 
 	return (
 		<div className="relative group border border-white/[0.06] overflow-hidden">

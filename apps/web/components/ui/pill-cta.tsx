@@ -1,5 +1,6 @@
 'use client'
 
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUpRight } from 'iconoir-react'
@@ -162,13 +163,9 @@ interface InstallCommandProps {
 }
 
 export function InstallCommand({ command, size = 'md', className }: InstallCommandProps) {
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(command)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}
+	const { copy } = useCopyToClipboard()
+
+	const handleCopy = () => copy(command)
 
 	const sizeClasses = {
 		sm: 'px-4 py-2 text-sm',

@@ -4,11 +4,12 @@ import { Container, Section } from '@/components/layout'
 import { BlueprintCard, BlueprintSection } from '@/components/ui/blueprint-grid'
 import { LineTitle } from '@/components/ui/line-title'
 import { PillCTA, PillCTAGroup } from '@/components/ui/pill-cta'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { GITHUB_URL, INSTALL_COMMAND } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { motion, useInView } from 'framer-motion'
 import { Book, Check, Copy, Github } from 'iconoir-react'
-import { useCallback, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 /**
  * FinalCTA - Cloudflare Sandbox inspired final call-to-action
@@ -35,19 +36,11 @@ export function FinalCTA({
 	githubUrl = GITHUB_URL,
 	docsUrl = '/docs',
 }: FinalCTAProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 	const ref = useRef(null)
 	const isInView = useInView(ref, { once: true, margin: '-100px' })
 
-	const handleCopy = useCallback(async () => {
-		try {
-			await navigator.clipboard.writeText(installCommand)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}, [installCommand])
+	const handleCopy = () => copy(installCommand)
 
 	return (
 		<Section className="py-24 md:py-32 relative overflow-hidden">

@@ -1,8 +1,8 @@
 'use client'
 
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { Check, Copy } from 'iconoir-react'
-import { useCallback, useState } from 'react'
 
 /**
  * CodeBlock - Syntax-highlighted code block with Cloudflare-style coloring
@@ -45,17 +45,9 @@ export function CodeBlock({
 	output,
 	className,
 }: CodeBlockProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = useCallback(async () => {
-		try {
-			await navigator.clipboard.writeText(code)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}, [code])
+	const handleCopy = () => copy(code)
 
 	const lines = code.split('\n')
 
@@ -291,18 +283,9 @@ interface TerminalBlockProps {
 }
 
 export function TerminalBlock({ commands, className }: TerminalBlockProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = useCallback(async () => {
-		try {
-			const text = commands.join('\n')
-			await navigator.clipboard.writeText(text)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}, [commands])
+	const handleCopy = () => copy(commands.join('\n'))
 
 	return (
 		<div className={cn('relative group', className)}>

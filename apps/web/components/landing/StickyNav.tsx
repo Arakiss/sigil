@@ -1,12 +1,13 @@
 'use client'
 
 import { Wordmark } from '@/components/ui/logo'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { GITHUB_URL, INSTALL_COMMAND } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Book, Check, Code, Copy, Github, Menu, Play, Xmark } from 'iconoir-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * StickyNav - Cloudflare Sandbox inspired sticky navigation
@@ -30,28 +31,26 @@ export function StickyNav({
 	githubUrl = GITHUB_URL,
 	className,
 }: StickyNavProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 	const [scrolled, setScrolled] = useState(false)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const ticking = useRef(false)
 
 	useEffect(() => {
 		const handleScroll = () => {
-			setScrolled(window.scrollY > 20)
+			if (!ticking.current) {
+				requestAnimationFrame(() => {
+					setScrolled(window.scrollY > 20)
+					ticking.current = false
+				})
+				ticking.current = true
+			}
 		}
-		window.addEventListener('scroll', handleScroll)
+		window.addEventListener('scroll', handleScroll, { passive: true })
 		return () => window.removeEventListener('scroll', handleScroll)
 	}, [])
 
-	const handleCopy = useCallback(async () => {
-		try {
-			await navigator.clipboard.writeText(installCommand)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch {
-			// Clipboard API may fail in some contexts
-			console.warn('Failed to copy to clipboard')
-		}
-	}, [installCommand])
+	const handleCopy = () => copy(installCommand)
 
 	return (
 		<>

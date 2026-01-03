@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 
 interface CodeBlockProps {
 	code: string
@@ -9,17 +9,9 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({ code, language = 'typescript', filename }: CodeBlockProps) {
-	const [copied, setCopied] = useState(false)
+	const { copied, copy } = useCopyToClipboard()
 
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(code)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.warn('Failed to copy to clipboard:', error)
-		}
-	}
+	const handleCopy = () => copy(code)
 
 	return (
 		<div className="code-block">
