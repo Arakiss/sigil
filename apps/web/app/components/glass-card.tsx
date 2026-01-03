@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, type CSSProperties } from 'react'
+import { type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface GlassCardProps {

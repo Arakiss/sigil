@@ -92,7 +92,8 @@ export function getDocNavigation(): DocNavSection[] {
  */
 export async function getDocBySlug(slug: string): Promise<DocPage | null> {
 	// This will be implemented with gray-matter + MDX
-	console.log(`Loading doc: ${slug}`)
+	// Currently unused - docs are served via app router MDX pages
+	void slug // Suppress unused parameter warning
 	return null
 }
 

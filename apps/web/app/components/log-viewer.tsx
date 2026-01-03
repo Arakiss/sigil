@@ -306,11 +306,11 @@ export function LogViewer() {
 				<span
 					className={cn(
 						'w-1.5 h-1.5 rounded-full transition-colors',
-						state.isConnected ? 'bg-white animate-pulse' : 'bg-white/20',
+						state.connectionStatus === 'connected' ? 'bg-white animate-pulse' : 'bg-white/20',
 					)}
 				/>
 				<span className="text-[10px] text-white/40">
-					{state.isConnected ? 'Connected' : 'Disconnected'}
+					{state.connectionStatus === 'connected' ? 'Connected' : 'Disconnected'}
 				</span>
 			</div>
 
@@ -374,7 +374,7 @@ export function CompactLogViewer() {
 					<span
 						className={cn(
 							'w-1.5 h-1.5 rounded-full transition-colors',
-							state.isConnected ? 'bg-white animate-pulse' : 'bg-white/20',
+							state.connectionStatus === 'connected' ? 'bg-white animate-pulse' : 'bg-white/20',
 						)}
 					/>
 					<span className="text-xs text-white/50 font-medium">Live Logs</span>

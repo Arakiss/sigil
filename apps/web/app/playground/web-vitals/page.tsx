@@ -1,16 +1,10 @@
 'use client'
 
 import { Container } from '@/components/layout'
-import {
-	GlassCard,
-	GlassCardBadge,
-	GlassButton,
-	GlassGrid,
-	MetricValue,
-} from '@/app/components/glass-card'
+import { GlassCard, GlassCardBadge, GlassButton, MetricValue } from '@/app/components/glass-card'
 import { GraphUp, Refresh, Clock, Activity, Eye, MouseButtonLeft } from 'iconoir-react'
-import { useWebVitalsData, useWebVitalsSummary } from '@vestig/next/metrics'
-import { useState, useEffect } from 'react'
+import { useWebVitalsData } from '@vestig/next/metrics'
+import { useState } from 'react'
 
 /**
  * Core Web Vitals thresholds
@@ -63,24 +57,8 @@ const vitalsInfo = [
 	},
 ]
 
-/**
- * Color mapping for ratings
- */
-const ratingColors = {
-	good: 'text-emerald-400',
-	'needs-improvement': 'text-amber-400',
-	poor: 'text-red-400',
-}
-
-const ratingBgColors = {
-	good: 'bg-emerald-500/10 border-emerald-500/20',
-	'needs-improvement': 'bg-amber-500/10 border-amber-500/20',
-	poor: 'bg-red-500/10 border-red-500/20',
-}
-
 export default function WebVitalsPage() {
 	const vitals = useWebVitalsData()
-	const summary = useWebVitalsSummary()
 	const [refreshKey, setRefreshKey] = useState(0)
 
 	// Trigger actions to generate INP metrics
