@@ -1,5 +1,6 @@
 import { withVestig } from '@vestig/next'
 import { RUNTIME } from 'vestig'
+import { z } from 'zod'
 
 /**
  * Demo API endpoint that demonstrates logging in API Routes
@@ -8,6 +9,17 @@ import { RUNTIME } from 'vestig'
  * GET /api/demo - Returns mock data with full logging
  * POST /api/demo - Accepts data and logs the processing
  */
+
+/**
+ * Schema for POST request body validation
+ * Accepts any object with optional common fields
+ */
+const DemoRequestSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email().optional(),
+	message: z.string().max(1000).optional(),
+	data: z.record(z.string(), z.unknown()).optional(),
+})
 
 export const GET = withVestig(
 	async (request, { log, ctx, timing }) => {
@@ -75,19 +87,51 @@ export const POST = withVestig(
 			url: request.url,
 		})
 
+		// Validate Content-Type header
+		const contentType = request.headers.get('content-type')
+		if (!contentType?.includes('application/json')) {
+			log.warn('Invalid Content-Type', { contentType })
+			return Response.json(
+				{ error: 'Content-Type must be application/json', code: 'INVALID_CONTENT_TYPE' },
+				{ status: 415 },
+			)
+		}
+
 		try {
 			// Parse request body
 			log.debug('Parsing request body')
-			const body = await request.json()
+			const rawBody = await request.json()
 
-			log.info('Request body parsed', {
+			// Validate with Zod schema
+			log.trace('Validating input with Zod')
+			const parseResult = DemoRequestSchema.safeParse(rawBody)
+
+			if (!parseResult.success) {
+				log.warn('Request validation failed', {
+					errors: parseResult.error.issues.map((i) => ({
+						path: i.path.join('.'),
+						message: i.message,
+					})),
+				})
+				return Response.json(
+					{
+						error: 'Validation failed',
+						code: 'VALIDATION_ERROR',
+						details: parseResult.error.issues.map((i) => ({
+							field: i.path.join('.'),
+							message: i.message,
+						})),
+					},
+					{ status: 400 },
+				)
+			}
+
+			const body = parseResult.data
+
+			log.info('Request body validated', {
 				fieldCount: Object.keys(body).length,
 				fields: Object.keys(body),
 			})
-
-			// Simulate validation
-			log.trace('Validating input')
-			await new Promise((r) => setTimeout(r, 50))
 
 			// Log the data (will be sanitized if PII is present)
 			log.debug('Processing user data', {
@@ -118,12 +162,23 @@ export const POST = withVestig(
 				},
 			})
 		} catch (error) {
+			// Determine if it's a JSON parsing error
+			const isParseError = error instanceof SyntaxError
+
 			log.error('POST request failed', {
-				error,
+				error: error instanceof Error ? error.message : String(error),
+				errorType: isParseError ? 'PARSE_ERROR' : 'INTERNAL_ERROR',
 				duration: `${timing.elapsed().toFixed(2)}ms`,
 			})
 
-			return Response.json({ error: 'Bad request', requestId: ctx.requestId }, { status: 400 })
+			return Response.json(
+				{
+					error: isParseError ? 'Invalid JSON payload' : 'Internal server error',
+					code: isParseError ? 'PARSE_ERROR' : 'INTERNAL_ERROR',
+					requestId: ctx.requestId,
+				},
+				{ status: isParseError ? 400 : 500 },
+			)
 		}
 	},
 	{ namespace: 'api:demo', level: 'trace' },
