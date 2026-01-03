@@ -34,13 +34,27 @@ export function isError(value: unknown): value is Error {
 
 /**
  * Serialize an error object with cause chain support
+ * Handles circular references by tracking seen errors
  */
-export function serializeError(error: unknown, depth = 0): SerializedError | undefined {
+export function serializeError(
+	error: unknown,
+	depth = 0,
+	seen: WeakSet<object> = new WeakSet(),
+): SerializedError | undefined {
 	if (depth > MAX_DEPTH) return undefined
 	if (!error) return undefined
 
 	// Handle Error instances
 	if (error instanceof Error) {
+		// Check for circular references
+		if (seen.has(error)) {
+			return {
+				name: error.name,
+				message: '[Circular Reference]',
+			}
+		}
+		seen.add(error)
+
 		const serialized: SerializedError = {
 			name: error.name,
 			message: error.message,
@@ -58,7 +72,7 @@ export function serializeError(error: unknown, depth = 0): SerializedError | und
 
 		// Handle cause chain (ES2022)
 		if ('cause' in error && error.cause) {
-			serialized.cause = serializeError(error.cause, depth + 1)
+			serialized.cause = serializeError(error.cause, depth + 1, seen)
 		}
 
 		return serialized
@@ -66,13 +80,29 @@ export function serializeError(error: unknown, depth = 0): SerializedError | und
 
 	// Handle error-like objects
 	if (typeof error === 'object' && error !== null) {
+		// Check for circular references on error-like objects too
+		if (seen.has(error)) {
+			return {
+				name: 'Error',
+				message: '[Circular Reference]',
+			}
+		}
+		seen.add(error)
+
 		const obj = error as Record<string, unknown>
 		if (typeof obj.message === 'string') {
-			return {
+			const serialized: SerializedError = {
 				name: (obj.name as string) ?? 'Error',
 				message: obj.message,
 				stack: obj.stack as string | undefined,
 			}
+
+			// Handle cause chain for error-like objects
+			if ('cause' in obj && obj.cause) {
+				serialized.cause = serializeError(obj.cause, depth + 1, seen)
+			}
+
+			return serialized
 		}
 	}
 

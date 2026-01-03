@@ -81,7 +81,8 @@ function formatArgs(args: unknown[]): { message: string; metadata: LogMetadata }
 export class LoggerImpl implements Logger {
 	private config: ResolvedLoggerConfig
 	private transports: Transport[] = []
-	private children: Map<string, LoggerImpl> = new Map()
+	/** WeakRef cache to prevent memory leaks - children can be GC'd when no longer referenced */
+	private children: Map<string, WeakRef<LoggerImpl>> = new Map()
 	private initialized = false
 	private sampler: Sampler | null = null
 
@@ -211,10 +212,15 @@ export class LoggerImpl implements Logger {
 			? `${this.config.namespace}:${namespace}`
 			: namespace
 
-		// Check cache
-		const cached = this.children.get(fullNamespace)
-		if (cached && !config) {
-			return cached
+		// Check cache (WeakRef allows GC when not referenced elsewhere)
+		const cachedRef = this.children.get(fullNamespace)
+		if (cachedRef && !config) {
+			const cached = cachedRef.deref()
+			if (cached) {
+				return cached
+			}
+			// WeakRef was collected, remove stale entry
+			this.children.delete(fullNamespace)
 		}
 
 		// Create new child logger
@@ -225,9 +231,9 @@ export class LoggerImpl implements Logger {
 			context: { ...this.config.context, ...config?.context },
 		})
 
-		// Cache if no custom config
+		// Cache if no custom config (using WeakRef to allow GC)
 		if (!config) {
-			this.children.set(fullNamespace, child)
+			this.children.set(fullNamespace, new WeakRef(child))
 		}
 
 		return child
