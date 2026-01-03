@@ -35,22 +35,20 @@ log.error('Request failed', { error: new Error('Timeout') })
 
 ### Feature Guides
 
-- [PII Sanitization](/docs/features/sanitization) - Automatic data redaction
-- [Native Tracing](/docs/features/tracing) - Distributed tracing with spans
-- [Context Propagation](/docs/features/context) - Request correlation
-- [Transports](/docs/features/transports) - Console, HTTP, File, Datadog
-- [Sampling](/docs/features/sampling) - Control log volume
+- [PII Sanitization](/docs/security/sanitization) - Automatic data redaction
+- [Native Tracing](/docs/tracing) - Distributed tracing with spans
+- [Context Propagation](/docs/tracing/context) - Request correlation
+- [Transports](/docs/transports) - Console, HTTP, File, Datadog
+- [Sampling](/docs/sampling) - Control log volume
 
 ### Integration Guides
 
-- [Next.js](/docs/integrations/nextjs) - Server components, route handlers, middleware
-- [Express](/docs/integrations/express) - Middleware and request logging
-- [Hono](/docs/integrations/hono) - Lightweight edge framework
+- [Next.js](/docs/nextjs) - Server components, route handlers, middleware
+- [Express](/docs/express) - Middleware and request logging
 
 ## Optional Packages
 
 - `@vestig/next` - Next.js integration with server/client components
-- `@vestig/express` - Express.js middleware
 
 ## Links
 

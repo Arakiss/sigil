@@ -33,7 +33,7 @@ const features = [
 		badge: 'Popular',
 		link: {
 			text: 'Learn more about sanitization',
-			href: '/docs/features/sanitization',
+			href: '/docs/security/sanitization',
 		},
 	},
 	{
@@ -44,7 +44,7 @@ const features = [
 		visualization: 'icons' as const,
 		link: {
 			text: 'See supported runtimes',
-			href: '/docs/features/runtimes',
+			href: '/docs/runtime',
 		},
 	},
 	{
@@ -56,7 +56,7 @@ const features = [
 		badge: 'New',
 		link: {
 			text: 'Tracing guide',
-			href: '/docs/features/tracing',
+			href: '/docs/tracing',
 		},
 	},
 	{
@@ -67,7 +67,7 @@ const features = [
 		visualization: 'flow' as const,
 		link: {
 			text: 'Context documentation',
-			href: '/docs/features/context',
+			href: '/docs/tracing/context',
 		},
 	},
 	{
@@ -78,7 +78,7 @@ const features = [
 		visualization: 'custom' as const,
 		link: {
 			text: 'See performance benchmarks',
-			href: '/docs/features/performance',
+			href: '/docs/features',
 		},
 	},
 	{
@@ -89,7 +89,7 @@ const features = [
 		visualization: 'flow' as const,
 		link: {
 			text: 'Transport documentation',
-			href: '/docs/features/transports',
+			href: '/docs/transports',
 		},
 	},
 ]

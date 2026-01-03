@@ -19,6 +19,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			changeFrequency: 'monthly',
 			priority: 0.8,
 		},
+		{
+			url: `${BASE_URL}/changelog`,
+			lastModified: now,
+			changeFrequency: 'weekly',
+			priority: 0.7,
+		},
 	]
 
 	// Documentation pages
@@ -30,6 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		{ path: '/docs/api', priority: 0.8 },
 
 		// Core concepts
+		{ path: '/docs/core', priority: 0.85 },
 		{ path: '/docs/core/logging', priority: 0.85 },
 		{ path: '/docs/core/levels', priority: 0.8 },
 		{ path: '/docs/core/structured', priority: 0.8 },
@@ -59,6 +66,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		{ path: '/docs/nextjs/route-handlers', priority: 0.8 },
 		{ path: '/docs/nextjs/server-actions', priority: 0.8 },
 		{ path: '/docs/nextjs/client', priority: 0.8 },
+		{ path: '/docs/nextjs/database', priority: 0.8 },
+		{ path: '/docs/nextjs/dev-overlay', priority: 0.8 },
+		{ path: '/docs/nextjs/error-boundary', priority: 0.8 },
+		{ path: '/docs/nextjs/web-vitals', priority: 0.8 },
 		{ path: '/docs/express', priority: 0.85 },
 
 		// Advanced
@@ -99,6 +110,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		'/playground/actions',
 		'/playground/edge',
 		'/playground/transports',
+		'/playground/dev-overlay',
+		'/playground/database',
+		'/playground/web-vitals',
+		'/playground/error-boundary',
 	]
 
 	const playgroundSitemap: MetadataRoute.Sitemap = playgroundPages.map((path) => ({
