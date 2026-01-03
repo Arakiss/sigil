@@ -59,9 +59,13 @@ function TerminalCodeBlock({ code, language = 'typescript' }: { code: string; la
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(code)
-		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
+		try {
+			await navigator.clipboard.writeText(code)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.warn('Failed to copy to clipboard:', error)
+		}
 	}
 
 	return (
@@ -81,6 +85,7 @@ function TerminalCodeBlock({ code, language = 'typescript' }: { code: string; la
 						'bg-white/5 border border-white/10',
 						'opacity-0 group-hover:opacity-100 transition-all duration-200',
 						'hover:bg-white/10 hover:border-white/20',
+						'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50',
 					)}
 					aria-label="Copy code"
 				>
