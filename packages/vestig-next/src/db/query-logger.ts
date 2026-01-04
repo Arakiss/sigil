@@ -44,24 +44,100 @@ function detectOperation(query: string): QueryLogEntry['operation'] {
 }
 
 /**
+ * Pattern for matching quoted or unquoted table identifiers
+ * Supports: table, "table", `table`, 'table', schema.table, "schema"."table"
+ */
+const TABLE_IDENTIFIER = /["'`]?([\w]+)["'`]?(?:\.["'`]?([\w]+)["'`]?)?/
+
+/**
  * Extract table name from query (best effort)
+ *
+ * Handles:
+ * - SELECT ... FROM table
+ * - INSERT INTO table
+ * - UPDATE table SET ...
+ * - DELETE FROM table
+ * - TRUNCATE table
+ * - JOIN table ON ...
+ * - Schema-qualified names (schema.table)
+ * - Quoted identifiers ("table", `table`)
  */
 function extractTableName(query: string): string | undefined {
+	// Normalize whitespace (replace newlines, multiple spaces with single space)
+	const normalized = query.replace(/\s+/g, ' ').trim()
+
+	// Table name patterns in order of specificity
 	const patterns = [
-		/FROM\s+["'`]?(\w+)["'`]?/i,
-		/INTO\s+["'`]?(\w+)["'`]?/i,
-		/UPDATE\s+["'`]?(\w+)["'`]?/i,
-		/DELETE\s+FROM\s+["'`]?(\w+)["'`]?/i,
+		// DELETE FROM [schema.]table
+		new RegExp(`DELETE\\s+FROM\\s+${TABLE_IDENTIFIER.source}`, 'i'),
+		// INSERT INTO [schema.]table
+		new RegExp(`INTO\\s+${TABLE_IDENTIFIER.source}`, 'i'),
+		// UPDATE [schema.]table SET
+		new RegExp(`UPDATE\\s+${TABLE_IDENTIFIER.source}`, 'i'),
+		// TRUNCATE [TABLE] [schema.]table
+		new RegExp(`TRUNCATE\\s+(?:TABLE\\s+)?${TABLE_IDENTIFIER.source}`, 'i'),
+		// SELECT ... FROM [schema.]table (primary table)
+		new RegExp(
+			`FROM\\s+${TABLE_IDENTIFIER.source}(?:\\s+(?:AS\\s+)?\\w+)?(?:\\s*,|\\s+(?:WHERE|LEFT|RIGHT|INNER|OUTER|CROSS|JOIN|ON|GROUP|ORDER|LIMIT|OFFSET|$))`,
+			'i',
+		),
+		// Fallback: just FROM [schema.]table
+		new RegExp(`FROM\\s+${TABLE_IDENTIFIER.source}`, 'i'),
 	]
 
 	for (const pattern of patterns) {
-		const match = pattern.exec(query)
-		if (match?.[1]) {
-			return match[1]
+		const match = pattern.exec(normalized)
+		if (match) {
+			// If we have both schema and table (groups 1 and 2), return schema.table
+			if (match[2]) {
+				return `${match[1]}.${match[2]}`
+			}
+			// Otherwise just return the table name
+			if (match[1]) {
+				return match[1]
+			}
 		}
 	}
 
 	return undefined
+}
+
+/**
+ * Extract all table names from a query (including JOINs)
+ *
+ * @returns Array of table names found in the query
+ */
+export function extractAllTableNames(query: string): string[] {
+	const normalized = query.replace(/\s+/g, ' ').trim()
+	const tables = new Set<string>()
+
+	// Patterns that capture table names
+	const tablePatterns = [
+		// FROM clause (can have multiple tables separated by commas)
+		/FROM\s+(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+		// JOIN clauses
+		/JOIN\s+(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+		// INSERT INTO
+		/INTO\s+(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+		// UPDATE
+		/UPDATE\s+(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+		// DELETE FROM
+		/DELETE\s+FROM\s+(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+		// TRUNCATE
+		/TRUNCATE\s+(?:TABLE\s+)?(["'`]?[\w]+["'`]?(?:\.["'`]?[\w]+["'`]?)?)/gi,
+	]
+
+	for (const pattern of tablePatterns) {
+		let match: RegExpExecArray | null = null
+		while ((match = pattern.exec(normalized)) !== null) {
+			const tableName = match[1]
+				// Remove quotes
+				.replace(/["'`]/g, '')
+			tables.add(tableName)
+		}
+	}
+
+	return Array.from(tables)
 }
 
 /**

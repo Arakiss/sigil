@@ -60,7 +60,13 @@ export {
 } from './drizzle'
 
 // Core utilities
-export { formatDuration, createQueryLogEntry, logQuery, mergeConfig } from './query-logger'
+export {
+	formatDuration,
+	createQueryLogEntry,
+	logQuery,
+	mergeConfig,
+	extractAllTableNames,
+} from './query-logger'
 
 // Types
 export type {
