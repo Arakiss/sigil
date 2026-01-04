@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.11.1](https://github.com/Arakiss/vestig/compare/v0.11.0...v0.11.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* **web:** resolve critical issues from analysis ([ebbfc5b](https://github.com/Arakiss/vestig/commit/ebbfc5b7d2366683773f07a4c2c3562bfe8dad7b))
+
 ## [0.11.0](https://github.com/Arakiss/vestig/compare/v0.10.2...v0.11.0) (2026-01-04)
 
 ### ✨ Features
