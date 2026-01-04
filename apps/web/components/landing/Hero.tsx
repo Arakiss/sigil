@@ -8,6 +8,7 @@ import type { HeroContent } from '@/lib/content/types'
 import { motion } from 'framer-motion'
 import { ArrowRight, Check, Copy } from 'iconoir-react'
 import Link from 'next/link'
+import { VERSION } from 'vestig'
 import { AnimatedLogs } from './AnimatedLogs'
 
 /**
@@ -53,22 +54,20 @@ export function Hero({ content }: HeroProps) {
 			<Container size="wide" className="relative">
 				{/* Main Content - Centered */}
 				<div className="text-center max-w-4xl mx-auto mb-12">
-					{/* Badge */}
-					{content.badge && (
-						<motion.div
-							className="mb-8"
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.4 }}
-						>
-							<Link href={content.badge.href || '#'}>
-								<span className="inline-flex items-center gap-2 px-4 py-2 text-sm badge-brand hover:bg-brand/20 transition-colors">
-									{content.badge.text}
-									<ArrowRight className="w-3 h-3" />
-								</span>
-							</Link>
-						</motion.div>
-					)}
+					{/* Badge - Version from package.json */}
+					<motion.div
+						className="mb-8"
+						initial={{ opacity: 0, y: -10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.4 }}
+					>
+						<Link href="/changelog">
+							<span className="inline-flex items-center gap-2 px-4 py-2 text-sm badge-brand hover:bg-brand/20 transition-colors">
+								v{VERSION} — Latest Release
+								<ArrowRight className="w-3 h-3" />
+							</span>
+						</Link>
+					</motion.div>
 
 					{/* Massive Title with Line Effect */}
 					<div className="mb-6">

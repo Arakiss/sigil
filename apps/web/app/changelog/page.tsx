@@ -28,6 +28,35 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.11.0',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.10.1...v0.11.0',
+		features: [
+			'Add SentryTransport for Sentry error monitoring integration',
+			'Add error boundary stack trace filtering for production',
+			'Add duplicate log suppression option to logger',
+			'Add CircularBuffer iterator pattern for efficient memory usage',
+			'Add Connection keep-alive to HTTP transport',
+			'Add async logger initialization option',
+			'Add Prometheus metrics export format',
+		],
+		docs: [
+			'Add SentryTransport documentation and examples',
+			'Add Pino migration guide',
+			'Add performance tuning, memory management, and error recovery guides',
+			'Add documentation validation to pre-push hooks',
+		],
+		fixes: [
+			'Improve query logger table extraction patterns',
+			'Wrap all HTTP transport errors in HTTPTransportError consistently',
+		],
+		tests: [
+			'Add dev-overlay stress tests for 500+ logs',
+			'Add W3C trace context malformed input tests',
+			'Add sanitizer performance and sampling edge case tests',
+		],
+	},
+	{
 		version: '0.10.2',
 		date: '2026-01-04',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.10.1...v0.10.2',
