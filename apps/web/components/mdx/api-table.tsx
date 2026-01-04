@@ -23,16 +23,16 @@ export function ApiTable({ title, params, className }: ApiTableProps) {
 				<table className="w-full text-sm">
 					<thead>
 						<tr className="border-b border-white/10 bg-white/[0.02]">
-							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/40">
+							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/60">
 								Parameter
 							</th>
-							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/40">
+							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/60">
 								Type
 							</th>
-							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/40">
+							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/60">
 								Default
 							</th>
-							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/40">
+							<th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/60">
 								Description
 							</th>
 						</tr>
@@ -49,7 +49,7 @@ export function ApiTable({ title, params, className }: ApiTableProps) {
 								<td className="px-4 py-3">
 									<code className="text-white/50 font-mono text-sm">{param.type}</code>
 								</td>
-								<td className="px-4 py-3 text-white/40">
+								<td className="px-4 py-3 text-white/60">
 									{param.default ? (
 										<code className="font-mono text-sm">{param.default}</code>
 									) : (
@@ -81,14 +81,14 @@ export function MethodSignature({
 }: MethodSignatureProps) {
 	return (
 		<div className="my-4 p-4 bg-surface border border-white/[0.06] font-mono text-sm">
-			<span className="text-white/40">{isAsync ? 'async ' : ''}</span>
+			<span className="text-white/60">{isAsync ? 'async ' : ''}</span>
 			<span className="text-white font-semibold">{name}</span>
-			<span className="text-white/40">(</span>
+			<span className="text-white/60">(</span>
 			<span className="text-white/70">{params}</span>
-			<span className="text-white/40">)</span>
+			<span className="text-white/60">)</span>
 			{returns && (
 				<>
-					<span className="text-white/40">: </span>
+					<span className="text-white/60">: </span>
 					<span className="text-white/70">{returns}</span>
 				</>
 			)}

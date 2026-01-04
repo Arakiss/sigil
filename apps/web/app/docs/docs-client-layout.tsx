@@ -143,7 +143,7 @@ export function DocsClientLayout({ children }: { children: React.ReactNode }) {
 			<Sidebar sections={navigation} />
 
 			{/* Main content */}
-			<main className="lg:pl-64 pt-14">
+			<main id="main-content" className="lg:pl-64 pt-14">
 				<div className="max-w-4xl mx-auto px-6 lg:px-8 py-12">
 					{/* Clean article wrapper - styling handled by mdx-components */}
 					<article className="min-h-[calc(100vh-8rem)]">{children}</article>

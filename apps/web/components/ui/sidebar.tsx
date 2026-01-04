@@ -68,7 +68,8 @@ const SidebarProvider = React.forwardRef<
 		},
 		ref,
 	) => {
-		const isMobile = useIsMobile()
+		// Default to false (desktop) during SSR to prevent hydration mismatch
+		const isMobile = useIsMobile() ?? false
 		const [openMobile, setOpenMobile] = React.useState(false)
 
 		// This is the internal state of the sidebar.
@@ -85,7 +86,7 @@ const SidebarProvider = React.forwardRef<
 				}
 
 				// This sets the cookie to keep the sidebar state.
-				document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+				document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax; Secure`
 			},
 			[setOpenProp, open],
 		)

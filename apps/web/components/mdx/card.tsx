@@ -37,7 +37,7 @@ export function Card({ title, description, href, icon, children, className }: Ca
 			</h3>
 
 			{/* Description */}
-			{description && <p className="mt-2 text-sm text-white/40 leading-relaxed">{description}</p>}
+			{description && <p className="mt-2 text-sm text-white/60 leading-relaxed">{description}</p>}
 
 			{/* Children */}
 			{children && <div className="mt-3 text-sm text-white/50">{children}</div>}

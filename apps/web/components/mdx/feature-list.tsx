@@ -23,12 +23,12 @@ export function Feature({ children, available = true, className }: FeatureProps)
 			<div
 				className={cn(
 					'flex items-center justify-center w-5 h-5 shrink-0 mt-0.5',
-					available ? 'bg-white/10 text-white' : 'bg-white/5 text-white/30',
+					available ? 'bg-white/10 text-white' : 'bg-white/5 text-white/50',
 				)}
 			>
 				<Check className="h-3 w-3" />
 			</div>
-			<span className={cn('text-sm', available ? 'text-white/70' : 'text-white/40')}>
+			<span className={cn('text-sm', available ? 'text-white/70' : 'text-white/60')}>
 				{children}
 			</span>
 		</li>
