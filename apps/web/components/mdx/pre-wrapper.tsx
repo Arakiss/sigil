@@ -107,8 +107,9 @@ export function PreWrapper({
 					<div
 						className={cn(
 							'p-4 text-sm leading-relaxed font-mono',
-							'[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0',
-							'[&_code]:!bg-transparent [&_.line]:block',
+							'[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:!border-0',
+							'[&_code]:!bg-transparent [&_code]:!border-0 [&_code]:!outline-0',
+							'[&_.line]:block [&_.line]:!border-0',
 						)}
 						dangerouslySetInnerHTML={{ __html: highlightedCode }}
 					/>
