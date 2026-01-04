@@ -132,8 +132,9 @@ export class LoggerImpl implements Logger {
 		const asyncContext = getContext()
 
 		// Sanitize metadata if enabled
+		// Note: sanitize() can return null/undefined for edge cases, so we fallback to empty object
 		const sanitizedMetadata = this.config.sanitize
-			? (sanitize(metadata, this.config.sanitizeFields) as LogMetadata)
+			? ((sanitize(metadata, this.config.sanitizeFields) as LogMetadata) ?? {})
 			: metadata
 
 		// Build log entry
