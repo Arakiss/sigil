@@ -82,7 +82,7 @@ export const features: Feature[] = [
 		icon: 'Server',
 		title: 'Flexible Transports',
 		description:
-			'Console, HTTP, File, Datadog, and more. Create custom transports with a simple interface. Batching and retry built-in.',
+			'Console, HTTP, File, Datadog, Sentry, and more. Create custom transports with a simple interface. Batching and retry built-in.',
 		link: {
 			text: 'Transport docs',
 			href: '/docs/transports',

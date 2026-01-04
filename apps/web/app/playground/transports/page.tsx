@@ -8,7 +8,7 @@ import { IS_SERVER, RUNTIME } from 'vestig'
 export const metadata: Metadata = {
 	title: 'Transports',
 	description:
-		'Multi-transport configuration demo showing Console, HTTP, File, and Datadog transports.',
+		'Multi-transport configuration demo showing Console, HTTP, File, Datadog, and Sentry transports.',
 }
 
 const transports = [
@@ -70,6 +70,21 @@ const transports = [
   tags: ['env:production'],
 })`,
 		features: ['Datadog integration', 'Automatic tagging', 'Source mapping'],
+	},
+	{
+		name: 'SentryTransport',
+		icon: <Antenna className="h-5 w-5" />,
+		color: 'text-rose-400',
+		bgColor: 'from-rose-500/20 to-red-500/20',
+		borderColor: 'border-rose-500/20',
+		description: 'Send errors and logs to Sentry for monitoring',
+		config: `new SentryTransport({
+  dsn: process.env.SENTRY_DSN,
+  environment: 'production',
+  release: '1.0.0',
+  minLevel: 'warn',
+})`,
+		features: ['Error tracking', 'Stack traces', 'Level filtering'],
 	},
 ]
 
@@ -160,6 +175,7 @@ export default async function TransportsPage() {
   ConsoleTransport,
   HTTPTransport,
   FileTransport,
+  SentryTransport,
 } from 'vestig'
 
 const log = createLogger({
@@ -181,6 +197,12 @@ const log = createLogger({
     new FileTransport({
       filename: './logs/app.log',
       maxSize: '50mb',
+    }),
+
+    // Sentry for error monitoring (warn+ only)
+    new SentryTransport({
+      dsn: process.env.SENTRY_DSN,
+      minLevel: 'warn',
     }),
   ],
 })

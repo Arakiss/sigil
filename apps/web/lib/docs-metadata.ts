@@ -90,8 +90,8 @@ export const docsMetadata: Record<string, DocPageMeta> = {
 	'/docs/transports': {
 		title: 'Transports',
 		description:
-			'Configure log destinations with Vestig transports. Console, HTTP, File, and Datadog integrations.',
-		keywords: ['log transports', 'logging destinations', 'datadog logging'],
+			'Configure log destinations with Vestig transports. Console, HTTP, File, Datadog, and Sentry integrations.',
+		keywords: ['log transports', 'logging destinations', 'datadog logging', 'sentry logging'],
 	},
 
 	// Next.js Integration

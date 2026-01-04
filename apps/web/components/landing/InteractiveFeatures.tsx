@@ -85,7 +85,7 @@ const features = [
 		id: 'transports',
 		title: 'Flexible Transports',
 		description:
-			'Console, HTTP, File, Datadog, and more. Create custom transports with a simple interface. Built-in batching and retry logic keeps your logs flowing.',
+			'Console, HTTP, File, Datadog, Sentry, and more. Create custom transports with a simple interface. Built-in batching and retry logic keeps your logs flowing.',
 		visualization: 'flow' as const,
 		link: {
 			text: 'Transport documentation',
@@ -279,6 +279,7 @@ function TransportsFlow() {
 		{ id: 'http', label: 'HTTP', icon: '🌐' },
 		{ id: 'file', label: 'File', icon: '📄' },
 		{ id: 'datadog', label: 'Datadog', icon: '🐕' },
+		{ id: 'sentry', label: 'Sentry', icon: '🔴' },
 	]
 
 	return (

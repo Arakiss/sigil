@@ -230,6 +230,7 @@ import {
   HTTPTransport,
   FileTransport,
   DatadogTransport,
+  SentryTransport,
   BatchTransport
 } from 'vestig'
 
@@ -262,6 +263,14 @@ const datadogTransport = new DatadogTransport({
   apiKey: process.env.DD_API_KEY,
   service: 'my-app',
   env: 'production'
+})
+
+// Sentry transport (error monitoring)
+const sentryTransport = new SentryTransport({
+  dsn: process.env.SENTRY_DSN,
+  environment: 'production',
+  release: '1.0.0',
+  minLevel: 'warn'
 })
 ```
 

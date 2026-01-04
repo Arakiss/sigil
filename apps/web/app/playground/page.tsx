@@ -115,7 +115,7 @@ const coreDemos = [
 const stats = [
 	{ value: '5', label: 'Runtimes', sublabel: 'Node, Bun, Edge, Browser, Deno' },
 	{ value: '6', label: 'Presets', sublabel: 'GDPR, HIPAA, PCI-DSS, Strict, Relaxed, None' },
-	{ value: '4', label: 'Transports', sublabel: 'Console, HTTP, File, Datadog' },
+	{ value: '5', label: 'Transports', sublabel: 'Console, HTTP, File, Datadog, Sentry' },
 	{ value: '0', label: 'Dependencies', sublabel: 'Zero external deps' },
 ]
 

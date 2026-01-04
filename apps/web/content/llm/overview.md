@@ -38,7 +38,7 @@ log.error('Request failed', { error: new Error('Timeout') })
 - [PII Sanitization](/docs/security/sanitization) - Automatic data redaction
 - [Native Tracing](/docs/tracing) - Distributed tracing with spans
 - [Context Propagation](/docs/tracing/context) - Request correlation
-- [Transports](/docs/transports) - Console, HTTP, File, Datadog
+- [Transports](/docs/transports) - Console, HTTP, File, Datadog, Sentry
 - [Sampling](/docs/sampling) - Control log volume
 
 ### Integration Guides
