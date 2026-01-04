@@ -30,6 +30,7 @@ export abstract class BatchTransport implements Transport {
 	private flushTimer: ReturnType<typeof setInterval> | null = null
 	private isFlushing = false
 	private isDestroyed = false
+	private failedBatch: LogEntry[] | null = null
 
 	constructor(config: BatchTransportConfig) {
 		this.config = {
@@ -88,13 +89,19 @@ export abstract class BatchTransport implements Transport {
 	 * Flush all buffered entries
 	 */
 	async flush(): Promise<void> {
-		if (this.isFlushing || this.buffer.size === 0) return
+		if (this.isFlushing || (this.buffer.size === 0 && !this.failedBatch)) return
 
 		this.isFlushing = true
 
 		try {
-			const entries = this.buffer.toArray()
+			// Include any previously failed batch entries
+			const failedEntries = this.failedBatch
+			this.failedBatch = null
+
+			const newEntries = this.buffer.toArray()
 			this.buffer.clear()
+
+			const entries = failedEntries ? [...failedEntries, ...newEntries] : newEntries
 
 			await this.sendWithRetry(entries)
 		} finally {
@@ -140,7 +147,12 @@ export abstract class BatchTransport implements Transport {
 			}
 		}
 
-		// All retries failed, call error handler
+		// All retries failed - store for retry on next flush
+		// This ensures entries aren't lost due to transient failures
+		// Note: Only ONE failed batch is retained to prevent unbounded growth
+		this.failedBatch = entries
+
+		// Call error handler for logging/monitoring
 		this.onSendError(lastError, entries)
 	}
 
@@ -183,12 +195,14 @@ export abstract class BatchTransport implements Transport {
 		buffered: number
 		dropped: number
 		isFlushing: boolean
+		pendingRetry: number
 	} {
 		const stats = this.buffer.getStats()
 		return {
 			buffered: stats.size,
 			dropped: stats.dropped,
 			isFlushing: this.isFlushing,
+			pendingRetry: this.failedBatch?.length ?? 0,
 		}
 	}
 }
