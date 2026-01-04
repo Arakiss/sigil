@@ -221,7 +221,18 @@ export interface HTTPTransportConfig extends BatchTransportConfig {
 	timeout?: number
 	/** Transform entries before sending */
 	transform?: (entries: LogEntry[]) => unknown
+	/**
+	 * Enable keep-alive connections (default: true).
+	 * When true, adds Connection: keep-alive header and enables
+	 * the fetch keepalive option for browser page-unload scenarios.
+	 */
+	keepAlive?: boolean
 }
+
+/**
+ * Rotation interval for time-based log rotation
+ */
+export type RotationInterval = 'hourly' | 'daily' | 'weekly' | 'none'
 
 /**
  * File transport configuration
@@ -235,6 +246,8 @@ export interface FileTransportConfig extends BatchTransportConfig {
 	maxFiles?: number
 	/** Compress rotated files with gzip (default: false) */
 	compress?: boolean
+	/** Time-based rotation interval (default: 'none' - only size-based rotation) */
+	rotateInterval?: RotationInterval
 }
 
 /**

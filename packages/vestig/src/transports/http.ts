@@ -7,6 +7,7 @@ import { BatchTransport } from './batch'
 const DEFAULTS = {
 	method: 'POST' as const,
 	timeout: 30000,
+	keepAlive: true,
 	headers: {
 		'Content-Type': 'application/json',
 	},
@@ -41,6 +42,7 @@ export class HTTPTransport extends BatchTransport {
 	private readonly headers: Record<string, string>
 	private readonly timeout: number
 	private readonly transform?: (entries: LogEntry[]) => unknown
+	private readonly keepAlive: boolean
 
 	constructor(config: HTTPTransportConfig) {
 		super({
@@ -51,9 +53,16 @@ export class HTTPTransport extends BatchTransport {
 		this.name = config.name ?? 'http'
 		this.url = config.url
 		this.method = config.method ?? DEFAULTS.method
-		this.headers = { ...DEFAULTS.headers, ...config.headers }
 		this.timeout = config.timeout ?? DEFAULTS.timeout
 		this.transform = config.transform
+		this.keepAlive = config.keepAlive ?? DEFAULTS.keepAlive
+
+		// Build headers with optional keep-alive
+		this.headers = {
+			...DEFAULTS.headers,
+			...(this.keepAlive ? { Connection: 'keep-alive' } : {}),
+			...config.headers,
+		}
 	}
 
 	/**
@@ -72,6 +81,9 @@ export class HTTPTransport extends BatchTransport {
 				headers: this.headers,
 				body,
 				signal: controller.signal,
+				// Enable keepalive for browser page-unload scenarios
+				// This ensures the request completes even during navigation
+				keepalive: this.keepAlive,
 			})
 
 			if (!response.ok) {
