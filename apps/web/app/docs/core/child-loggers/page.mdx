@@ -50,9 +50,37 @@ userRepo.info('User created')
 // → namespace: "app:user-service:repository"
 ```
 
-## Overriding Configuration
+## Configuration Merge Semantics
 
-Child loggers can have their own settings:
+Understanding how child logger configuration works is important for predictable behavior.
+
+### Merge Behavior
+
+Child loggers merge configuration with their parent using object spread:
+
+```typescript
+// Simplified internal implementation:
+const childConfig = {
+  ...parentConfig,    // Start with parent config
+  ...childOptions,    // Override with child options
+  namespace: fullNamespace,
+  context: { ...parentConfig.context, ...childOptions?.context }
+}
+```
+
+### Config Properties
+
+| Property | Inheritance Behavior |
+|----------|---------------------|
+| `level` | Child overrides parent if specified |
+| `enabled` | Child overrides parent if specified |
+| `structured` | Child overrides parent if specified |
+| `sanitize` | Child overrides parent if specified |
+| `context` | Merged (parent + child, child wins conflicts) |
+| `namespace` | Concatenated with `:` separator |
+| `transports` | **Not inherited** - use same instance |
+
+### Override Level
 
 ```typescript
 // Parent with info level
@@ -67,19 +95,94 @@ debugLogger.debug('This is visible')
 logger.debug('This is not visible')
 ```
 
-### Override Context
+### Context Merging
+
+Context is deeply merged, with child values taking precedence:
 
 ```typescript
 const logger = createLogger({
-  context: { service: 'api', version: '1.0' }
+  context: { service: 'api', version: '1.0', env: 'prod' }
 })
 
 const v2Logger = logger.child('v2', {
-  context: { version: '2.0' }
+  context: { version: '2.0' }  // Only override version
 })
 
 v2Logger.info('Request')
-// → context: { service: 'api', version: '2.0' }
+// → context: { service: 'api', version: '2.0', env: 'prod' }
+//            ↑ from parent    ↑ from child    ↑ from parent
+```
+
+### Transports Are Shared
+
+Child loggers share the same transport instances as their parent:
+
+```typescript
+const logger = createLogger()
+logger.addTransport(new HTTPTransport({ url: '...' }))
+
+const child = logger.child('module')
+
+// Both use the same HTTPTransport instance
+logger.info('Parent log')  // → sent via HTTPTransport
+child.info('Child log')    // → sent via same HTTPTransport
+```
+
+## Caching Behavior
+
+### With No Config (Cached)
+
+Child loggers without config options are cached via `WeakRef`:
+
+```typescript
+const logger = createLogger()
+
+const child1 = logger.child('api')
+const child2 = logger.child('api')
+
+child1 === child2  // true (same instance)
+```
+
+This prevents memory bloat when creating child loggers repeatedly (e.g., per-request).
+
+### With Config (Not Cached)
+
+Child loggers with config options are never cached:
+
+```typescript
+const logger = createLogger()
+
+const child1 = logger.child('api', { level: 'debug' })
+const child2 = logger.child('api', { level: 'debug' })
+
+child1 === child2  // false (different instances)
+```
+
+### Memory Management
+
+Cached children use `WeakRef`, allowing garbage collection when no references remain:
+
+```typescript
+function processRequest(id: string) {
+  const requestLogger = logger.child(id)  // Cached by namespace
+  requestLogger.info('Processing')
+  // When function exits and no references remain, GC can collect
+}
+
+// Safe to call millions of times - old children are GC'd
+for (let i = 0; i < 1000000; i++) {
+  processRequest(`req-${i}`)
+}
+```
+
+**Tip:** For request-scoped logging with unique IDs, use context instead of namespace:
+
+```typescript
+// ✅ Better: Single cached child, unique context per request
+function processRequest(id: string) {
+  const requestLogger = logger.child('request', { context: { requestId: id } })
+  requestLogger.info('Processing')
+}
 ```
 
 ## Use Cases

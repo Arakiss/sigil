@@ -33,6 +33,76 @@ interface Transport {
 }
 ```
 
+## Sync vs Async Logging
+
+The `log()` method can be synchronous or asynchronous:
+
+```typescript
+interface Transport {
+  // Can return void (sync) or Promise<void> (async)
+  log(entry: LogEntry): void | Promise<void>
+}
+```
+
+### When to Use Sync
+
+Use synchronous `log()` when:
+- Buffering internally (most common)
+- Writing to console
+- No I/O operations needed
+
+```typescript
+class BufferingTransport implements Transport {
+  private buffer: LogEntry[] = []
+
+  // Sync: Just adds to buffer, no waiting
+  log(entry: LogEntry): void {
+    this.buffer.push(entry)
+  }
+}
+```
+
+### When to Use Async
+
+Use asynchronous `log()` when:
+- Each log requires immediate I/O
+- You need backpressure handling
+- Testing or debugging
+
+```typescript
+class ImmediateHttpTransport implements Transport {
+  // Async: Each log is sent immediately
+  async log(entry: LogEntry): Promise<void> {
+    await fetch(this.url, {
+      method: 'POST',
+      body: JSON.stringify(entry)
+    })
+  }
+}
+```
+
+**Warning:** Async `log()` without batching can severely impact performance. The logger awaits each transport's `log()` method. Prefer `BatchTransport` for network operations.
+
+### Logger Behavior
+
+The logger handles both sync and async transports:
+
+```typescript
+// Internal logger behavior (simplified):
+for (const transport of this.transports) {
+  const result = transport.log(entry)
+  // If async, the promise is NOT awaited by default
+  // Logs are fire-and-forget for performance
+}
+```
+
+To ensure delivery, call `logger.flush()`:
+
+```typescript
+logger.info('Important message')
+await logger.flush()  // Waits for all transports to complete
+```
+
 ## Quick Start: Simple Transport
 
 The simplest transport just implements `name`, `config`, and `log`:
