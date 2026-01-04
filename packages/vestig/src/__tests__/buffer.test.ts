@@ -241,4 +241,119 @@ describe('CircularBuffer', () => {
 			expect(buffer.size).toBeLessThanOrEqual(3)
 		})
 	})
+
+	describe('iterator pattern', () => {
+		test('should support for...of loops', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			const result: number[] = []
+			for (const item of buffer) {
+				result.push(item)
+			}
+
+			expect(result).toEqual([1, 2, 3])
+		})
+
+		test('should support spread operator', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			expect([...buffer]).toEqual([1, 2, 3])
+		})
+
+		test('should support Array.from', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			expect(Array.from(buffer)).toEqual([1, 2, 3])
+		})
+
+		test('should iterate in correct order after wrapping', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 3 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+			buffer.push(4) // wraps, drops 1
+			buffer.push(5) // drops 2
+
+			expect([...buffer]).toEqual([3, 4, 5])
+		})
+
+		test('should not remove items during iteration', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			// First iteration
+			const first = [...buffer]
+
+			// Second iteration should return same items
+			const second = [...buffer]
+
+			expect(first).toEqual([1, 2, 3])
+			expect(second).toEqual([1, 2, 3])
+			expect(buffer.size).toBe(3)
+		})
+
+		test('should handle empty buffer iteration', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+
+			const result: number[] = []
+			for (const item of buffer) {
+				result.push(item)
+			}
+
+			expect(result).toEqual([])
+		})
+
+		test('should support values() method', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			const result: number[] = []
+			for (const item of buffer.values()) {
+				result.push(item)
+			}
+
+			expect(result).toEqual([1, 2, 3])
+		})
+
+		test('should work with destructuring', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			const [first, second, third] = buffer
+
+			expect(first).toBe(1)
+			expect(second).toBe(2)
+			expect(third).toBe(3)
+		})
+
+		test('should work with Array.prototype methods via spread', () => {
+			const buffer = new CircularBuffer<number>({ maxSize: 5 })
+			buffer.push(1)
+			buffer.push(2)
+			buffer.push(3)
+
+			const sum = [...buffer].reduce((acc, n) => acc + n, 0)
+			const mapped = [...buffer].map((n) => n * 2)
+			const filtered = [...buffer].filter((n) => n > 1)
+
+			expect(sum).toBe(6)
+			expect(mapped).toEqual([2, 4, 6])
+			expect(filtered).toEqual([2, 3])
+		})
+	})
 })

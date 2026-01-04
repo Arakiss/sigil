@@ -8,8 +8,10 @@ export interface CircularBufferConfig {
 
 /**
  * A memory-safe circular buffer for storing log entries
+ *
+ * Implements the Iterable protocol for use with for...of loops
  */
-export class CircularBuffer<T> {
+export class CircularBuffer<T> implements Iterable<T> {
 	private buffer: (T | undefined)[]
 	private head = 0
 	private tail = 0
@@ -71,15 +73,53 @@ export class CircularBuffer<T> {
 	 */
 	toArray(): T[] {
 		const result: T[] = []
+		for (const item of this) {
+			result.push(item)
+		}
+		return result
+	}
+
+	/**
+	 * Iterator implementation for for...of loops
+	 *
+	 * Iterates from oldest to newest without removing items.
+	 *
+	 * @example
+	 * ```typescript
+	 * const buffer = new CircularBuffer<number>({ maxSize: 10 })
+	 * buffer.push(1)
+	 * buffer.push(2)
+	 * buffer.push(3)
+	 *
+	 * for (const item of buffer) {
+	 *   console.log(item)  // 1, 2, 3
+	 * }
+	 *
+	 * // Spread operator
+	 * const arr = [...buffer]  // [1, 2, 3]
+	 *
+	 * // Array.from
+	 * const arr2 = Array.from(buffer)  // [1, 2, 3]
+	 * ```
+	 */
+	*[Symbol.iterator](): Iterator<T> {
 		let index = this.head
 		for (let i = 0; i < this.count; i++) {
 			const item = this.buffer[index]
 			if (item !== undefined) {
-				result.push(item)
+				yield item
 			}
 			index = (index + 1) % this.maxSize
 		}
-		return result
+	}
+
+	/**
+	 * Returns an iterator over buffer values (oldest first)
+	 *
+	 * Alias for [Symbol.iterator]() for explicit usage.
+	 */
+	values(): IterableIterator<T> {
+		return this[Symbol.iterator]() as IterableIterator<T>
 	}
 
 	/**
