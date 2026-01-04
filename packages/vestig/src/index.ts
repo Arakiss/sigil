@@ -18,6 +18,7 @@ export type {
 	FileTransportConfig,
 	RotationInterval,
 	DatadogTransportConfig,
+	SentryTransportConfig,
 	SerializedError,
 	Runtime,
 	// Sanitization types
@@ -106,6 +107,7 @@ export { BatchTransport } from './transports/batch'
 export { HTTPTransport, HTTPTransportError } from './transports/http'
 export { FileTransport } from './transports/file'
 export { DatadogTransport, DatadogTransportError } from './transports/datadog'
+export { SentryTransport, SentryTransportError } from './transports/sentry'
 
 // Tracing - standalone functions and utilities
 export {

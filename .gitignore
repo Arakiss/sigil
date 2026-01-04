@@ -30,6 +30,11 @@ npm-debug.log*
 # Coverage
 coverage/
 
+# Temporary/scratch files
+*.scratch.*
+ANALYSIS.md
+.ralph/
+
 # Bun
 bun.lockb
 .vercel

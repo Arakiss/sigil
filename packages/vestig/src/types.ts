@@ -332,6 +332,32 @@ export interface DatadogTransportConfig extends BatchTransportConfig {
 	tags?: string[]
 }
 
+/**
+ * Sentry transport configuration
+ */
+export interface SentryTransportConfig extends BatchTransportConfig {
+	/**
+	 * Sentry DSN (Data Source Name)
+	 * @example "https://abc123@o123456.ingest.sentry.io/1234567"
+	 */
+	dsn: string
+	/** Environment name (e.g., 'production', 'staging') */
+	environment?: string
+	/** Application release/version */
+	release?: string
+	/** Service name (added as 'service' tag) */
+	service?: string
+	/** Server name or hostname */
+	serverName?: string
+	/** Additional tags (key-value pairs) */
+	tags?: Record<string, string>
+	/**
+	 * Minimum log level to send to Sentry (default: 'warn')
+	 * Lower levels (trace, debug, info) are typically too verbose for Sentry
+	 */
+	minLevel?: LogLevel
+}
+
 // Re-export tracing types for convenience
 export type {
 	Span,
