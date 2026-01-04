@@ -82,6 +82,9 @@ export function getSubscriberCount(): number {
 /**
  * Create an SSE stream for log entries
  * Used by the /api/logs route to stream logs to the client
+ *
+ * Wraps each log entry with { type: 'log', ...entry } to match
+ * the format expected by VestigDevOverlay's useServerLogs hook.
  */
 export function createLogStream(): ReadableStream {
 	return new ReadableStream({
@@ -89,14 +92,16 @@ export function createLogStream(): ReadableStream {
 			// Send recent logs first
 			const recentLogs = logStore.getRecent()
 			for (const entry of recentLogs) {
-				const data = `data: ${JSON.stringify(entry)}\n\n`
+				// Wrap with type: 'log' for DevOverlay compatibility
+				const data = `data: ${JSON.stringify({ type: 'log', ...entry })}\n\n`
 				controller.enqueue(new TextEncoder().encode(data))
 			}
 
 			// Subscribe to new logs
 			const unsubscribe = logStore.subscribe((entry) => {
 				try {
-					const data = `data: ${JSON.stringify(entry)}\n\n`
+					// Wrap with type: 'log' for DevOverlay compatibility
+					const data = `data: ${JSON.stringify({ type: 'log', ...entry })}\n\n`
 					controller.enqueue(new TextEncoder().encode(data))
 				} catch {
 					// Stream closed

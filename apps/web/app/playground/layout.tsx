@@ -124,7 +124,7 @@ export default function PlaygroundLayout({
 			<VestigMetrics debug />
 
 			{/* Dev Overlay replaces LogPanel */}
-			<VestigDevOverlay position="bottom-right" />
+			<VestigDevOverlay position="bottom-right" endpoint="/api/logs" />
 		</div>
 	)
 }
