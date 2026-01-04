@@ -10,7 +10,7 @@ export function BlogClientLayout({ children }: { children: React.ReactNode }) {
 			<InnerNav section="Blog" />
 
 			{/* Main content */}
-			<main className="pt-14">
+			<main id="main-content" className="pt-14">
 				<div className="max-w-3xl mx-auto px-6 lg:px-8 py-12">
 					{/* Back to blog link */}
 					<Link

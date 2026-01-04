@@ -65,7 +65,7 @@ export default function BlogPage() {
 				{/* Featured Posts */}
 				{featuredPosts.length > 0 && (
 					<section className="mb-16">
-						<h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-6">
+						<h2 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-6">
 							Featured
 						</h2>
 						<div className="grid gap-6">
@@ -81,16 +81,16 @@ export default function BlogPage() {
 										>
 											{post.category}
 										</span>
-										<span className="flex items-center gap-1.5 text-xs text-white/40">
-											<Calendar className="h-3.5 w-3.5" />
+										<span className="flex items-center gap-1.5 text-xs text-white/50">
+											<Calendar className="h-3.5 w-3.5" aria-hidden="true" />
 											{new Date(post.date).toLocaleDateString('en-US', {
 												month: 'short',
 												day: 'numeric',
 												year: 'numeric',
 											})}
 										</span>
-										<span className="flex items-center gap-1.5 text-xs text-white/40">
-											<Clock className="h-3.5 w-3.5" />
+										<span className="flex items-center gap-1.5 text-xs text-white/50">
+											<Clock className="h-3.5 w-3.5" aria-hidden="true" />
 											{post.readTime}
 										</span>
 									</div>
@@ -111,7 +111,7 @@ export default function BlogPage() {
 				{/* Other Posts */}
 				{otherPosts.length > 0 && (
 					<section>
-						<h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-6">
+						<h2 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-6">
 							All Posts
 						</h2>
 						<div className="space-y-4">
@@ -133,7 +133,7 @@ export default function BlogPage() {
 											{post.title}
 										</h3>
 									</div>
-									<div className="text-sm text-white/40">{post.date}</div>
+									<div className="text-sm text-white/50">{post.date}</div>
 								</Link>
 							))}
 						</div>
@@ -143,7 +143,7 @@ export default function BlogPage() {
 				{/* Empty State */}
 				{posts.length === 0 && (
 					<div className="text-center py-16">
-						<p className="text-white/40">No posts yet. Check back soon!</p>
+						<p className="text-white/50">No posts yet. Check back soon!</p>
 					</div>
 				)}
 			</div>

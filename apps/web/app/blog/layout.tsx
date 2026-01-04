@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/constants'
 import type { Metadata } from 'next'
 import { BlogClientLayout } from './blog-client-layout'
 
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
 	openGraph: {
 		type: 'article',
 		siteName: 'Vestig',
+	},
+	alternates: {
+		types: {
+			'application/rss+xml': `${SITE_URL}/blog/feed.xml`,
+		},
 	},
 }
 
