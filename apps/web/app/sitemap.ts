@@ -1,3 +1,4 @@
+import { blogPosts } from '@/lib/blog-manifest'
 import type { MetadataRoute } from 'next'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vestig.dev'
@@ -87,19 +88,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		priority,
 	}))
 
-	// Blog pages
-	const blogPages = [
-		{ path: '/blog', priority: 0.9 },
-		{ path: '/blog/vestig-v0.7.0-deno-sampling', priority: 0.85 },
-		{ path: '/blog/why-vestig', priority: 0.85 },
+	// Blog pages - dynamically generated from blog manifest
+	const blogSitemap: MetadataRoute.Sitemap = [
+		// Blog index page
+		{
+			url: `${BASE_URL}/blog`,
+			lastModified: now,
+			changeFrequency: 'weekly' as const,
+			priority: 0.9,
+		},
+		// Individual blog posts from manifest
+		...blogPosts.map((post) => ({
+			url: `${BASE_URL}/blog/${post.slug}`,
+			lastModified: post.modifiedTime ? new Date(post.modifiedTime) : new Date(post.publishedTime),
+			changeFrequency: 'monthly' as const,
+			priority: 0.85,
+		})),
 	]
-
-	const blogSitemap: MetadataRoute.Sitemap = blogPages.map(({ path, priority }) => ({
-		url: `${BASE_URL}${path}`,
-		lastModified: now,
-		changeFrequency: 'weekly' as const,
-		priority,
-	}))
 
 	// Playground pages
 	const playgroundPages = [
