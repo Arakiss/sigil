@@ -1,6 +1,7 @@
 import { GlassCard, GlassCardBadge, GlassGrid } from '@/app/components/glass-card'
 import { Container } from '@/components/layout'
-import { getLogger, getRequestContext } from '@vestig/next'
+import { getDemoLogger } from '@/lib/demo-logger'
+import { getRequestContext } from '@vestig/next'
 import { Code, GitFork, Search, Server } from 'iconoir-react'
 import type { Metadata } from 'next'
 import { IS_SERVER, RUNTIME } from 'vestig'
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 /**
  * Simulated async data fetching with logging
  */
-async function fetchUser(id: number, log: Awaited<ReturnType<typeof getLogger>>) {
+async function fetchUser(id: number, log: Awaited<ReturnType<typeof getDemoLogger>>) {
 	log.debug('Fetching user', { userId: id })
 	await new Promise((r) => setTimeout(r, 100))
 	const user = {
@@ -27,7 +28,7 @@ async function fetchUser(id: number, log: Awaited<ReturnType<typeof getLogger>>)
 	return user
 }
 
-async function fetchPosts(userId: number, log: Awaited<ReturnType<typeof getLogger>>) {
+async function fetchPosts(userId: number, log: Awaited<ReturnType<typeof getDemoLogger>>) {
 	log.debug('Fetching posts for user', { userId })
 	await new Promise((r) => setTimeout(r, 80))
 	const posts = [
@@ -42,7 +43,7 @@ async function fetchPosts(userId: number, log: Awaited<ReturnType<typeof getLogg
  * Nested async component with context propagation
  */
 async function UserProfile({ userId }: { userId: number }) {
-	const profileLog = await getLogger('server-demo:profile')
+	const profileLog = await getDemoLogger('server-demo:profile')
 	profileLog.trace('UserProfile component rendering', { userId })
 
 	const user = await fetchUser(userId, profileLog)
@@ -72,7 +73,7 @@ async function UserProfile({ userId }: { userId: number }) {
 }
 
 export default async function ServerDemoPage() {
-	const log = await getLogger('server-demo')
+	const log = await getDemoLogger('server-demo')
 	const ctx = await getRequestContext()
 
 	log.info('Server Component page rendering', {

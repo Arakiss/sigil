@@ -1,6 +1,7 @@
 import { GlassCard, GlassGrid } from '@/app/components/glass-card'
 import { Container } from '@/components/layout'
-import { getLogger, getRequestContext } from '@vestig/next'
+import { getDemoLogger } from '@/lib/demo-logger'
+import { getRequestContext } from '@vestig/next'
 import { Code, Copy, Lock, Search } from 'iconoir-react'
 import type { Metadata } from 'next'
 import { IS_SERVER, PRESETS, RUNTIME, type SanitizePreset, Sanitizer } from 'vestig'
@@ -57,7 +58,7 @@ const presetColors: Record<string, string> = {
 }
 
 export default async function SanitizationPage() {
-	const log = await getLogger('sanitization-demo')
+	const log = await getDemoLogger('sanitization-demo')
 	const ctx = await getRequestContext()
 
 	log.info('PII Sanitization demo page rendering', {

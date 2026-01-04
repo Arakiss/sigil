@@ -1,6 +1,7 @@
 import { GlassCard, GlassGrid } from '@/app/components/glass-card'
 import { Container } from '@/components/layout'
-import { getLogger, getRequestContext } from '@vestig/next'
+import { getDemoLogger } from '@/lib/demo-logger'
+import { getRequestContext } from '@vestig/next'
 import { Antenna, Database, Folder, Globe, Settings, Shuffle, Terminal } from 'iconoir-react'
 import type { Metadata } from 'next'
 import { IS_SERVER, RUNTIME } from 'vestig'
@@ -89,7 +90,7 @@ const transports = [
 ]
 
 export default async function TransportsPage() {
-	const log = await getLogger('transports-demo')
+	const log = await getDemoLogger('transports-demo')
 	const ctx = await getRequestContext()
 
 	log.info('Transports demo page rendering', {

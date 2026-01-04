@@ -1,6 +1,7 @@
 import { GlassCard, GlassGrid } from '@/app/components/glass-card'
 import { Container } from '@/components/layout'
-import { getLogger, getRequestContext } from '@vestig/next'
+import { getDemoLogger } from '@/lib/demo-logger'
+import { getRequestContext } from '@vestig/next'
 import { Code, Link as LinkIcon, Play } from 'iconoir-react'
 import type { Metadata } from 'next'
 import { IS_SERVER, RUNTIME } from 'vestig'
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ActionsPage() {
-	const log = await getLogger('actions-demo')
+	const log = await getDemoLogger('actions-demo')
 	const ctx = await getRequestContext()
 
 	log.info('Server Actions demo page rendering', {

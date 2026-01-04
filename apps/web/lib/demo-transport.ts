@@ -69,8 +69,19 @@ class LogStore {
 	}
 }
 
+// Use globalThis to ensure singleton survives Next.js module isolation
+// This ensures Server Components and API Routes share the same instance
+const globalForLogStore = globalThis as typeof globalThis & {
+	__vestigDemoLogStore?: LogStore
+}
+
 // Global singleton for log collection (demo-specific)
-export const logStore = new LogStore()
+export const logStore = globalForLogStore.__vestigDemoLogStore ?? new LogStore()
+
+// Persist to globalThis in development to survive HMR and module isolation
+if (process.env.NODE_ENV !== 'production') {
+	globalForLogStore.__vestigDemoLogStore = logStore
+}
 
 /**
  * Get current subscriber count (for connection limiting)

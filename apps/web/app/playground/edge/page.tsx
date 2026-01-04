@@ -1,6 +1,7 @@
 import { GlassCard, GlassGrid } from '@/app/components/glass-card'
 import { Container } from '@/components/layout'
-import { getLogger, getRequestContext } from '@vestig/next'
+import { getDemoLogger } from '@/lib/demo-logger'
+import { getRequestContext } from '@vestig/next'
 import { Check, Code, Flash, Search, Settings, Xmark } from 'iconoir-react'
 import type { Metadata } from 'next'
 import { CAPABILITIES, IS_EDGE, IS_SERVER, RUNTIME } from 'vestig'
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export const runtime = 'edge'
 
 export default async function EdgePage() {
-	const log = await getLogger('edge-demo')
+	const log = await getDemoLogger('edge-demo')
 	const ctx = await getRequestContext()
 
 	log.info('Edge Runtime demo page rendering', {
