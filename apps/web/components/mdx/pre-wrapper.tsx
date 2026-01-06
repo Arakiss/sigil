@@ -3,13 +3,77 @@
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { Check, Copy } from 'iconoir-react'
-import { type ReactElement, type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react'
 import { codeToHtml } from 'shiki'
 
 interface PreWrapperProps {
 	children: ReactNode
 	className?: string
 	'data-language'?: string
+}
+
+// Parse meta string for features like {1,3-5} for highlighting or showLineNumbers
+function parseMetaString(meta: string | undefined): {
+	highlightLines: Set<number>
+	showLineNumbers: boolean
+	filename: string | null
+} {
+	const highlightLines = new Set<number>()
+	let showLineNumbers = true // Default to showing line numbers
+	let filename: string | null = null
+
+	if (!meta) return { highlightLines, showLineNumbers, filename }
+
+	// Parse highlight ranges like {1,3-5,8}
+	const highlightMatch = meta.match(/\{([^}]+)\}/)
+	if (highlightMatch) {
+		const ranges = highlightMatch[1].split(',')
+		for (const range of ranges) {
+			if (range.includes('-')) {
+				const [start, end] = range.split('-').map(Number)
+				for (let i = start; i <= end; i++) {
+					highlightLines.add(i)
+				}
+			} else {
+				highlightLines.add(Number(range))
+			}
+		}
+	}
+
+	// Parse showLineNumbers=false
+	if (meta.includes('showLineNumbers=false')) {
+		showLineNumbers = false
+	}
+
+	// Parse filename like title="app.ts" or filename="app.ts"
+	const filenameMatch = meta.match(/(?:title|filename)="([^"]+)"/)
+	if (filenameMatch) {
+		filename = filenameMatch[1]
+	}
+
+	return { highlightLines, showLineNumbers, filename }
+}
+
+// Extract lines from Shiki HTML output
+function extractLinesFromHtml(html: string): string[] {
+	// Shiki wraps each line in <span class="line">...</span>
+	const lineRegex = /<span class="line">([\s\S]*?)<\/span>/g
+	const lines: string[] = []
+	let match: RegExpExecArray | null
+
+	while ((match = lineRegex.exec(html)) !== null) {
+		lines.push(match[1])
+	}
+
+	// If no lines found (shouldn't happen), return the whole content
+	if (lines.length === 0) {
+		const codeMatch = html.match(/<code[^>]*>([\s\S]*?)<\/code>/)
+		if (codeMatch) {
+			return [codeMatch[1]]
+		}
+	}
+
+	return lines
 }
 
 export function PreWrapper({
@@ -19,26 +83,27 @@ export function PreWrapper({
 	...props
 }: PreWrapperProps) {
 	const { copied, copy } = useCopyToClipboard()
-	const [highlightedCode, setHighlightedCode] = useState<string | null>(null)
-	const preRef = useRef<HTMLDivElement>(null)
+	const [highlightedLines, setHighlightedLines] = useState<string[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 
-	// Extract language from code element's className or pre's className
-	const getLanguage = (): string => {
-		// Check if children is a code element with language class
+	// Extract language and meta from code element's className
+	const getLanguageAndMeta = (): { language: string; meta: string | undefined } => {
 		if (children && typeof children === 'object' && 'props' in children) {
-			const codeProps = (children as ReactElement<{ className?: string }>).props
+			const codeProps = (children as ReactElement<{ className?: string; meta?: string }>).props
 			const codeClassName = codeProps?.className || ''
 			const match = codeClassName.match(/language-(\w+)/)
-			if (match) return match[1]
+			return {
+				language: match ? match[1] : 'text',
+				meta: codeProps?.meta,
+			}
 		}
-		// Fallback to pre className or data attribute
-		if (dataLang) return dataLang
+		if (dataLang) return { language: dataLang, meta: undefined }
 		const langMatch = className?.match(/language-(\w+)/)
-		if (langMatch) return langMatch[1]
-		return 'text'
+		return { language: langMatch ? langMatch[1] : 'text', meta: undefined }
 	}
 
-	const language = getLanguage()
+	const { language, meta } = getLanguageAndMeta()
+	const { highlightLines, showLineNumbers, filename } = parseMetaString(meta)
 
 	// Extract raw code from children
 	const extractText = (node: ReactNode): string => {
@@ -54,11 +119,16 @@ export function PreWrapper({
 
 	const rawCode = extractText(children).trim()
 
+	// Memoize lines to avoid recalculating on every render
+	const lines = useMemo(() => rawCode.split('\n'), [rawCode])
+	const lineCount = lines.length
+	const gutterWidth = Math.max(2, String(lineCount).length)
+
 	// Highlight code on mount
 	useEffect(() => {
 		const highlight = async () => {
+			setIsLoading(true)
 			try {
-				// Map common aliases
 				const langMap: Record<string, string> = {
 					ts: 'typescript',
 					js: 'javascript',
@@ -70,80 +140,97 @@ export function PreWrapper({
 				}
 				const lang = langMap[language] || language
 
+				// Process entire code at once to preserve context (multi-line strings, etc.)
 				const html = await codeToHtml(rawCode, {
 					lang,
 					theme: 'github-dark',
 				})
 
-				setHighlightedCode(html)
+				const extractedLines = extractLinesFromHtml(html)
+				setHighlightedLines(extractedLines)
 			} catch {
-				// Fallback if language not supported
-				setHighlightedCode(null)
+				// Fallback to raw lines if highlighting fails
+				setHighlightedLines(lines.map((line) => escapeHtml(line)))
+			} finally {
+				setIsLoading(false)
 			}
 		}
 
 		if (rawCode) {
 			highlight()
 		}
-	}, [rawCode, language])
+	}, [rawCode, language, lines])
 
 	const handleCopy = () => copy(rawCode)
 
+	// Escape HTML for fallback rendering
+	function escapeHtml(text: string): string {
+		return text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;')
+	}
+
+	const renderLines = isLoading ? lines.map((line) => escapeHtml(line)) : highlightedLines
+
 	return (
-		<div
-			ref={preRef}
-			className="relative group my-6 bg-surface border border-white/[0.06] overflow-hidden"
-		>
-			{/* Language badge header */}
+		<div className="relative group my-6 bg-surface border border-white/[0.06] overflow-hidden">
+			{/* Header with language badge and optional filename */}
 			<div className="flex items-center justify-between px-4 py-2 bg-white/[0.02] border-b border-white/[0.06]">
-				<span className="text-[10px] uppercase tracking-widest text-white/50 font-medium">
-					{language}
-				</span>
+				<div className="flex items-center gap-3">
+					<span className="text-[10px] uppercase tracking-widest text-white/50 font-medium">
+						{language}
+					</span>
+					{filename && (
+						<>
+							<span className="text-white/20">·</span>
+							<span className="text-xs font-mono text-white/40">{filename}</span>
+						</>
+					)}
+				</div>
+				{/* Copy button in header */}
+				<button
+					type="button"
+					onClick={handleCopy}
+					className={cn(
+						'p-1.5 -mr-1.5 text-white/40 hover:text-white/70 transition-colors',
+						'opacity-0 group-hover:opacity-100',
+					)}
+					aria-label="Copy code"
+				>
+					{copied ? (
+						<Check className="h-3.5 w-3.5 text-green-400" />
+					) : (
+						<Copy className="h-3.5 w-3.5" />
+					)}
+				</button>
 			</div>
 
 			{/* Code content */}
 			<div className="relative overflow-x-auto scrollbar-thin">
-				{highlightedCode ? (
-					<div
-						className={cn(
-							'p-4 text-sm leading-normal font-mono',
-							'[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:!border-0',
-							'[&_code]:!bg-transparent [&_code]:!border-0 [&_code]:!outline-0',
-							'[&_.line]:block [&_.line]:!border-0',
-						)}
-						dangerouslySetInnerHTML={{ __html: highlightedCode }}
-					/>
-				) : (
-					<pre
-						className={cn(
-							'!p-4 text-sm leading-normal font-mono !bg-transparent !border-0 !m-0',
-							'[&_code]:!bg-transparent [&_code]:!p-0',
-							className,
-						)}
-						{...props}
-					>
-						<code className="text-white/70">{rawCode}</code>
-					</pre>
-				)}
+				<pre className="!p-0 text-sm font-mono !bg-transparent !border-0 !m-0">
+					<code className="!bg-transparent block">
+						{renderLines.map((lineHtml, i) => (
+							<div key={i} className={cn('flex', highlightLines.has(i + 1) && 'bg-yellow-500/10')}>
+								{showLineNumbers && (
+									<span
+										className="select-none text-white/20 text-right pr-4 pl-4 py-0.5 border-r border-white/[0.06] bg-white/[0.01] shrink-0"
+										style={{ minWidth: `${gutterWidth + 2}ch` }}
+									>
+										{i + 1}
+									</span>
+								)}
+								<span
+									className={cn('flex-1 px-4 py-0.5', isLoading && 'text-white/70')}
+									dangerouslySetInnerHTML={{ __html: lineHtml || '&nbsp;' }}
+								/>
+							</div>
+						))}
+					</code>
+				</pre>
 			</div>
-
-			{/* Copy button */}
-			<button
-				type="button"
-				onClick={handleCopy}
-				className={cn(
-					'absolute top-2 right-2 p-2 bg-white/5 border border-white/10',
-					'opacity-0 group-hover:opacity-100 transition-all duration-200',
-					'hover:bg-white/10 hover:border-white/20',
-				)}
-				aria-label="Copy code"
-			>
-				{copied ? (
-					<Check className="h-4 w-4 text-green-400" />
-				) : (
-					<Copy className="h-4 w-4 text-white/60" />
-				)}
-			</button>
 		</div>
 	)
 }
