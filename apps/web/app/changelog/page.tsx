@@ -28,6 +28,68 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.13.0',
+		date: '2026-01-06',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.12.0...v0.13.0',
+		features: [
+			'Wide Events (Canonical Log Lines) - comprehensive single-event records per operation',
+			'Tail Sampling for wide events - outcome-based sampling (100% errors, sample success)',
+			'WideEventBuilder for accumulating context throughout request lifecycle',
+			'Request-scoped wide event context via AsyncLocalStorage',
+			'HTTP request and background job event schemas',
+			'Next.js wide events integration with middleware and server actions',
+		],
+		docs: [
+			'Add Wide Events documentation with tail sampling guide',
+			'Add Next.js wide events integration guide',
+			'Update README with Wide Events section and examples',
+		],
+		tests: ['Add comprehensive tests for wide events builder, context, and schemas'],
+	},
+	{
+		version: '0.12.0',
+		date: '2026-01-06',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.5...v0.12.0',
+		features: [
+			'Implement emitWideEvent() method in Logger for wide event emission',
+			'Add TailSampler for outcome-based wide event sampling',
+			'Export wide events module from main package entry point',
+		],
+		fixes: ['Resolve all BiomeJS linting errors (import ordering, non-null assertions)'],
+	},
+	{
+		version: '0.11.5',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.4...v0.11.5',
+		fixes: ['Replace Unicode box-drawing characters with ASCII in documentation'],
+	},
+	{
+		version: '0.11.4',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.3...v0.11.4',
+		features: ['Enable GFM (GitHub Flavored Markdown) support for tables in MDX'],
+		docs: ['Update README to reflect current v0.11.3 release'],
+		refactoring: ['Redesign error page with enhanced visuals'],
+	},
+	{
+		version: '0.11.3',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.2...v0.11.3',
+		fixes: ['Correct error page button styling'],
+	},
+	{
+		version: '0.11.2',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.1...v0.11.2',
+		fixes: ['Remove double border from MDX code blocks'],
+	},
+	{
+		version: '0.11.1',
+		date: '2026-01-04',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.11.0...v0.11.1',
+		fixes: ['Resolve critical issues from codebase analysis'],
+	},
+	{
 		version: '0.11.0',
 		date: '2026-01-04',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.10.1...v0.11.0',

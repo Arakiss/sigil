@@ -8,10 +8,10 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 [![npm version](https://img.shields.io/npm/v/vestig.svg)](https://www.npmjs.com/package/vestig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/tests-824%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
+[![Test Coverage](https://img.shields.io/badge/tests-898%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**v0.11.3** · Beta · Active Development
+**v0.13.0** · Beta · Active Development
 
 </div>
 
@@ -23,11 +23,11 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 
 | Metric | Status |
 |--------|--------|
-| **Version** | v0.11.3 |
+| **Version** | v0.13.0 |
 | **Stage** | Beta - API stable |
-| **Tests** | 824 passing (1,602 assertions) |
-| **Core Coverage** | 90%+ |
-| **Releases** | 16 versions published |
+| **Tests** | 898 passing |
+| **Core Coverage** | 81%+ |
+| **Releases** | 18 versions published |
 | **Packages** | 2 (`vestig`, `@vestig/next`) |
 
 ### Packages
@@ -48,6 +48,7 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 | Runtime Agnostic | ✅ | ❌ | ❌ | ❌ |
 | Auto PII Sanitization | ✅ | ❌ | ❌ | ❌ |
 | GDPR/HIPAA/PCI-DSS Presets | ✅ | ❌ | ❌ | ❌ |
+| Wide Events / Tail Sampling | ✅ | ❌ | ❌ | ❌ |
 | Zero Config | ✅ | ✅ | ❌ | ❌ |
 | TypeScript First | ✅ | ✅ | ⚠️ | ❌ |
 | Edge Runtime Support | ✅ | ❌ | ❌ | ❌ |
@@ -121,7 +122,7 @@ export default async function Page() {
 Send logs to multiple destinations simultaneously:
 
 ```typescript
-import { createLogger, ConsoleTransport, HTTPTransport, DatadogTransport } from 'vestig'
+import { createLogger, HTTPTransport, DatadogTransport, SentryTransport } from 'vestig'
 
 const log = createLogger()
 
@@ -140,10 +141,18 @@ log.addTransport(new DatadogTransport({
   tags: ['env:production'],
 }))
 
+// Add Sentry for error tracking
+log.addTransport(new SentryTransport({
+  name: 'sentry',
+  dsn: process.env.SENTRY_DSN,
+  environment: 'production',
+  minLevel: 'warn', // Only send warn/error to Sentry
+}))
+
 // Initialize transports (starts flush timers)
 await log.init()
 
-// All logs go to console, HTTP endpoint, and Datadog
+// All logs go to console, HTTP endpoint, Datadog, and Sentry
 log.info('Server started', { port: 3000 })
 ```
 
@@ -155,6 +164,7 @@ log.info('Server started', { port: 3000 })
 | `HTTPTransport` | Send to any HTTP endpoint | Custom log aggregation |
 | `FileTransport` | Write to files with rotation | Server-side logging |
 | `DatadogTransport` | Datadog Log Management | Production observability |
+| `SentryTransport` | Sentry error tracking | Error monitoring, alerting |
 
 ### PII Sanitization with Presets
 
@@ -238,6 +248,44 @@ const rateLimitedLogger = createLogger({
 | `createCompositeSampler` | Combine multiple samplers | Complex sampling logic |
 
 For more details, see the [Sampling documentation](https://vestig.dev/docs/sampling).
+
+### Wide Events (Canonical Log Lines)
+
+Wide Events capture **all context about a complete operation in ONE structured event**. Instead of scattered logs, you get a single comprehensive record per request.
+
+```typescript
+import { createLogger, createWideEvent } from 'vestig'
+
+const log = createLogger({
+  tailSampling: {
+    enabled: true,
+    alwaysKeepStatuses: ['error'],  // 100% of errors
+    slowThresholdMs: 2000,          // 100% of slow requests
+    successSampleRate: 0.1,         // 10% of successful requests
+  }
+})
+
+// Create and enrich the wide event throughout the request
+const event = createWideEvent({ type: 'http.request' })
+
+// Add context as you go
+event.merge('http', { method: 'POST', path: '/api/checkout', status_code: 200 })
+event.merge('user', { id: 'user-456', subscription: 'premium' })
+event.merge('performance', { db_query_ms: 45, external_api_ms: 230 })
+
+// End and emit the event
+const completedEvent = event.end({ status: 'success' })
+log.emitWideEvent(completedEvent)
+
+// Output: ONE event with 50+ fields, easily queryable
+```
+
+**Why Wide Events?**
+- **Debug faster**: All context in one place, no log correlation needed
+- **Reduce costs**: Tail sampling keeps 100% of errors, samples success
+- **Better queries**: "Show me slow requests from premium users with payment errors"
+
+For more details, see the [Wide Events documentation](https://vestig.dev/docs/wide-events).
 
 ### Custom Sanitization
 

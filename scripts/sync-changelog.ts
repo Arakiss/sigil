@@ -1,13 +1,16 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
+
 /**
  * Changelog Sync Script
- *
- * This script validates that the changelog page is up-to-date with git tags.
+ * =====================
+ * This script validates that the web changelog page is up-to-date with git tags.
  * Run during CI or as a pre-push hook to ensure changelog stays synchronized.
  *
+ * STRICT MODE: Fails (exit 1) if changelog is out of sync.
+ *
  * Usage:
- *   node scripts/sync-changelog.js        # Check mode (exits with error if out of sync)
- *   node scripts/sync-changelog.js --fix  # Show instructions for what's missing
+ *   bun scripts/sync-changelog.ts        # Check mode (exits with error if out of sync)
+ *   bun scripts/sync-changelog.ts --fix  # Show instructions for what's missing
  */
 
 import { execSync } from 'node:child_process'
@@ -27,13 +30,25 @@ const colors = {
 	yellow: '\x1b[33m',
 	blue: '\x1b[34m',
 	cyan: '\x1b[36m',
+} as const
+
+type ColorName = keyof typeof colors
+
+interface CategorizedCommits {
+	features: string[]
+	fixes: string[]
+	docs: string[]
+	tests: string[]
+	breaking: string[]
+	refactoring: string[]
+	cicd: string[]
 }
 
-function log(color, message) {
+function log(color: ColorName, message: string): void {
 	console.log(`${colors[color] || ''}${message}${colors.reset}`)
 }
 
-function getGitTags() {
+function getGitTags(): string[] {
 	try {
 		const output = execSync('git tag --sort=-version:refname', {
 			cwd: ROOT,
@@ -43,13 +58,13 @@ function getGitTags() {
 			.split('\n')
 			.filter((tag) => tag.startsWith('v'))
 			.map((tag) => tag.slice(1))
-	} catch (error) {
+	} catch {
 		log('red', 'Error: Failed to get git tags')
 		process.exit(1)
 	}
 }
 
-function getChangelogVersions() {
+function getChangelogVersions(): string[] {
 	try {
 		const changelogPath = resolve(ROOT, 'apps/web/app/changelog/page.tsx')
 		const content = readFileSync(changelogPath, 'utf-8')
@@ -57,13 +72,13 @@ function getChangelogVersions() {
 		// Extract versions from changelog entries
 		const versionMatches = content.matchAll(/version:\s*['"]([0-9]+\.[0-9]+\.[0-9]+)['"]/g)
 		return [...versionMatches].map((m) => m[1])
-	} catch (error) {
+	} catch {
 		log('red', 'Error: Failed to read changelog page')
 		process.exit(1)
 	}
 }
 
-function getTagDate(tag) {
+function getTagDate(tag: string): string {
 	try {
 		const output = execSync(`git log -1 --format=%ci v${tag}`, {
 			cwd: ROOT,
@@ -75,7 +90,7 @@ function getTagDate(tag) {
 	}
 }
 
-function getTagCommits(fromTag, toTag) {
+function getTagCommits(fromTag: string | null, toTag: string): string[] {
 	try {
 		const range = fromTag ? `v${fromTag}..v${toTag}` : `v${toTag}`
 		const output = execSync(`git log ${range} --oneline`, {
@@ -88,7 +103,9 @@ function getTagCommits(fromTag, toTag) {
 	}
 }
 
-function categorizeCommit(message) {
+type CommitCategory = keyof CategorizedCommits | null
+
+function categorizeCommit(message: string): CommitCategory {
 	const lower = message.toLowerCase()
 	if (lower.includes('feat:') || lower.includes('feat(')) return 'features'
 	if (lower.includes('fix:') || lower.includes('fix(')) return 'fixes'
@@ -102,9 +119,9 @@ function categorizeCommit(message) {
 	return null
 }
 
-function generateEntryCode(version, prevVersion, date) {
+function generateEntryCode(version: string, prevVersion: string | null, date: string): string {
 	const commits = getTagCommits(prevVersion, version)
-	const categorized = {
+	const categorized: CategorizedCommits = {
 		features: [],
 		fixes: [],
 		docs: [],
@@ -131,7 +148,7 @@ function generateEntryCode(version, prevVersion, date) {
 		}
 	}
 
-	const lines = [
+	const lines: string[] = [
 		'\t{',
 		`\t\tversion: '${version}',`,
 		`\t\tdate: '${date}',`,
@@ -153,7 +170,7 @@ function generateEntryCode(version, prevVersion, date) {
 	return lines.join('\n')
 }
 
-function main() {
+function main(): void {
 	const fixMode = process.argv.includes('--fix')
 
 	log('bold', '\n🔍 Changelog Sync Validator\n')
@@ -173,7 +190,7 @@ function main() {
 		process.exit(0)
 	}
 
-	log('yellow', `\n⚠️  Missing ${missingVersions.length} version(s) in changelog:`)
+	log('red', `\n❌ Missing ${missingVersions.length} version(s) in changelog:`)
 	for (const version of missingVersions) {
 		console.log(`   - v${version} (tagged on ${getTagDate(version)})`)
 	}
@@ -193,9 +210,12 @@ function main() {
 		}
 	} else {
 		log('yellow', '\nRun with --fix to see suggested changelog entries:')
-		console.log('  node scripts/sync-changelog.js --fix\n')
+		console.log('  bun scripts/sync-changelog.ts --fix\n')
 	}
 
+	// STRICT: Always fail if changelog is out of sync
+	log('red', '\n❌ Push blocked: Changelog is out of sync with git tags.')
+	log('yellow', '   Please update apps/web/app/changelog/page.tsx before pushing.\n')
 	process.exit(1)
 }
 

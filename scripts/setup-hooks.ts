@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Git Hooks Setup Script
@@ -7,10 +7,18 @@
  * This runs via the "prepare" script in package.json.
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const HOOKS_DIR = path.join(__dirname, '..', '.git', 'hooks')
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
+const HOOKS_DIR = join(ROOT, '.git', 'hooks')
+
+interface Hook {
+	name: string
+	content: string
+}
 
 // Pre-push hook: validates versions, docs, and changelog before pushing to remote
 const PRE_PUSH_HOOK = `#!/bin/sh
@@ -26,7 +34,7 @@ if [ "$current_branch" != "main" ]; then
 fi
 
 echo "🔍 Running version validation before push..."
-node scripts/validate-version.js
+bun scripts/validate-version.ts
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -40,7 +48,7 @@ echo "✅ Version validation passed"
 
 echo ""
 echo "🔍 Running documentation validation..."
-node scripts/validate-docs.js
+bun scripts/validate-docs.ts
 
 if [ $? -eq 1 ]; then
     echo ""
@@ -52,14 +60,14 @@ fi
 
 echo ""
 echo "🔍 Running changelog sync validation..."
-node scripts/sync-changelog.js
+bun scripts/sync-changelog.ts
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo "⚠️  Warning: Changelog may be out of sync"
-    echo "   Run 'node scripts/sync-changelog.js --fix' for suggestions"
+    echo "❌ Push blocked: Changelog is out of sync"
+    echo "   Run 'bun scripts/sync-changelog.ts --fix' for suggestions"
     echo ""
-    # Just warn, don't block push
+    exit 1
 fi
 
 exit 0
@@ -84,14 +92,14 @@ fi
 exit 0
 `
 
-function setupHooks() {
+function setupHooks(): void {
 	// Check if we're in a git repository
-	if (!fs.existsSync(HOOKS_DIR)) {
+	if (!existsSync(HOOKS_DIR)) {
 		console.log('⚠️  Not a git repository or .git/hooks not found. Skipping hook setup.')
 		return
 	}
 
-	const hooks = [
+	const hooks: Hook[] = [
 		{ name: 'pre-push', content: PRE_PUSH_HOOK },
 		{ name: 'pre-commit', content: PRE_COMMIT_HOOK },
 	]
@@ -99,21 +107,21 @@ function setupHooks() {
 	console.log('🔧 Setting up git hooks...')
 
 	for (const hook of hooks) {
-		const hookPath = path.join(HOOKS_DIR, hook.name)
+		const hookPath = join(HOOKS_DIR, hook.name)
 
 		// Check if hook already exists (and is not a sample)
-		if (fs.existsSync(hookPath) && !hookPath.endsWith('.sample')) {
-			const existing = fs.readFileSync(hookPath, 'utf8')
+		if (existsSync(hookPath) && !hookPath.endsWith('.sample')) {
+			const existing = readFileSync(hookPath, 'utf8')
 			if (existing.includes('vestig') || existing.includes('validate-version')) {
 				console.log(`   ✓ ${hook.name} hook already installed`)
 				continue
 			}
 			// Backup existing hook
-			fs.copyFileSync(hookPath, `${hookPath}.backup`)
+			copyFileSync(hookPath, `${hookPath}.backup`)
 			console.log(`   ⚠️  Backed up existing ${hook.name} to ${hook.name}.backup`)
 		}
 
-		fs.writeFileSync(hookPath, hook.content, { mode: 0o755 })
+		writeFileSync(hookPath, hook.content, { mode: 0o755 })
 		console.log(`   ✓ Installed ${hook.name} hook`)
 	}
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Version Validation Script
@@ -6,52 +6,70 @@
  * Validates that package versions are:
  * 1. Synchronized across all packages
  * 2. Sequential (no gaps like 0.4.0 → 0.7.0)
- * 3. Consistent with git tags
+ * 3. Consistent with git tags and npm
  *
- * Run: node scripts/validate-version.js
+ * Run: bun scripts/validate-version.ts
  * Exit codes:
  *   0 = All validations passed
  *   1 = Validation failed
  */
 
-const fs = require('node:fs')
-const { execSync } = require('node:child_process')
-const path = require('node:path')
+import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
 
 // Configuration
-const PACKAGES = ['packages/vestig/package.json', 'packages/vestig-next/package.json']
+const PACKAGES = ['packages/vestig/package.json', 'packages/vestig-next/package.json'] as const
 
 const ROOT_PACKAGE = 'package.json'
 
 // Colors for console output
 const colors = {
-	red: (text) => `\x1b[31m${text}\x1b[0m`,
-	green: (text) => `\x1b[32m${text}\x1b[0m`,
-	yellow: (text) => `\x1b[33m${text}\x1b[0m`,
-	blue: (text) => `\x1b[34m${text}\x1b[0m`,
-	bold: (text) => `\x1b[1m${text}\x1b[0m`,
+	red: (text: string): string => `\x1b[31m${text}\x1b[0m`,
+	green: (text: string): string => `\x1b[32m${text}\x1b[0m`,
+	yellow: (text: string): string => `\x1b[33m${text}\x1b[0m`,
+	blue: (text: string): string => `\x1b[34m${text}\x1b[0m`,
+	bold: (text: string): string => `\x1b[1m${text}\x1b[0m`,
 }
 
-function log(message) {
+interface ParsedVersion {
+	major: number
+	minor: number
+	patch: number
+	prerelease: string | null
+	raw: string
+}
+
+interface BumpResult {
+	valid: boolean
+	type?: 'major' | 'minor' | 'patch' | 'none'
+	reason?: string
+}
+
+function log(message: string): void {
 	console.log(message)
 }
 
-function error(message) {
+function error(message: string): void {
 	console.error(colors.red(`❌ ${message}`))
 }
 
-function success(message) {
+function success(message: string): void {
 	console.log(colors.green(`✅ ${message}`))
 }
 
-function warn(message) {
+function warn(message: string): void {
 	console.log(colors.yellow(`⚠️  ${message}`))
 }
 
 /**
  * Parse semantic version string
  */
-function parseVersion(version) {
+function parseVersion(version: string): ParsedVersion | null {
 	const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/)
 	if (!match) return null
 	return {
@@ -66,16 +84,16 @@ function parseVersion(version) {
 /**
  * Get all package versions
  */
-function getPackageVersions() {
-	const versions = {}
+function getPackageVersions(): Record<string, string> {
+	const versions: Record<string, string> = {}
 
 	// Root package
-	const rootPkg = JSON.parse(fs.readFileSync(ROOT_PACKAGE, 'utf8'))
+	const rootPkg = JSON.parse(readFileSync(resolve(ROOT, ROOT_PACKAGE), 'utf8'))
 	versions.root = rootPkg.version
 
 	// Sub-packages
 	for (const pkgPath of PACKAGES) {
-		const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+		const pkg = JSON.parse(readFileSync(resolve(ROOT, pkgPath), 'utf8'))
 		versions[pkg.name] = pkg.version
 	}
 
@@ -85,10 +103,11 @@ function getPackageVersions() {
 /**
  * Get the latest git tag
  */
-function getLatestTag() {
+function getLatestTag(): string | null {
 	try {
 		const tag = execSync('git describe --tags --abbrev=0 2>/dev/null', {
 			encoding: 'utf8',
+			cwd: ROOT,
 		}).trim()
 		return tag.startsWith('v') ? tag.slice(1) : tag
 	} catch {
@@ -99,10 +118,11 @@ function getLatestTag() {
 /**
  * Get all git tags sorted by version
  */
-function getAllTags() {
+function getAllTags(): string[] {
 	try {
 		const tags = execSync('git tag -l "v*" --sort=-version:refname 2>/dev/null', {
 			encoding: 'utf8',
+			cwd: ROOT,
 		})
 			.trim()
 			.split('\n')
@@ -117,7 +137,7 @@ function getAllTags() {
 /**
  * Get the latest version published on npm
  */
-function getNpmVersion(packageName) {
+function getNpmVersion(packageName: string): string | null {
 	try {
 		const version = execSync(`npm view ${packageName} version 2>/dev/null`, {
 			encoding: 'utf8',
@@ -132,7 +152,7 @@ function getNpmVersion(packageName) {
  * Compare two semantic versions
  * Returns: -1 if a < b, 0 if a === b, 1 if a > b
  */
-function compareVersions(a, b) {
+function compareVersions(a: string, b: string): number {
 	const vA = parseVersion(a)
 	const vB = parseVersion(b)
 	if (!vA || !vB) return 0
@@ -146,7 +166,7 @@ function compareVersions(a, b) {
 /**
  * Check if version bump is valid (no gaps)
  */
-function isValidBump(from, to) {
+function isValidBump(from: string, to: string): BumpResult {
 	const fromV = parseVersion(from)
 	const toV = parseVersion(to)
 
@@ -182,7 +202,7 @@ function isValidBump(from, to) {
 /**
  * Main validation
  */
-function validate() {
+function validate(): void {
 	log(colors.bold('\n🔍 Vestig Version Validator\n'))
 	log('━'.repeat(50))
 
@@ -213,8 +233,8 @@ function validate() {
 	const currentVersion = uniqueVersions[0]
 
 	// Determine the actual latest released version (higher of tag or npm)
-	let latestReleased = null
-	let releaseSource = null
+	let latestReleased: string | null = null
+	let releaseSource: string | null = null
 
 	if (latestTag && npmVersion) {
 		const comparison = compareVersions(latestTag, npmVersion)
@@ -244,7 +264,7 @@ function validate() {
 		const bumpCheck = isValidBump(latestReleased, currentVersion)
 
 		if (!bumpCheck.valid) {
-			error(bumpCheck.reason)
+			error(bumpCheck.reason ?? 'Invalid version bump')
 			hasErrors = true
 		} else if (bumpCheck.type === 'none') {
 			warn(`Version ${currentVersion} matches latest release.`)
