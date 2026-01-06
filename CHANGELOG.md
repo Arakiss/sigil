@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.13.0](https://github.com/Arakiss/vestig/compare/v0.12.0...v0.13.0) (2026-01-06)
 
+### ✨ Features
+
+* **wide-events:** Add Wide Events (Canonical Log Lines) for comprehensive request tracking
+* **wide-events:** Add Tail Sampling for outcome-based log sampling (100% errors, sample success)
+* **vestig-next:** Add Wide Events integration for Next.js (middleware, server actions, helpers)
+* **validation:** Add npm registry validation to prevent version conflicts
+
+### 🐛 Bug Fixes
+
+* **lint:** Fix all BiomeJS linting errors in wide-events modules
+* **lint:** Fix import statement ordering and non-null assertions
+
+### 📚 Documentation
+
+* **web:** Add comprehensive Wide Events documentation page
+* **web:** Add Tail Sampling documentation with configuration examples
+* **web:** Add Next.js Wide Events integration guide
+* **readme:** Update README with Wide Events examples and API reference
+
 ## [0.11.5](https://github.com/Arakiss/vestig/compare/v0.11.4...v0.11.5) (2026-01-04)
 
 ### 🐛 Bug Fixes
