@@ -45,6 +45,10 @@
 		"./db": {
 			"types": "./dist/db/index.d.ts",
 			"import": "./dist/db/index.js"
+		},
+		"./wide-events": {
+			"types": "./dist/wide-events/index.d.ts",
+			"import": "./dist/wide-events/index.js"
 		}
 	},
 	"files": ["dist"],
@@ -70,7 +74,10 @@
 		"typescript",
 		"request-correlation",
 		"tracing",
-		"observability"
+		"observability",
+		"wide-events",
+		"canonical-log-lines",
+		"tail-sampling"
 	],
 	"author": "Arakiss",
 	"license": "MIT",
