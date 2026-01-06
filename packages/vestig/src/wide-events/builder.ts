@@ -101,15 +101,22 @@ export class WideEventBuilderImpl implements WideEventBuilder {
 
 	end(options: WideEventEndOptions = {}): WideEvent {
 		this._assertNotEnded()
-		this._ended = true
 
 		const endedAt = new Date()
 		const durationMs = now() - this._startTime
 
-		// Merge final fields if provided
+		// Merge final fields if provided (before marking as ended)
 		if (options.fields) {
-			this.mergeAll(options.fields)
+			for (const [category, categoryFields] of Object.entries(options.fields)) {
+				if (!this._fields[category]) {
+					this._fields[category] = {}
+				}
+				Object.assign(this._fields[category], categoryFields)
+			}
 		}
+
+		// Mark as ended after all modifications
+		this._ended = true
 
 		// Determine status
 		let status: WideEventStatus = options.status ?? 'success'
