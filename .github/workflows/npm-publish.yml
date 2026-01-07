@@ -50,12 +50,6 @@ jobs:
       - name: Build packages
         run: bun run build
 
-      # Configure npm authentication for Bun
-      # Bun reads .npmrc from $HOME, so we create it there with the auth token
-      - name: Configure npm authentication
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Get versions
         id: versions
         run: |
@@ -86,15 +80,21 @@ jobs:
         if: inputs.dry_run != true && (inputs.package == 'vestig' || inputs.package == 'all')
         run: |
           cd packages/vestig
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           bun publish --access public
           echo "✅ Published vestig@${{ steps.versions.outputs.vestig_version }}"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @vestig/next
         if: inputs.dry_run != true && (inputs.package == '@vestig/next' || inputs.package == 'all')
         run: |
           cd packages/vestig-next
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           bun publish --access public
           echo "✅ Published @vestig/next@${{ steps.versions.outputs.vestig_next_version }}"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Summary
         run: |

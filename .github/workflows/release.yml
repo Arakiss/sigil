@@ -192,31 +192,31 @@ jobs:
       # =========================================================================
       # Publish to npm
       # =========================================================================
-      # Configure npm authentication for Bun
-      # Bun reads .npmrc from $HOME, so we create it there with the auth token
-      - name: Configure npm authentication
-        if: steps.release.outputs.released == 'true'
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       # Note: Using 'bun publish' instead of 'npm publish' because Bun automatically
       # converts workspace:* references to actual versions during publish.
       # npm publish does NOT handle the workspace: protocol.
+      # The .npmrc is created in each package directory for bun to find.
       - name: Publish vestig to npm
         id: npm_vestig
         if: steps.release.outputs.released == 'true'
         run: |
           cd packages/vestig
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           bun publish --access public
           echo "Published vestig@${{ steps.release.outputs.version }} to npm"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @vestig/next to npm
         id: npm_vestig_next
         if: steps.release.outputs.released == 'true'
         run: |
           cd packages/vestig-next
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           bun publish --access public
           echo "Published @vestig/next@${{ steps.release.outputs.version }} to npm"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     outputs:
       released: ${{ steps.release.outputs.released }}
