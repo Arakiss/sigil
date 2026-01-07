@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.14.1](https://github.com/Arakiss/vestig/compare/v0.14.0...v0.14.1) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* **ci:** configure npm auth for bun publish ([dcba17b](https://github.com/Arakiss/vestig/commit/dcba17bc01ee9f7ceeb666c52ea10837c591e20c))
+
 ## [0.14.0](https://github.com/Arakiss/vestig/compare/v0.13.0...v0.14.0) (2026-01-07)
 
 ### ✨ Features
