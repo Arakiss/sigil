@@ -50,6 +50,12 @@ jobs:
       - name: Build packages
         run: bun run build
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Get versions
         id: versions
         run: |
@@ -59,42 +65,56 @@ jobs:
           echo "vestig_next_version=$VESTIG_NEXT_VERSION" >> $GITHUB_OUTPUT
           echo "Publishing vestig@$VESTIG_VERSION and @vestig/next@$VESTIG_NEXT_VERSION"
 
-      # Note: Using 'bun publish' instead of 'npm publish' because Bun automatically
-      # converts workspace:* references to actual versions during publish.
-      # npm publish does NOT handle the workspace: protocol.
+      # Resolve workspace:* references to actual versions before publishing
+      # npm publish does NOT handle the workspace: protocol
+      - name: Resolve workspace references
+        run: |
+          VERSION=${{ steps.versions.outputs.vestig_version }}
+          echo "Resolving workspace:* to version $VERSION"
+
+          # Update @vestig/next to use the actual vestig version
+          cd packages/vestig-next
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            if (pkg.dependencies && pkg.dependencies.vestig === 'workspace:*') {
+              pkg.dependencies.vestig = '$VERSION';
+              fs.writeFileSync('package.json', JSON.stringify(pkg, null, '\t') + '\n');
+              console.log('✅ Updated vestig dependency to $VERSION');
+            }
+          "
+
       - name: Publish vestig (dry run)
         if: inputs.dry_run == true && (inputs.package == 'vestig' || inputs.package == 'all')
         run: |
           cd packages/vestig
-          bun publish --access public --dry-run
+          npm publish --access public --dry-run
           echo "Would publish vestig@${{ steps.versions.outputs.vestig_version }}"
 
       - name: Publish @vestig/next (dry run)
         if: inputs.dry_run == true && (inputs.package == '@vestig/next' || inputs.package == 'all')
         run: |
           cd packages/vestig-next
-          bun publish --access public --dry-run
+          npm publish --access public --dry-run
           echo "Would publish @vestig/next@${{ steps.versions.outputs.vestig_next_version }}"
 
       - name: Publish vestig
         if: inputs.dry_run != true && (inputs.package == 'vestig' || inputs.package == 'all')
         run: |
           cd packages/vestig
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          bun publish --access public
+          npm publish --access public
           echo "✅ Published vestig@${{ steps.versions.outputs.vestig_version }}"
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @vestig/next
         if: inputs.dry_run != true && (inputs.package == '@vestig/next' || inputs.package == 'all')
         run: |
           cd packages/vestig-next
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          bun publish --access public
+          npm publish --access public
           echo "✅ Published @vestig/next@${{ steps.versions.outputs.vestig_next_version }}"
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Summary
         run: |
