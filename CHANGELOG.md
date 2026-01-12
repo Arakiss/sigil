@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.15.1](https://github.com/Arakiss/vestig/compare/v0.15.0...v0.15.1) (2026-01-12)
+
+### 🐛 Bug Fixes
+
+* fetch remote tags before changelog validation ([6a23e76](https://github.com/Arakiss/vestig/commit/6a23e768e89de217da92f6ffd7c8b68b5f97521d))
+
+### 📚 Documentation
+
+* add v0.14.4 and v0.15.0 to changelog page ([e84c772](https://github.com/Arakiss/vestig/commit/e84c7723de27b5cb04a6ecce55aadd5a97d2a074))
+
 ## [0.15.0](https://github.com/Arakiss/vestig/compare/v0.14.4...v0.15.0) (2026-01-12)
 
 ### ✨ Features
