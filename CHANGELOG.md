@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.14.4](https://github.com/Arakiss/vestig/compare/v0.14.3...v0.14.4) (2026-01-12)
+
+### 🐛 Bug Fixes
+
+* add Cloudflare Workers compatibility for FinalizationRegistry ([4bdea19](https://github.com/Arakiss/vestig/commit/4bdea195572d1277a1244c85009c2918d074491b))
+
+### 🔧 CI/CD
+
+* fix npm publish with workspace:* resolution ([578cdd0](https://github.com/Arakiss/vestig/commit/578cdd06d8607af4825296f6f60a0f8bd3c5abf0))
+
 ## [0.14.3](https://github.com/Arakiss/vestig/compare/v0.14.2...v0.14.3) (2026-01-07)
 
 ### 🐛 Bug Fixes
