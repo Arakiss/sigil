@@ -28,6 +28,21 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.15.0',
+		date: '2026-01-12',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.4...v0.15.0',
+		features: ['add LLMs.txt button with copy/download in docs sidebar'],
+		docs: [
+			'update llms.txt with complete API documentation (Wide Events, Metrics, Runtime detection)',
+		],
+	},
+	{
+		version: '0.14.4',
+		date: '2026-01-12',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.3...v0.14.4',
+		fixes: ['add Cloudflare Workers compatibility for FinalizationRegistry'],
+	},
+	{
 		version: '0.14.3',
 		date: '2026-01-07',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.2...v0.14.3',
