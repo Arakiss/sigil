@@ -1,7 +1,7 @@
 import { mergeConfig } from './config'
 import { getContext } from './context'
 import { LOG_LEVELS, shouldLog } from './levels'
-import { RUNTIME } from './runtime'
+import { IS_EDGE, RUNTIME } from './runtime'
 import { type Sampler, TailSampler, createSampler } from './sampling'
 import {
 	type Span,
@@ -77,18 +77,32 @@ function formatArgs(args: unknown[]): { message: string; metadata: LogMetadata }
 }
 
 /**
+ * Check if FinalizationRegistry is available in the current runtime.
+ * Edge runtimes (Cloudflare Workers, Vercel Edge, etc.) don't support FinalizationRegistry
+ * for security and memory model reasons.
+ */
+const hasFinalizationRegistry =
+	!IS_EDGE && typeof FinalizationRegistry !== 'undefined' && typeof WeakRef !== 'undefined'
+
+/**
  * FinalizationRegistry for cleaning up stale WeakRef entries in children Map.
  * When a child logger is garbage collected, this removes its entry from the parent's Map.
+ *
+ * Note: This is null in edge runtimes where FinalizationRegistry is not available.
+ * In those environments, child loggers won't be automatically cleaned up from the parent's
+ * cache, but this is acceptable since edge functions are short-lived anyway.
  */
-const childLoggerRegistry = new FinalizationRegistry<{
-	parent: WeakRef<LoggerImpl>
-	namespace: string
-}>((heldValue) => {
-	const parent = heldValue.parent.deref()
-	if (parent) {
-		parent.cleanupChild(heldValue.namespace)
-	}
-})
+const childLoggerRegistry = hasFinalizationRegistry
+	? new FinalizationRegistry<{
+			parent: WeakRef<LoggerImpl>
+			namespace: string
+		}>((heldValue) => {
+			const parent = heldValue.parent.deref()
+			if (parent) {
+				parent.cleanupChild(heldValue.namespace)
+			}
+		})
+	: null
 
 /**
  * Core logger implementation
@@ -293,10 +307,13 @@ export class LoggerImpl implements Logger {
 			this.children.set(fullNamespace, new WeakRef(child))
 
 			// Register for automatic cleanup when child is garbage collected
-			childLoggerRegistry.register(child, {
-				parent: new WeakRef(this),
-				namespace: fullNamespace,
-			})
+			// (only if FinalizationRegistry is available - not in edge runtimes)
+			if (childLoggerRegistry) {
+				childLoggerRegistry.register(child, {
+					parent: new WeakRef(this),
+					namespace: fullNamespace,
+				})
+			}
 		}
 
 		return child

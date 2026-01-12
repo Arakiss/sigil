@@ -28,6 +28,43 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.14.3',
+		date: '2026-01-07',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.2...v0.14.3',
+		fixes: ['create .npmrc in package dir for bun publish auth'],
+	},
+	{
+		version: '0.14.2',
+		date: '2026-01-07',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.1...v0.14.2',
+		fixes: ['remove deprecated @vestig/express from workflows'],
+	},
+	{
+		version: '0.14.1',
+		date: '2026-01-07',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.14.0...v0.14.1',
+		fixes: ['configure npm auth for bun publish'],
+	},
+	{
+		version: '0.14.0',
+		date: '2026-01-07',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.13.0...v0.14.0',
+		features: ['enhanced code blocks with line numbers and highlighting'],
+		fixes: [
+			'skip git hooks during release push',
+			'update README version in release hook',
+			'use bun publish to resolve workspace:* dependencies',
+			'properly extract nested spans from Shiki HTML output',
+			'reduce excessive line-height in code blocks',
+		],
+		docs: [
+			'sync sidebar navigation with all documentation pages',
+			'add attribution for wide events concept',
+			'add Wide Events release notes for v0.13.0',
+		],
+		refactoring: ['convert scripts to TypeScript and add strict validation'],
+	},
+	{
 		version: '0.13.0',
 		date: '2026-01-06',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.12.0...v0.13.0',
