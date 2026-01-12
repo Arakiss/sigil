@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.15.0](https://github.com/Arakiss/vestig/compare/v0.14.4...v0.15.0) (2026-01-12)
+
+### ✨ Features
+
+* add LLMs.txt button with copy/download in docs sidebar ([9f87040](https://github.com/Arakiss/vestig/commit/9f87040e88c2516e8d1213d9f1e1d7ad4bf3bdc5))
+
 ## [0.14.4](https://github.com/Arakiss/vestig/compare/v0.14.3...v0.14.4) (2026-01-12)
 
 ### 🐛 Bug Fixes

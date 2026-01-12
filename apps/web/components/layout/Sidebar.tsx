@@ -71,11 +71,7 @@ export function Sidebar({ sections, className, footer }: SidebarProps) {
 						))}
 					</nav>
 				</ScrollArea>
-				{footer && (
-					<div className="shrink-0 p-4 border-t border-white/6">
-						{footer}
-					</div>
-				)}
+				{footer && <div className="shrink-0 p-4 border-t border-white/6">{footer}</div>}
 			</div>
 		</aside>
 	)
