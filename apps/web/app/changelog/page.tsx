@@ -28,6 +28,17 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.16.0',
+		date: '2026-01-13',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.15.1...v0.16.0',
+		features: [
+			'add OpenTelemetry Protocol (OTLP) export support',
+			'add OTLPExporter for exporting spans to OTLP backends',
+			'add SpanProcessor interface with global registry',
+			'automatic span capture on start/end via registerSpanProcessor()',
+		],
+	},
+	{
 		version: '0.15.1',
 		date: '2026-01-12',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.15.0...v0.15.1',

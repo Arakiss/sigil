@@ -743,12 +743,138 @@ import type {
   // Misc
   CircularBufferConfig,
   TracestateEntry,
+  // OTLP / SpanProcessor (from main export)
+  SpanProcessor,
+  registerSpanProcessor,
+  unregisterSpanProcessor,
+  getSpanProcessors,
+  flushSpanProcessors,
+  shutdownSpanProcessors,
 } from 'vestig'
+```
+
+## OTLP Export API
+
+Export spans to OpenTelemetry-compatible backends (Jaeger, Honeycomb, Grafana, Vercel, etc.).
+
+### OTLPExporter
+
+```typescript
+import { registerSpanProcessor, span } from 'vestig'
+import { OTLPExporter } from 'vestig/otlp'
+
+const exporter = new OTLPExporter({
+  endpoint: 'https://otel.example.com/v1/traces',
+  serviceName: 'my-service',
+  serviceVersion: '1.0.0',
+  environment: 'production',
+  headers: {
+    'Authorization': 'Bearer token'
+  },
+  resourceAttributes: {
+    'host.name': 'server-1',
+    'cloud.region': 'us-east-1'
+  },
+  batchSize: 100,        // Max spans per batch (default: 100)
+  flushInterval: 5000,   // Auto-flush interval ms (default: 5000)
+  timeout: 30000,        // Request timeout ms (default: 30000)
+  maxRetries: 3,         // Retry attempts (default: 3)
+  retryDelay: 1000,      // Initial retry delay ms (default: 1000)
+})
+
+// Register to automatically capture all spans
+registerSpanProcessor(exporter)
+
+// Spans are now exported automatically
+await span('db:query', async (s) => {
+  s.setAttribute('db.table', 'users')
+  return await db.query()
+})
+
+// Graceful shutdown
+await exporter.shutdown()
+```
+
+### SpanProcessor Interface
+
+```typescript
+import { registerSpanProcessor, unregisterSpanProcessor } from 'vestig'
+import type { SpanProcessor } from 'vestig'
+
+// Custom span processor
+const processor: SpanProcessor = {
+  onStart(span) {
+    // Called when span starts
+  },
+  onEnd(span) {
+    // Called when span ends (required)
+    console.log('Span completed:', span.name, span.duration)
+  },
+  forceFlush() {
+    // Force flush buffered data
+    return Promise.resolve()
+  },
+  shutdown() {
+    // Cleanup resources
+    return Promise.resolve()
+  }
+}
+
+registerSpanProcessor(processor)
+unregisterSpanProcessor(processor)
+```
+
+### SpanProcessor Management
+
+```typescript
+import {
+  registerSpanProcessor,
+  unregisterSpanProcessor,
+  getSpanProcessors,
+  flushSpanProcessors,
+  shutdownSpanProcessors,
+} from 'vestig'
+
+// Get all registered processors
+const processors = getSpanProcessors()
+
+// Flush all processors
+await flushSpanProcessors()
+
+// Shutdown all processors (call on app exit)
+await shutdownSpanProcessors()
+```
+
+### OTLP Types (Advanced)
+
+```typescript
+import {
+  OTLPExporter,
+  OTLPExportError,
+  // Conversion utilities
+  toOTLPSpan,
+  toOTLPAttributes,
+  toOTLPStatusCode,
+  msToNano,
+  isoToNano,
+  // Enums
+  OTLPStatusCode,
+  OTLPSpanKind,
+  OTLPSeverityNumber,
+} from 'vestig/otlp'
+
+import type {
+  OTLPExporterConfig,
+  OTLPSpan,
+  OTLPResource,
+  OTLPKeyValue,
+  OTLPExportTraceServiceRequest,
+} from 'vestig/otlp'
 ```
 
 ## Version
 
 ```typescript
 import { VERSION } from 'vestig'
-console.log(VERSION)  // e.g., '0.14.4'
+console.log(VERSION)  // e.g., '0.16.0'
 ```
