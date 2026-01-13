@@ -73,7 +73,7 @@ fi
 exit 0
 `
 
-// Pre-commit hook: runs linting
+// Pre-commit hook: runs linting and regenerates llms.txt if needed
 const PRE_COMMIT_HOOK = `#!/bin/sh
 #
 # Pre-commit hook: Run basic checks before commit
@@ -87,6 +87,14 @@ if [ $? -ne 0 ]; then
     echo "   Run 'bun run format' to fix."
     echo ""
     exit 1
+fi
+
+# Regenerate llms.txt if LLM content files changed
+if git diff --cached --name-only | grep -q "apps/web/content/llm/"; then
+    echo "📝 LLM content changed, regenerating llms.txt..."
+    cd apps/web && bun run prebuild && cd ../..
+    git add apps/web/public/llms.txt apps/web/public/llms-full.txt
+    echo "   ✓ llms.txt regenerated and staged"
 fi
 
 exit 0
