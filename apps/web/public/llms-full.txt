@@ -949,9 +949,160 @@ import type {
 } from 'vestig/otlp'
 ```
 
+## Auto-Instrumentation API
+
+### instrumentFetch(options?)
+
+Automatically create spans for all `fetch()` calls. Call once in your instrumentation file.
+
+```typescript
+import { instrumentFetch } from 'vestig'
+
+// Basic usage
+instrumentFetch()
+
+// With options
+instrumentFetch({
+  spanNamePrefix: 'http.client',        // Span name prefix (default: 'http.client')
+  captureHeaders: ['content-type', 'x-request-id'],  // Headers to capture
+  ignoreUrls: ['/health', /^\/_next/],  // URLs to skip (strings or RegExp)
+  propagateContext: true,               // Add traceparent header (default: true)
+  captureRequestBody: false,            // Capture request body (default: false)
+  captureResponseBody: false,           // Capture response body (default: false)
+  maxRequestBodyLength: 1024,           // Max body length to capture
+  maxResponseBodyLength: 1024,
+  defaultAttributes: {                  // Attributes added to all spans
+    'app.version': '1.0.0'
+  },
+  spanNameGenerator: (method, url) => `${method} ${url.pathname}`,  // Custom name
+})
+
+// All fetch calls now create spans automatically
+await fetch('https://api.example.com/users')
+// → Span: "http.client GET api.example.com/users"
+```
+
+### uninstrumentFetch()
+
+Restore original fetch (for testing):
+
+```typescript
+import { instrumentFetch, uninstrumentFetch, isFetchInstrumented } from 'vestig'
+
+instrumentFetch()
+console.log(isFetchInstrumented())  // true
+
+uninstrumentFetch()
+console.log(isFetchInstrumented())  // false
+```
+
+## @vestig/next Instrumentation
+
+### registerVestig(options)
+
+Unified setup for Next.js instrumentation. Combines OTLP export, fetch instrumentation, and more.
+
+```typescript
+// instrumentation.ts
+import { registerVestig } from '@vestig/next/instrumentation'
+
+export function register() {
+  registerVestig({
+    serviceName: 'my-app',
+  })
+}
+```
+
+### Full Configuration
+
+```typescript
+// instrumentation.ts
+import { registerVestig } from '@vestig/next/instrumentation'
+
+export function register() {
+  const result = registerVestig({
+    serviceName: 'my-app',
+
+    // OTLP configuration (optional)
+    otlp: {
+      endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,  // or auto-read from env
+      headers: {
+        'Authorization': `Bearer ${process.env.OTEL_AUTH_TOKEN}`,
+      },
+      serviceVersion: '1.0.0',
+      environment: 'production',  // or auto-read from VERCEL_ENV/NODE_ENV
+      resourceAttributes: {
+        'cloud.region': 'us-east-1',
+      },
+      batchSize: 100,
+      flushInterval: 5000,
+    },
+
+    // Auto-instrumentation (optional)
+    autoInstrument: {
+      fetch: true,  // or detailed options:
+      // fetch: {
+      //   captureHeaders: ['content-type'],
+      //   ignoreUrls: ['/health'],
+      // },
+      console: true,  // Capture console.error as spans
+    },
+
+    // Debug logging (optional)
+    debug: process.env.NODE_ENV === 'development',
+  })
+
+  // result contains:
+  // - otlpEnabled: boolean
+  // - fetchInstrumented: boolean
+  // - consoleInstrumented: boolean
+  // - shutdown: () => Promise<void>
+}
+```
+
+### Environment Variables
+
+```bash
+# OTLP (auto-read if not specified in config)
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otel.vercel.com/v1/traces
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer token,x-custom=value
+
+# Environment detection
+VERCEL_ENV=production    # or NODE_ENV
+```
+
+### RegisterVestigOptions
+
+```typescript
+interface RegisterVestigOptions {
+  serviceName: string              // Required: service name for traces
+  otlp?: {
+    endpoint?: string              // OTLP endpoint (or from env)
+    headers?: Record<string, string>
+    serviceVersion?: string
+    environment?: string
+    resourceAttributes?: Record<string, unknown>
+    batchSize?: number             // Default: 100
+    flushInterval?: number         // Default: 5000ms
+  }
+  autoInstrument?: {
+    fetch?: boolean | InstrumentFetchOptions
+    console?: boolean              // Capture console.error
+  }
+  debug?: boolean                  // Enable debug logging
+}
+
+interface RegisterVestigResult {
+  otlpEnabled: boolean
+  fetchInstrumented: boolean
+  consoleInstrumented: boolean
+  shutdown: () => Promise<void>
+}
+```
+
 ## Version
 
 ```typescript
 import { VERSION } from 'vestig'
-console.log(VERSION)  // e.g., '0.16.0'
+console.log(VERSION)  // e.g., '0.17.0'
 ```

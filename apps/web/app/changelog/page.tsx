@@ -28,6 +28,19 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.17.0',
+		date: '2026-01-13',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.16.0...v0.17.0',
+		features: [
+			'add instrumentFetch() for automatic fetch() span creation',
+			'add registerVestig() unified setup for Next.js instrumentation',
+			'auto-propagate trace context via traceparent header',
+			'configurable URL filtering and header capture',
+			'automatic OTLP environment variable detection',
+		],
+		docs: ['add Auto-Instrumentation API documentation', 'add @vestig/next instrumentation guide'],
+	},
+	{
 		version: '0.16.0',
 		date: '2026-01-13',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.15.1...v0.16.0',

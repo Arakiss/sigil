@@ -49,11 +49,11 @@ const features = [
 	},
 	{
 		id: 'native-tracing',
-		title: 'Native Distributed Tracing',
+		title: 'Tracing + OTLP Export',
 		description:
-			'Built-in span-based tracing with automatic context propagation. No OpenTelemetry overhead—just simple, powerful observability.',
+			'Auto-instrument fetch() with one line. Export spans to Jaeger, Honeycomb, Vercel, and any OTLP backend. Zero manual span management needed.',
 		visualization: 'code' as const,
-		badge: 'New',
+		badge: 'New in v0.17',
 		link: {
 			text: 'Tracing guide',
 			href: '/docs/tracing',
@@ -95,14 +95,15 @@ const features = [
 ]
 
 // Code example for tracing feature
-const tracingCode = `import { log } from 'vestig'
+const tracingCode = `import { instrumentFetch } from 'vestig'
+import { OTLPExporter } from 'vestig/otlp'
 
-// Automatic span creation
-const result = await log.span('fetch-user', async () => {
-  const user = await db.users.findById(id)
-  log.info('User found', { userId: user.id })
-  return user
-})`
+// One-line auto-instrumentation
+instrumentFetch()
+
+// All fetch() calls now create spans automatically
+await fetch('https://api.example.com/users')
+// → Span: "http.client GET api.example.com/users"`
 
 // Flow nodes for transports
 const transportNodes: FlowNode[] = [

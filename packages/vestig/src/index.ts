@@ -136,6 +136,10 @@ export {
 } from './otlp'
 export type { SpanProcessor } from './otlp'
 
+// Auto-Instrumentation
+export { instrumentFetch, uninstrumentFetch, isFetchInstrumented } from './instrumentation'
+export type { InstrumentFetchOptions } from './instrumentation'
+
 // Sampling - factory functions for creating samplers
 export {
 	createSampler,

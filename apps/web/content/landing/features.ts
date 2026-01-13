@@ -38,9 +38,9 @@ export const features: Feature[] = [
 	{
 		id: 'native-tracing',
 		icon: 'Activity',
-		title: 'Native Tracing',
+		title: 'Native Tracing + OTLP',
 		description:
-			'Built-in distributed tracing with span(), startSpan(), and automatic context propagation. No OpenTelemetry overhead.',
+			'Built-in distributed tracing with span(), auto fetch() instrumentation, and OTLP export to Jaeger, Honeycomb, Vercel, and more.',
 		highlight: 'New',
 		link: {
 			text: 'Tracing guide',
@@ -59,15 +59,15 @@ export const features: Feature[] = [
 		},
 	},
 	{
-		id: 'smart-sampling',
-		icon: 'Filter',
-		title: 'Smart Sampling',
+		id: 'auto-instrumentation',
+		icon: 'Zap',
+		title: 'Auto-Instrumentation',
 		description:
-			'Probability, rate-limit, and namespace-based sampling strategies to control log volume without losing important data.',
+			'One-line setup for automatic fetch() tracing. instrumentFetch() patches globally, registerVestig() for Next.js. Zero code changes.',
 		highlight: 'New',
 		link: {
-			text: 'Sampling strategies',
-			href: '/docs/sampling',
+			text: 'Instrumentation docs',
+			href: '/docs/tracing',
 		},
 	},
 	{
