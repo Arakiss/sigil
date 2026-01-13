@@ -2,7 +2,7 @@ import type { HeroContent } from '@/lib/content/types'
 
 export const heroContent: HeroContent = {
 	badge: {
-		text: 'v0.17.0 — Auto-Instrumentation & OTLP',
+		text: 'v0.18.0 — Auto-Instrumentation & OTLP',
 		href: '/changelog',
 		variant: 'new',
 	},

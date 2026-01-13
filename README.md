@@ -8,7 +8,7 @@ A modern, runtime-agnostic structured logging library with automatic PII sanitiz
 [![npm version](https://img.shields.io/npm/v/vestig.svg)](https://www.npmjs.com/package/vestig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/tests-898%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
+[![Test Coverage](https://img.shields.io/badge/tests-1273%20passing-brightgreen.svg)](https://github.com/Arakiss/vestig)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **v0.18.0** · Beta · Active Development
@@ -25,9 +25,9 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 |--------|--------|
 | **Version** | v0.18.0 |
 | **Stage** | Beta - API stable |
-| **Tests** | 898 passing |
+| **Tests** | 1273 passing |
 | **Core Coverage** | 81%+ |
-| **Releases** | 18 versions published |
+| **Releases** | 34 versions published |
 | **Packages** | 2 (`vestig`, `@vestig/next`) |
 
 ### Packages
@@ -49,6 +49,8 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 | Auto PII Sanitization | ✅ | ❌ | ❌ | ❌ |
 | GDPR/HIPAA/PCI-DSS Presets | ✅ | ❌ | ❌ | ❌ |
 | Wide Events / Tail Sampling | ✅ | ❌ | ❌ | ❌ |
+| OTLP Export (Jaeger, Honeycomb) | ✅ | ❌ | ❌ | ❌ |
+| Auto Fetch Instrumentation | ✅ | ❌ | ❌ | ❌ |
 | Zero Config | ✅ | ✅ | ❌ | ❌ |
 | TypeScript First | ✅ | ✅ | ⚠️ | ❌ |
 | Edge Runtime Support | ✅ | ❌ | ❌ | ❌ |
@@ -61,6 +63,8 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 - Works everywhere (Node.js, Bun, Deno, Edge, Browser)
 - Automatically sanitizes PII with compliance presets
 - Propagates context through async operations
+- Exports spans to OTLP backends (Jaeger, Honeycomb, Vercel, Grafana)
+- Auto-instruments fetch() with zero code changes
 - Has zero runtime dependencies
 
 ## Installation
@@ -213,6 +217,69 @@ await span('api:request', async (s) => {
 
   s.setStatus('ok')
 })
+```
+
+### Auto-Instrumentation (New in v0.18)
+
+Automatically trace all `fetch()` calls with zero code changes:
+
+```typescript
+import { instrumentFetch } from 'vestig'
+
+// One line - all fetch() calls now create spans
+instrumentFetch({
+  ignoreUrls: ['/health', /^\/_next/],
+  captureHeaders: ['content-type', 'x-request-id'],
+})
+
+// Now every fetch is traced automatically
+await fetch('https://api.example.com/users')
+// → Span: "http.client GET api.example.com/users"
+```
+
+### OTLP Export (New in v0.16)
+
+Export spans to any OpenTelemetry-compatible backend:
+
+```typescript
+import { registerSpanProcessor, span } from 'vestig'
+import { OTLPExporter } from 'vestig/otlp'
+
+// Connect to Jaeger, Honeycomb, Vercel, Grafana, etc.
+const exporter = new OTLPExporter({
+  endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  serviceName: 'my-app',
+  headers: { 'Authorization': `Bearer ${process.env.OTEL_TOKEN}` },
+})
+
+registerSpanProcessor(exporter)
+
+// All spans automatically exported
+await span('checkout', async (s) => {
+  s.setAttribute('orderId', order.id)
+  await processPayment()
+})
+```
+
+### Next.js Unified Setup (New in v0.18)
+
+One-liner setup for Next.js with OTLP and fetch instrumentation:
+
+```typescript
+// instrumentation.ts
+import { registerVestig } from '@vestig/next/instrumentation'
+
+export function register() {
+  registerVestig({
+    serviceName: 'my-nextjs-app',
+    otlp: {
+      endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    },
+    autoInstrument: {
+      fetch: true,  // Auto-trace all fetch() calls
+    },
+  })
+}
 ```
 
 ### Sampling
