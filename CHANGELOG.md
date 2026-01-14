@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.19.0](https://github.com/Arakiss/vestig/compare/v0.18.0...v0.19.0) (2026-01-14)
+
+### ✨ Features
+
+* **auto-instrument:** add instrumentPostgres() for database span creation ([16a1dc5](https://github.com/Arakiss/vestig/commit/16a1dc5e74220ae47efbfe9e06acd636478fccc8))
+
+### 📚 Documentation
+
+* add v0.17.0 to changelog and fix version history ([84214e8](https://github.com/Arakiss/vestig/commit/84214e89e49d8472d95ab69c37a15cb3cd3ee553))
+* update README and landing page for v0.18.0 ([ef649b6](https://github.com/Arakiss/vestig/commit/ef649b6d27593c5564d32360e850f06882b976be))
+
 ## [Unreleased]
 
 ### ✨ Features
