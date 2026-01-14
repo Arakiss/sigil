@@ -51,6 +51,7 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 | Wide Events / Tail Sampling | ✅ | ❌ | ❌ | ❌ |
 | OTLP Export (Jaeger, Honeycomb) | ✅ | ❌ | ❌ | ❌ |
 | Auto Fetch Instrumentation | ✅ | ❌ | ❌ | ❌ |
+| Auto Database Instrumentation | ✅ | ❌ | ❌ | ❌ |
 | Zero Config | ✅ | ✅ | ❌ | ❌ |
 | TypeScript First | ✅ | ✅ | ⚠️ | ❌ |
 | Edge Runtime Support | ✅ | ❌ | ❌ | ❌ |
@@ -64,7 +65,7 @@ Vestig is in **active beta** with continuous development. The API is stable and 
 - Automatically sanitizes PII with compliance presets
 - Propagates context through async operations
 - Exports spans to OTLP backends (Jaeger, Honeycomb, Vercel, Grafana)
-- Auto-instruments fetch() with zero code changes
+- Auto-instruments fetch() and database queries with zero code changes
 - Has zero runtime dependencies
 
 ## Installation
@@ -117,6 +118,30 @@ export default async function Page() {
 
   return <h1>Welcome</h1>
 }
+```
+
+### Database Instrumentation
+
+Automatic OTLP span creation for PostgreSQL queries with precise timing:
+
+```typescript
+// lib/db.ts
+import postgres from 'postgres'
+import { instrumentPostgres } from '@vestig/next/db'
+import { drizzle } from 'drizzle-orm/postgres-js'
+
+// Wrap postgres-js client for automatic instrumentation
+const client = instrumentPostgres(postgres(process.env.DATABASE_URL!), {
+  slowQueryThreshold: 100,  // Flag queries over 100ms
+  onQuery: (entry) => {
+    // Custom metrics callback (e.g., for noisy neighbor detection)
+    if (entry.isSlow) {
+      metrics.record('slow_query', { table: entry.table, duration: entry.duration })
+    }
+  }
+})
+
+export const db = drizzle(client)
 ```
 
 ## Features

@@ -17,21 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * add v0.17.0 to changelog and fix version history ([84214e8](https://github.com/Arakiss/vestig/commit/84214e89e49d8472d95ab69c37a15cb3cd3ee553))
 * update README and landing page for v0.18.0 ([ef649b6](https://github.com/Arakiss/vestig/commit/ef649b6d27593c5564d32360e850f06882b976be))
 
-## [Unreleased]
-
-### ✨ Features
-
-* **auto-instrument:** add instrumentPostgres() for automatic database span creation and metrics
-  - Wraps postgres-js client at driver level for precise timing measurement
-  - Creates OTLP spans with OpenTelemetry semantic conventions (db.system, db.operation, db.statement)
-  - Supports onQuery callback for external metrics (e.g., noisy neighbor detection)
-  - Automatically uses global config from registerVestig() when available
-  - Instruments sql\`...\`, sql.unsafe(), sql.begin() (transactions), and sql.file()
-
-* **registerVestig:** add database configuration to autoInstrument options
-  - New `autoInstrument.database` config for slowQueryThreshold, onQuery callback, dbSystem, dbName
-  - Global config store allows instrumentPostgres() to pick up settings automatically
-
 ## [0.18.0](https://github.com/Arakiss/vestig/compare/v0.16.0...v0.18.0) (2026-01-13)
 
 ### ✨ Features
