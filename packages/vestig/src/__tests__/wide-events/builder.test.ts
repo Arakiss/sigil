@@ -100,6 +100,57 @@ describe('WideEventBuilder', () => {
 		})
 	})
 
+	describe('setError', () => {
+		test('should set error fields from Error instance', () => {
+			const error = new Error('Something went wrong')
+			event.setError(error)
+
+			expect(event.get('error', 'name')).toBe('Error')
+			expect(event.get('error', 'message')).toBe('Something went wrong')
+			expect(event.get('error', 'stack')).toBeDefined()
+		})
+
+		test('should set error fields from non-Error value', () => {
+			event.setError('string error')
+
+			expect(event.get('error', 'name')).toBe('Error')
+			expect(event.get('error', 'message')).toBe('string error')
+		})
+
+		test('should include additional context', () => {
+			const error = new Error('Payment failed')
+			event.setError(error, { orderId: 'order-123', retryable: true })
+
+			expect(event.get('error', 'name')).toBe('Error')
+			expect(event.get('error', 'message')).toBe('Payment failed')
+			expect(event.get('error', 'orderId')).toBe('order-123')
+			expect(event.get('error', 'retryable')).toBe(true)
+		})
+
+		test('should support chaining', () => {
+			const result = event.setError(new Error('test')).set('user', 'id', '123')
+
+			expect(result).toBe(event)
+			expect(event.get('error', 'message')).toBe('test')
+			expect(event.get('user', 'id')).toBe('123')
+		})
+
+		test('should truncate stack trace to 10 lines', () => {
+			const error = new Error('Deep stack')
+			event.setError(error)
+
+			const stack = event.get('error', 'stack') as string
+			const lines = stack.split('\n')
+			expect(lines.length).toBeLessThanOrEqual(10)
+		})
+
+		test('should throw if called after end', () => {
+			event.end()
+
+			expect(() => event.setError(new Error('test'))).toThrow()
+		})
+	})
+
 	describe('merge', () => {
 		test('should merge fields into a category', () => {
 			event.merge('user', { id: 'user-123', name: 'Test User', tier: 'premium' })

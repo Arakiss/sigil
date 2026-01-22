@@ -67,7 +67,9 @@ export function requireWideEvent(): WideEventBuilder {
 	if (!event) {
 		throw new Error(
 			'requireWideEvent() called outside of a wide event context. ' +
-				'Ensure you are using withWideEvent() or vestigWideEventMiddleware().',
+				'If using in a server action, wrap your action with withWideEvent(). ' +
+				'The middleware context does not automatically propagate to server actions called from the client. ' +
+				'See: https://vestig.dev/docs/nextjs/wide-events#server-actions',
 		)
 	}
 	return event

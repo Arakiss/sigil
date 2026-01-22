@@ -64,6 +64,20 @@ export class WideEventBuilderImpl implements WideEventBuilder {
 		return this
 	}
 
+	setError(error: Error | unknown, additionalContext?: Record<string, unknown>): this {
+		this._assertNotEnded()
+		const err = error instanceof Error ? error : new Error(String(error))
+
+		this.merge('error', {
+			name: err.name,
+			message: err.message,
+			stack: err.stack?.split('\n').slice(0, 10).join('\n'),
+			...additionalContext,
+		})
+
+		return this
+	}
+
 	get(category: string, key: string): unknown {
 		return this._fields[category]?.[key]
 	}

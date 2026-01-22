@@ -141,6 +141,28 @@ export interface WideEventBuilder {
 	set(category: string, key: string, value: unknown): this
 
 	/**
+	 * Set error information on the event.
+	 *
+	 * This is a convenience method for recording error details.
+	 * The error will be stored in the 'error' category with name, message, and stack.
+	 *
+	 * @param error - The error that occurred
+	 * @param additionalContext - Additional context about the error
+	 * @returns this for chaining
+	 *
+	 * @example
+	 * ```typescript
+	 * try {
+	 *   await processPayment(order)
+	 * } catch (error) {
+	 *   event.setError(error, { orderId: order.id })
+	 *   throw error
+	 * }
+	 * ```
+	 */
+	setError(error: Error | unknown, additionalContext?: Record<string, unknown>): this
+
+	/**
 	 * Get a field value from a category.
 	 *
 	 * @param category - Field category

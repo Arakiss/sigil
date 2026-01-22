@@ -188,17 +188,27 @@ setWideEventFeatureFlags({
 })
 ```
 
-### `setWideEventError()`
+### `setWideEventError()` / `event.setError()`
 
-Record error information:
+Record error information. You can use either the standalone helper or the method on the event builder:
 
 ```typescript
+// Using the standalone helper (works anywhere in request context)
 import { setWideEventError } from '@vestig/next/wide-events'
 
 try {
   await processPayment(order)
 } catch (error) {
   setWideEventError(error, { orderId: order.id })
+  throw error
+}
+
+// Or using the event builder method directly (more symmetric API)
+const event = getWideEvent()
+try {
+  await processPayment(order)
+} catch (error) {
+  event?.setError(error, { orderId: order.id })
   throw error
 }
 ```
@@ -227,6 +237,28 @@ console.log(`Request running for ${elapsed}ms`)
 ```
 
 ## Server Actions
+
+**Important:** Server actions called from client components run as separate HTTP requests and do **not** automatically inherit the middleware's wide event context. You must wrap your server actions with `withWideEvent()` to enable tracking:
+
+```typescript
+// ❌ This will NOT work - no context available
+'use server'
+export async function updateStatus(userId: string) {
+  const event = requireWideEvent() // Throws: "called outside of a wide event context"
+}
+
+// ✅ This WILL work - withWideEvent creates/inherits context
+'use server'
+import { withWideEvent } from '@vestig/next/wide-events'
+
+export const updateStatus = withWideEvent(
+  async (userId: string, { event }) => {
+    event.set('user', 'id', userId)
+    // ...
+  },
+  { name: 'action.updateStatus' }
+)
+```
 
 Wrap server actions with wide event tracking:
 
