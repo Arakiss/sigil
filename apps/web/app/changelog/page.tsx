@@ -28,6 +28,13 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
 	{
+		version: '0.20.0',
+		date: '2026-01-22',
+		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.19.0...v0.20.0',
+		features: ['add event.setError() method and improve server action error message'],
+		docs: ['update README with instrumentPostgres() and clean up changelog'],
+	},
+	{
 		version: '0.19.0',
 		date: '2026-01-14',
 		githubCompare: 'https://github.com/Arakiss/vestig/compare/v0.18.0...v0.19.0',
