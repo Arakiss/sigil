@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.20.0](https://github.com/Arakiss/vestig/compare/v0.19.0...v0.20.0) (2026-01-22)
+
+### ✨ Features
+
+* **wide-events:** add event.setError() method and improve server action error message ([3231b99](https://github.com/Arakiss/vestig/commit/3231b990022c08c0f601d05d6405b38b8478b83d)), closes [#2](https://github.com/Arakiss/vestig/issues/2)
+
+### 📚 Documentation
+
+* update README with instrumentPostgres() and clean up changelog ([5c1f06b](https://github.com/Arakiss/vestig/commit/5c1f06be6b12e79d90d4d1be98761b759d7c3d04))
+
 ## [0.19.0](https://github.com/Arakiss/vestig/compare/v0.18.0...v0.19.0) (2026-01-14)
 
 ### ✨ Features
